@@ -1,0 +1,1 @@
+/usr/bin/cc    CMakeFiles/camera.dir/src/main.c.o CMakeFiles/camera.dir/src/decoder.c.o CMakeFiles/camera.dir/src/socket.c.o CMakeFiles/camera.dir/src/display.c.o CMakeFiles/camera.dir/src/loopback.c.o  -o camera -lavcodec -lavformat -lavfilter -lavdevice -lavutil -lswresample -lswscale -lSDL2 
