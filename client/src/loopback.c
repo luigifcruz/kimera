@@ -15,8 +15,8 @@ bool open_loopback(LoopbackState* state, char* interface) {
         return false;
 	}
 
-	v.fmt.pix.width = 1080;
-	v.fmt.pix.height = 2216;
+	v.fmt.pix.width = 1920;
+	v.fmt.pix.height = 1080;
 	v.fmt.pix.pixelformat = V4L2_PIX_FMT_YUV420;
 	v.fmt.pix.sizeimage = v.fmt.pix.width * v.fmt.pix.height * (3 / 2);
 	v.fmt.pix.field = V4L2_FIELD_NONE;
@@ -30,7 +30,7 @@ bool open_loopback(LoopbackState* state, char* interface) {
         printf("Couldn't allocate loopback buffer.\n");
         return false;
     }
-    printf("OK\n");
+
 	return true;
 }
 
@@ -40,8 +40,6 @@ void close_loopback(LoopbackState* state) {
 }
 
 void loopback_push_frame(LoopbackState* state, AVFrame* frame) {
-    printf("%d %d\n", frame->format, AV_PIX_FMT_YUVJ420P);
-    
     size_t y_len = (frame->linesize[0] * frame->height);
     size_t u_len = (frame->linesize[1] * frame->height) / 2;
     size_t v_len = (frame->linesize[2] * frame->height) / 2;
@@ -52,14 +50,4 @@ void loopback_push_frame(LoopbackState* state, AVFrame* frame) {
     memcpy(state->buffer + u_len + y_len, frame->data[2], v_len);
 
     write(state->dev_fd, state->buffer, len);
-/*
-    char* buf = NULL;
-    int len = -1;
-
-    if((len = convert_frame(decoder, frame, buf)) > 0) {
-        printf("A %d\n", len);
-        write(fd, buf, len);
-        free(buf);
-    }
-    */
 }

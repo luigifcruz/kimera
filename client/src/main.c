@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 
     // Start Socket Client. 
     int socketfd = -1; 
-    if ((socketfd = open_socket("cam")) < 0) {
+    if ((socketfd = open_socket(SOCKNAME_VS)) < 0) {
         return 1;
     }
 
@@ -64,12 +64,7 @@ int main(int argc, char *argv[]) {
     size_t out = 0;
     char header[HEADER_SIZE];
 
-    clock_t t;
-    float time_taken = 0;
-    float i = 0;
     while (!stop) { 
-        t = clock();
-
         out = socket_read_all(socketfd, (char*)&header, HEADER_SIZE); 
         if (out < HEADER_SIZE) {
             continue;
@@ -105,14 +100,8 @@ int main(int argc, char *argv[]) {
             }
         }
         
-        free(packet);
-
-        t = clock() - t; 
-        time_taken += ((double)t)/CLOCKS_PER_SEC; // in seconds 
-        i += 1.0;     
+        free(packet);   
     }
-
-    printf("FPS: %f\n", 1.0/(time_taken/i));  
 
 cleanup:
     close_decoder(&decoder);
