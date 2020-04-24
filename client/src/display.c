@@ -8,7 +8,7 @@ bool start_display(DisplayState* state) {
 
 	if ((state->win = SDL_CreateWindow(
 					  "Camera Loopback", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
-                      720, 480, SDL_WINDOW_SHOWN)) == NULL) {
+                      960, 540, SDL_WINDOW_SHOWN)) == NULL) {
 		printf("[SDL] Window error: %s\n", SDL_GetError());
 		goto cleanup;
 	}
@@ -47,5 +47,11 @@ void close_display(DisplayState* state) {
 }
 
 bool display_draw(DisplayState* state, AVFrame* frame) {
-
+	SDL_RenderClear(state->ren);		
+	SDL_UpdateYUVTexture(state->tex, NULL,
+            frame->data[0], frame->linesize[0],
+            frame->data[1], frame->linesize[1],
+            frame->data[2], frame->linesize[2]);
+	SDL_RenderCopy(state->ren, state->tex, NULL, NULL);
+	SDL_RenderPresent(state->ren);
 }

@@ -94,23 +94,27 @@ int main(int argc, char *argv[]) {
             free(packet);
             continue;
         }
-        
+
         if (decoder_push(&decoder, packet, len, pts)) {
             if (oopt == DISPLAY) {
+                display_draw(&display, decoder.frame);
             }
 
             if (oopt == LOOPBACK) {
                 loopback_push_frame(&loopback, decoder.frame);
             }
+        } else {
+            printf("NOK\n");
         };
         
         free(packet);
 
         t = clock() - t; 
         time_taken += ((double)t)/CLOCKS_PER_SEC; // in seconds 
-        i += 1.0;
-        printf("FPS: %f\n", 1.0/(time_taken/i));    
+        i += 1.0;     
     }
+
+    printf("FPS: %f\n", 1.0/(time_taken/i));  
 
 cleanup:
     close_decoder(&decoder);

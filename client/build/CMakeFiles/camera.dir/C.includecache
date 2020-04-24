@@ -36,10 +36,6 @@ SDL2/SDL.h
 libavcodec/avcodec.h
 -
 
-/home/luigifcruz/AndroidStudioProjects/Camera/client/src/loopback.c
-loopback.h
-/home/luigifcruz/AndroidStudioProjects/Camera/client/src/loopback.h
-
 /home/luigifcruz/AndroidStudioProjects/Camera/client/src/loopback.h
 stdio.h
 -

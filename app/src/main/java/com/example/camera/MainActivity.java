@@ -131,9 +131,9 @@ public class MainActivity extends AppCompatActivity {
         format.setInteger(MediaFormat.KEY_BIT_RATE, 5000000);
         format.setInteger(MediaFormat.KEY_FRAME_RATE, 30);
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
-        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 10);
+        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
         format.setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, 100_000);
-        //format.setInteger(MediaFormat.KEY_LATENCY, 0);
+        format.setInteger(MediaFormat.KEY_LATENCY, 0);
         format.setInteger(MediaFormat.KEY_PRIORITY, 0);
         format.setInteger(MediaFormat.KEY_WIDTH, 1920);
         format.setInteger(MediaFormat.KEY_HEIGHT, 1080);

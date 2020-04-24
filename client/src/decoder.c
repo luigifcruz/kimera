@@ -49,7 +49,7 @@ void close_decoder(DecoderState* decoder) {
 
 bool parse_packet(DecoderState* decoder, AVPacket* packet) {
     if (decoder->parser_ctx->key_frame == 1) {
-        packet->flags |= AV_PKT_FLAG_KEY;
+        packet->flags |= AV_PKT_FLAG_CORRUPT;
     }
 
     int ret;
@@ -114,6 +114,7 @@ bool decoder_push(DecoderState* decoder, char* buf, uint32_t len, uint64_t pts) 
             goto cleanup;
         }
     } else {
+        parse_packet(decoder, packet);
         printf("Config packet.\n");
         status = false;
         goto cleanup;
