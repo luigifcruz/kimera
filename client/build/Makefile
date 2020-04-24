@@ -231,6 +231,33 @@ src/main.c.s:
 	$(MAKE) -f CMakeFiles/camera.dir/build.make CMakeFiles/camera.dir/src/main.c.s
 .PHONY : src/main.c.s
 
+src/resample.o: src/resample.c.o
+
+.PHONY : src/resample.o
+
+# target to build an object file
+src/resample.c.o:
+	$(MAKE) -f CMakeFiles/camera.dir/build.make CMakeFiles/camera.dir/src/resample.c.o
+.PHONY : src/resample.c.o
+
+src/resample.i: src/resample.c.i
+
+.PHONY : src/resample.i
+
+# target to preprocess a source file
+src/resample.c.i:
+	$(MAKE) -f CMakeFiles/camera.dir/build.make CMakeFiles/camera.dir/src/resample.c.i
+.PHONY : src/resample.c.i
+
+src/resample.s: src/resample.c.s
+
+.PHONY : src/resample.s
+
+# target to generate assembly for a file
+src/resample.c.s:
+	$(MAKE) -f CMakeFiles/camera.dir/build.make CMakeFiles/camera.dir/src/resample.c.s
+.PHONY : src/resample.c.s
+
 src/socket.o: src/socket.c.o
 
 .PHONY : src/socket.o
@@ -279,6 +306,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/resample.o"
+	@echo "... src/resample.i"
+	@echo "... src/resample.s"
 	@echo "... src/socket.o"
 	@echo "... src/socket.i"
 	@echo "... src/socket.s"

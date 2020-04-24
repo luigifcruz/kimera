@@ -8,6 +8,7 @@ set(CMAKE_DEPENDS_CHECK_C
   "/home/luigifcruz/AndroidStudioProjects/Camera/client/src/display.c" "/home/luigifcruz/AndroidStudioProjects/Camera/client/build/CMakeFiles/camera.dir/src/display.c.o"
   "/home/luigifcruz/AndroidStudioProjects/Camera/client/src/loopback.c" "/home/luigifcruz/AndroidStudioProjects/Camera/client/build/CMakeFiles/camera.dir/src/loopback.c.o"
   "/home/luigifcruz/AndroidStudioProjects/Camera/client/src/main.c" "/home/luigifcruz/AndroidStudioProjects/Camera/client/build/CMakeFiles/camera.dir/src/main.c.o"
+  "/home/luigifcruz/AndroidStudioProjects/Camera/client/src/resample.c" "/home/luigifcruz/AndroidStudioProjects/Camera/client/build/CMakeFiles/camera.dir/src/resample.c.o"
   "/home/luigifcruz/AndroidStudioProjects/Camera/client/src/socket.c" "/home/luigifcruz/AndroidStudioProjects/Camera/client/build/CMakeFiles/camera.dir/src/socket.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")

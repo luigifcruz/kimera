@@ -29,7 +29,7 @@ bool start_decoder(DecoderState* decoder) {
 
     decoder->parser_ctx->flags |= PARSER_FLAG_COMPLETE_FRAMES;
     decoder->retard = NULL;
-    decoder->sws_ctx = NULL;
+    decoder->frame = av_frame_alloc();
 
     return true;
 }
@@ -37,8 +37,8 @@ bool start_decoder(DecoderState* decoder) {
 void close_decoder(DecoderState* decoder) {
     if (decoder == NULL)
         return;
-    if (decoder->sws_ctx != NULL)
-        sws_freeContext(decoder->sws_ctx);
+    if (decoder->frame != NULL)
+        av_frame_free(&decoder->frame);
     if (decoder->parser_ctx != NULL)
         av_parser_close(decoder->parser_ctx);
     if (decoder->codec_ctx != NULL)
@@ -47,41 +47,7 @@ void close_decoder(DecoderState* decoder) {
         av_packet_free(&decoder->retard);
 }
 
-int convert_frame(DecoderState* decoder, AVFrame* frame, char* buf) {
-    if (decoder->sws_ctx == NULL) {
-        decoder->sws_ctx = sws_getContext(frame->width, frame->height, frame->format,
-                                          frame->width, frame->height, 0,
-                                          SWS_FAST_BILINEAR, NULL, NULL, NULL);
-    }
-   size_t y_len = (frame->linesize[0] * frame->height);
-    size_t u_len = (frame->linesize[1] * frame->height) / 2;
-    size_t v_len = (frame->linesize[2] * frame->height) / 2;
-    size_t len = ((frame->linesize[0] * frame->height)     +
-                 (frame->linesize[1] * frame->height / 2)  +
-                 (frame->linesize[2] * frame->height / 2));
-
-    uint8_t* a = (uint8_t*)malloc(y_len);
-    uint8_t* b = (uint8_t*)malloc(u_len);
-    uint8_t* c = (uint8_t*)malloc(v_len);
-    int dest_linesize[4] = { frame->linesize[0]+frame->linesize[1]+frame->linesize[2], 0,0,0 };
-    uint8_t* dest[4] = { a, NULL, NULL, NULL };
-    printf("1\n");
-    sws_scale(decoder->sws_ctx, frame->data, frame->linesize, 0, frame->height, dest, dest_linesize);
-    printf("2\n");
-    return dest_linesize[0];
-}
-
-bool parse_packet(DecoderState* decoder, AVFrame* frame, AVPacket* packet) {
-    uint8_t *out_data = NULL;
-    int out_len = 0;
-    int r = av_parser_parse2(decoder->parser_ctx, decoder->codec_ctx,
-                             &out_data, &out_len, packet->data, packet->size,
-                             AV_NOPTS_VALUE, AV_NOPTS_VALUE, -1);
-
-    assert(r == packet->size);
-    (void) r;
-    assert(out_len == packet->size);
-
+bool parse_packet(DecoderState* decoder, AVPacket* packet) {
     if (decoder->parser_ctx->key_frame == 1) {
         packet->flags |= AV_PKT_FLAG_KEY;
     }
@@ -92,7 +58,7 @@ bool parse_packet(DecoderState* decoder, AVFrame* frame, AVPacket* packet) {
         return false;
     }
 
-    ret = avcodec_receive_frame(decoder->codec_ctx, frame);
+    ret = avcodec_receive_frame(decoder->codec_ctx, decoder->frame);
     if (ret < 0) {
         printf("Couldn't receive video frame: %d\n", ret);
         return false;
@@ -101,7 +67,7 @@ bool parse_packet(DecoderState* decoder, AVFrame* frame, AVPacket* packet) {
     return true;
 }
 
-bool decoder_push(DecoderState* decoder, AVFrame* frame, char* buf, uint32_t len, uint64_t pts) {
+bool decoder_push(DecoderState* decoder, char* buf, uint32_t len, uint64_t pts) {
     bool status = true;
 
     AVPacket* packet = av_packet_alloc();
@@ -110,10 +76,41 @@ bool decoder_push(DecoderState* decoder, AVFrame* frame, char* buf, uint32_t len
     packet->size = len;
     packet->pts = pts != NO_PTS ? pts : AV_NOPTS_VALUE;
 
+    if (decoder->retard != NULL || packet->pts == AV_NOPTS_VALUE) {
+        decoder->retard = av_packet_alloc();
+        
+        size_t offset = 0;
+        if (decoder->retard != NULL) {
+            offset = decoder->retard->size;
+            if (av_grow_packet(decoder->retard, packet->size)) {
+                printf("Couldn't grow packet.\n");
+                goto cleanup;
+            }
+        } else {
+            if (av_new_packet(decoder->retard, packet->size)) {
+                printf("Couldn't create packet.\n");
+                goto cleanup;
+            }
+        }
+        memcpy(decoder->retard->data + offset, packet->data, packet->size);
+
+        if (packet->pts != AV_NOPTS_VALUE) {
+            decoder->retard->pts = packet->pts;
+            decoder->retard->dts = packet->dts;
+            decoder->retard->flags = packet->flags;
+            av_packet_free(&packet);
+            packet = decoder->retard;
+        }
+    }
+
     if (packet->pts != AV_NOPTS_VALUE) {
-        if (!parse_packet(decoder, frame, packet)) {
-            printf("Couldn't generate AVFrame.\n");
-            status = false;
+        bool ok = parse_packet(decoder, packet);
+
+        if (decoder->retard != NULL)
+            decoder->retard = NULL;
+
+        if (!ok) {
+            printf("Error parsing AVPacket.\n");
             goto cleanup;
         }
     } else {
@@ -123,6 +120,7 @@ bool decoder_push(DecoderState* decoder, AVFrame* frame, char* buf, uint32_t len
     }
 
 cleanup:
-    av_packet_free(&packet);
+    if (decoder->retard == NULL)
+        av_packet_free(&packet);
     return status;
 }

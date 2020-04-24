@@ -14,6 +14,8 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
 import android.view.Surface;
+import android.widget.TextView;
+
 import androidx.core.app.ActivityCompat;
 
 import java.io.FileDescriptor;
@@ -131,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
         format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 10);
         format.setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, 100_000);
-        format.setInteger(MediaFormat.KEY_LATENCY, 0);
+        //format.setInteger(MediaFormat.KEY_LATENCY, 0);
         format.setInteger(MediaFormat.KEY_PRIORITY, 0);
         format.setInteger(MediaFormat.KEY_WIDTH, 1920);
         format.setInteger(MediaFormat.KEY_HEIGHT, 1080);
@@ -184,9 +186,12 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 MediaCodec.BufferInfo bufferInfo = new MediaCodec.BufferInfo();
                 codec.start();
+                int outputBufferId;
+
+                TextView textView = (TextView)findViewById(R.id.textView);
 
                 while (connection.isConnected()) {
-                    int outputBufferId = codec.dequeueOutputBuffer(bufferInfo, -1);
+                    outputBufferId = codec.dequeueOutputBuffer(bufferInfo, -1);
                     try {
                         if (outputBufferId >= 0) {
                             FileDescriptor fd = connection.getFileDescriptor();
@@ -203,6 +208,8 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 pts = bufferInfo.presentationTimeUs - ptsOrigin;
                             }
+
+                            textView.setText(String.valueOf(pts));
 
                             headerBuffer.putLong(pts);
                             headerBuffer.putInt(codecBuffer.remaining());

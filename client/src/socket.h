@@ -13,7 +13,7 @@ typedef struct sockaddr_un saddr;
 size_t socket_read_all(int, char*, size_t);
 size_t socket_read(int, char*, size_t);
 
-int socket_open(char*);
-void socket_close(int);
+int open_socket(char*);
+void close_socket(int);
 
 #endif

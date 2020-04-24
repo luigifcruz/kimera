@@ -8,7 +8,7 @@ size_t socket_read(int socketfd, char* buf, size_t len) {
     return recv(socketfd, buf, len, MSG_DONTWAIT);
 }
 
-int socket_open(char* socketaddr) {
+int open_socket(char* socketaddr) {
     int socketfd;
     saddr server;
 
@@ -28,6 +28,6 @@ int socket_open(char* socketaddr) {
     return socketfd;
 }
 
-void socket_close(int socketfd) {
+void close_socket(int socketfd) {
     close(socketfd);
 }

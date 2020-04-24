@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <time.h> 
 #include <assert.h>
 #include <signal.h>
 
@@ -12,7 +13,7 @@
 #include "config.h"
 
 volatile sig_atomic_t stop;
-typedef enum { STDOUT, SDL, LOOPBACK } output_t;
+typedef enum { STDOUT, DISPLAY, LOOPBACK } output_t;
 
 void inthand(int signum) {
     if (stop == 1) {
@@ -23,7 +24,7 @@ void inthand(int signum) {
 
 int main(int argc, char *argv[]) {
     // Set options.
-    output_t oopt = LOOPBACK;
+    output_t oopt = DISPLAY;
 
     // Open ADB tunneling connection with the device.
     adb_open_tunnel(SOCKNAME_VS, APP_DOMAIN);
@@ -32,32 +33,43 @@ int main(int argc, char *argv[]) {
     // Setup signaling to exit safely.
     signal(SIGINT, inthand);
 
-    // Start LibAV decoder.
+    // Start HEVC Decoder.
     DecoderState decoder;
-    if (oopt == SDL || oopt == LOOPBACK) {
+    if (oopt == DISPLAY || oopt == LOOPBACK) {
         if (!start_decoder(&decoder))
             goto cleanup;
     }
 
     // Start Loopback Ouput.
-    int loopback_fd;
+    LoopbackState loopback;
     if (oopt == LOOPBACK) {
-        if ((loopback_fd = open_loopback(LOOPBACK_DEVICE)) < 0) {
+        if (!open_loopback(&loopback, LOOPBACK_DEVICE))
             goto cleanup;
-        }
     }
 
-    // Connect to the device using UNIX Socket. 
-    int socketfd = socket_open(SOCKNAME_VS); 
-    if (socketfd < 0) {
-      return 1;
+    // Start Display Screen.
+    DisplayState display;
+    if (oopt == DISPLAY) {
+        if (!start_display(&display))
+            goto cleanup;
     }
-    
+
+    // Start Socket Client. 
+    int socketfd = -1; 
+    if ((socketfd = open_socket(SOCKNAME_VS)) < 0) {
+        return 1;
+    }
+
     // Start Decoder Loop.
     size_t out = 0;
     char header[HEADER_SIZE];
 
+    clock_t t;
+    float time_taken = 0;
+    float i = 0;
     while (!stop) { 
+        t = clock();
+
         out = socket_read_all(socketfd, (char*)&header, HEADER_SIZE); 
         if (out < HEADER_SIZE) {
             continue;
@@ -76,29 +88,36 @@ int main(int argc, char *argv[]) {
        
         out = socket_read_all(socketfd, packet, len); 
         assert(out == len);
-
+        
         if (oopt == STDOUT) {
             fwrite(packet, sizeof(char), len, stdout);
             free(packet);
             continue;
         }
-
-        AVFrame* frame = av_frame_alloc();
-        if (decoder_push(&decoder, frame, packet, len, pts)) {
-            if (oopt == SDL) {
-
+        
+        if (decoder_push(&decoder, packet, len, pts)) {
+            if (oopt == DISPLAY) {
             }
 
             if (oopt == LOOPBACK) {
-                loopback_push_frame(loopback_fd, &decoder, frame);
+                loopback_push_frame(&loopback, decoder.frame);
             }
         };
-
-        av_frame_free(&frame);
+        
         free(packet);
+
+        t = clock() - t; 
+        time_taken += ((double)t)/CLOCKS_PER_SEC; // in seconds 
+        i += 1.0;
+        printf("FPS: %f\n", 1.0/(time_taken/i));    
     }
 
 cleanup:
     close_decoder(&decoder);
-    socket_close(socketfd);
+    close_socket(socketfd);
+
+    if (oopt == LOOPBACK)
+        close_loopback(&loopback);
+    if (oopt == DISPLAY)
+        close_display(&display);
 }

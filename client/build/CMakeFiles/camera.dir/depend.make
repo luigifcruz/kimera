@@ -29,10 +29,31 @@ CMakeFiles/camera.dir/src/decoder.c.o: /usr/include/x86_64-linux-gnu/libavutil/p
 CMakeFiles/camera.dir/src/decoder.c.o: /usr/include/x86_64-linux-gnu/libavutil/rational.h
 CMakeFiles/camera.dir/src/decoder.c.o: /usr/include/x86_64-linux-gnu/libavutil/samplefmt.h
 CMakeFiles/camera.dir/src/decoder.c.o: /usr/include/x86_64-linux-gnu/libavutil/version.h
-CMakeFiles/camera.dir/src/decoder.c.o: /usr/include/x86_64-linux-gnu/libswscale/swscale.h
 
 CMakeFiles/camera.dir/src/display.c.o: ../src/display.c
 CMakeFiles/camera.dir/src/display.c.o: ../src/display.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavcodec/avcodec.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavcodec/version.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavutil/attributes.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavutil/avconfig.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavutil/avutil.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavutil/buffer.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavutil/channel_layout.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavutil/common.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavutil/cpu.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavutil/dict.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavutil/error.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavutil/frame.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavutil/hwcontext.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavutil/intfloat.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavutil/log.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavutil/macros.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavutil/mathematics.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavutil/mem.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavutil/pixfmt.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavutil/rational.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavutil/samplefmt.h
+CMakeFiles/camera.dir/src/display.c.o: /usr/include/x86_64-linux-gnu/libavutil/version.h
 
 CMakeFiles/camera.dir/src/loopback.c.o: ../src/config.h
 CMakeFiles/camera.dir/src/loopback.c.o: ../src/decoder.h
@@ -88,7 +109,6 @@ CMakeFiles/camera.dir/src/loopback.c.o: /usr/include/x86_64-linux-gnu/libavutil/
 CMakeFiles/camera.dir/src/loopback.c.o: /usr/include/x86_64-linux-gnu/libavutil/rational.h
 CMakeFiles/camera.dir/src/loopback.c.o: /usr/include/x86_64-linux-gnu/libavutil/samplefmt.h
 CMakeFiles/camera.dir/src/loopback.c.o: /usr/include/x86_64-linux-gnu/libavutil/version.h
-CMakeFiles/camera.dir/src/loopback.c.o: /usr/include/x86_64-linux-gnu/libswscale/swscale.h
 CMakeFiles/camera.dir/src/loopback.c.o: /usr/include/x86_64-linux-gnu/sys/ioctl.h
 CMakeFiles/camera.dir/src/loopback.c.o: /usr/include/x86_64-linux-gnu/sys/select.h
 CMakeFiles/camera.dir/src/loopback.c.o: /usr/include/x86_64-linux-gnu/sys/ttydefaults.h
@@ -160,7 +180,6 @@ CMakeFiles/camera.dir/src/main.c.o: /usr/include/x86_64-linux-gnu/libavutil/pixf
 CMakeFiles/camera.dir/src/main.c.o: /usr/include/x86_64-linux-gnu/libavutil/rational.h
 CMakeFiles/camera.dir/src/main.c.o: /usr/include/x86_64-linux-gnu/libavutil/samplefmt.h
 CMakeFiles/camera.dir/src/main.c.o: /usr/include/x86_64-linux-gnu/libavutil/version.h
-CMakeFiles/camera.dir/src/main.c.o: /usr/include/x86_64-linux-gnu/libswscale/swscale.h
 CMakeFiles/camera.dir/src/main.c.o: /usr/include/x86_64-linux-gnu/sys/cdefs.h
 CMakeFiles/camera.dir/src/main.c.o: /usr/include/x86_64-linux-gnu/sys/ioctl.h
 CMakeFiles/camera.dir/src/main.c.o: /usr/include/x86_64-linux-gnu/sys/select.h
@@ -169,6 +188,37 @@ CMakeFiles/camera.dir/src/main.c.o: /usr/include/x86_64-linux-gnu/sys/ttydefault
 CMakeFiles/camera.dir/src/main.c.o: /usr/include/x86_64-linux-gnu/sys/types.h
 CMakeFiles/camera.dir/src/main.c.o: /usr/include/x86_64-linux-gnu/sys/uio.h
 CMakeFiles/camera.dir/src/main.c.o: /usr/include/x86_64-linux-gnu/sys/un.h
+
+CMakeFiles/camera.dir/src/resample.c.o: ../src/config.h
+CMakeFiles/camera.dir/src/resample.c.o: ../src/decoder.h
+CMakeFiles/camera.dir/src/resample.c.o: ../src/resample.c
+CMakeFiles/camera.dir/src/resample.c.o: ../src/resample.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavcodec/avcodec.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavcodec/version.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavformat/avformat.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavformat/avio.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavformat/version.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavutil/attributes.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavutil/avconfig.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavutil/avutil.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavutil/buffer.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavutil/channel_layout.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavutil/common.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavutil/cpu.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavutil/dict.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavutil/error.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavutil/frame.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavutil/hwcontext.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavutil/intfloat.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavutil/log.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavutil/macros.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavutil/mathematics.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavutil/mem.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavutil/pixfmt.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavutil/rational.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavutil/samplefmt.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libavutil/version.h
+CMakeFiles/camera.dir/src/resample.c.o: /usr/include/x86_64-linux-gnu/libswscale/swscale.h
 
 CMakeFiles/camera.dir/src/socket.c.o: ../src/socket.c
 CMakeFiles/camera.dir/src/socket.c.o: ../src/socket.h

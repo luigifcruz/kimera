@@ -1,68 +1,51 @@
 #include "display.h"
 
-int start_display() {
+bool start_display(DisplayState* state) {
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-		fprintf(stderr, "SDL_Init Error: %s\n", SDL_GetError());
-		return -1;
+		printf("[SDL] Init error: %s\n", SDL_GetError());
+		goto cleanup;
 	}
 
-	SDL_Window *win = SDL_CreateWindow("Hello World!",
-                    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
-                    620, 387, SDL_WINDOW_SHOWN);
-	if (win == NULL) {
-		fprintf(stderr, "SDL_CreateWindow Error: %s\n", SDL_GetError());
-		return -1;
+	if ((state->win = SDL_CreateWindow(
+					  "Camera Loopback", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+                      720, 480, SDL_WINDOW_SHOWN)) == NULL) {
+		printf("[SDL] Window error: %s\n", SDL_GetError());
+		goto cleanup;
+	}
+	
+	if ((state->ren = SDL_CreateRenderer(state->win, -1, 
+					  SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)) == NULL) {
+		printf("[SDL] Renderer error: %s\n", SDL_GetError());
+		goto cleanup;
 	}
 
-	SDL_Renderer *ren = SDL_CreateRenderer(win, -1,SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	if (ren == NULL) {
-		fprintf(stderr, "SDL_CreateRenderer Error: %s\n", SDL_GetError());
-		if (win != NULL) {
-			SDL_DestroyWindow(win);
-		}
-		SDL_Quit();
-		return -1;
+	if ((state->tex = SDL_CreateTexture(state->ren, SDL_PIXELFORMAT_YV12,
+					  SDL_TEXTUREACCESS_STREAMING, 1920, 1080)) == NULL) {
+		printf("[SDL] Error: %s\n", SDL_GetError());
+		goto cleanup;
 	}
 
-	SDL_Surface *bmp = SDL_LoadBMP("fram.bmp");
-	if (bmp == NULL) {
-		fprintf(stderr, "SDL_LoadBMP Error: %s\n", SDL_GetError());
-		if (ren != NULL) {
-			SDL_DestroyRenderer(ren);
-		}
-		if (win != NULL) {
-			SDL_DestroyWindow(win);
-		}
-		SDL_Quit();
-		return -1;
-	}
+	SDL_RenderClear(state->ren);
+	SDL_RenderCopy(state->ren, state->tex, NULL, NULL);
+	SDL_RenderPresent(state->ren);
 
-	SDL_Texture *tex = SDL_CreateTextureFromSurface(ren, bmp);
-	if (tex == NULL) {
-		fprintf(stderr, "SDL_CreateTextureFromSurface Error: %s\n", SDL_GetError());
-		if (bmp != NULL) {
-			SDL_FreeSurface(bmp);
-		}
-		if (ren != NULL) {
-			SDL_DestroyRenderer(ren);
-		}
-		if (win != NULL) {
-			SDL_DestroyWindow(win);
-		}
-		SDL_Quit();
-		return -1;
-	}
-	SDL_FreeSurface(bmp);
+	return true;
 
-	for (int i=0; i < 20; i++) {
-			SDL_RenderClear(ren);
-			SDL_RenderCopy(ren, tex, NULL, NULL);
-			SDL_RenderPresent(ren);
-			SDL_Delay(100);
-	}
+cleanup:
+	close_display(state);
+	return false;
+}
 
-	SDL_DestroyTexture(tex);
-	SDL_DestroyRenderer(ren);
-	SDL_DestroyWindow(win);
+void close_display(DisplayState* state) {
+	if (state->tex != NULL)
+		SDL_DestroyTexture(state->tex);
+	if (state->ren != NULL)
+		SDL_DestroyRenderer(state->ren);
+	if (state->win != NULL)
+		SDL_DestroyWindow(state->win);
 	SDL_Quit();
+}
+
+bool display_draw(DisplayState* state, AVFrame* frame) {
+
 }

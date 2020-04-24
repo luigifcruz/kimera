@@ -13,7 +13,13 @@
 
 #include "decoder.h"
 
-int open_loopback(char*);
-void loopback_push_frame(int, DecoderState*, AVFrame*);
+typedef struct {
+    int dev_fd;
+    uint8_t* buffer;
+} LoopbackState;
+
+bool open_loopback(LoopbackState* state, char*);
+void close_loopback(LoopbackState*);
+void loopback_push_frame(LoopbackState* state, AVFrame*);
 
 #endif

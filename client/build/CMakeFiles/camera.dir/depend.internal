@@ -30,10 +30,31 @@ CMakeFiles/camera.dir/src/decoder.c.o
  /usr/include/x86_64-linux-gnu/libavutil/rational.h
  /usr/include/x86_64-linux-gnu/libavutil/samplefmt.h
  /usr/include/x86_64-linux-gnu/libavutil/version.h
- /usr/include/x86_64-linux-gnu/libswscale/swscale.h
 CMakeFiles/camera.dir/src/display.c.o
  /home/luigifcruz/AndroidStudioProjects/Camera/client/src/display.c
  /home/luigifcruz/AndroidStudioProjects/Camera/client/src/display.h
+ /usr/include/x86_64-linux-gnu/libavcodec/avcodec.h
+ /usr/include/x86_64-linux-gnu/libavcodec/version.h
+ /usr/include/x86_64-linux-gnu/libavutil/attributes.h
+ /usr/include/x86_64-linux-gnu/libavutil/avconfig.h
+ /usr/include/x86_64-linux-gnu/libavutil/avutil.h
+ /usr/include/x86_64-linux-gnu/libavutil/buffer.h
+ /usr/include/x86_64-linux-gnu/libavutil/channel_layout.h
+ /usr/include/x86_64-linux-gnu/libavutil/common.h
+ /usr/include/x86_64-linux-gnu/libavutil/cpu.h
+ /usr/include/x86_64-linux-gnu/libavutil/dict.h
+ /usr/include/x86_64-linux-gnu/libavutil/error.h
+ /usr/include/x86_64-linux-gnu/libavutil/frame.h
+ /usr/include/x86_64-linux-gnu/libavutil/hwcontext.h
+ /usr/include/x86_64-linux-gnu/libavutil/intfloat.h
+ /usr/include/x86_64-linux-gnu/libavutil/log.h
+ /usr/include/x86_64-linux-gnu/libavutil/macros.h
+ /usr/include/x86_64-linux-gnu/libavutil/mathematics.h
+ /usr/include/x86_64-linux-gnu/libavutil/mem.h
+ /usr/include/x86_64-linux-gnu/libavutil/pixfmt.h
+ /usr/include/x86_64-linux-gnu/libavutil/rational.h
+ /usr/include/x86_64-linux-gnu/libavutil/samplefmt.h
+ /usr/include/x86_64-linux-gnu/libavutil/version.h
 CMakeFiles/camera.dir/src/loopback.c.o
  /home/luigifcruz/AndroidStudioProjects/Camera/client/src/config.h
  /home/luigifcruz/AndroidStudioProjects/Camera/client/src/decoder.h
@@ -89,7 +110,6 @@ CMakeFiles/camera.dir/src/loopback.c.o
  /usr/include/x86_64-linux-gnu/libavutil/rational.h
  /usr/include/x86_64-linux-gnu/libavutil/samplefmt.h
  /usr/include/x86_64-linux-gnu/libavutil/version.h
- /usr/include/x86_64-linux-gnu/libswscale/swscale.h
  /usr/include/x86_64-linux-gnu/sys/ioctl.h
  /usr/include/x86_64-linux-gnu/sys/select.h
  /usr/include/x86_64-linux-gnu/sys/ttydefaults.h
@@ -161,7 +181,6 @@ CMakeFiles/camera.dir/src/main.c.o
  /usr/include/x86_64-linux-gnu/libavutil/rational.h
  /usr/include/x86_64-linux-gnu/libavutil/samplefmt.h
  /usr/include/x86_64-linux-gnu/libavutil/version.h
- /usr/include/x86_64-linux-gnu/libswscale/swscale.h
  /usr/include/x86_64-linux-gnu/sys/cdefs.h
  /usr/include/x86_64-linux-gnu/sys/ioctl.h
  /usr/include/x86_64-linux-gnu/sys/select.h
@@ -170,6 +189,37 @@ CMakeFiles/camera.dir/src/main.c.o
  /usr/include/x86_64-linux-gnu/sys/types.h
  /usr/include/x86_64-linux-gnu/sys/uio.h
  /usr/include/x86_64-linux-gnu/sys/un.h
+CMakeFiles/camera.dir/src/resample.c.o
+ /home/luigifcruz/AndroidStudioProjects/Camera/client/src/config.h
+ /home/luigifcruz/AndroidStudioProjects/Camera/client/src/decoder.h
+ /home/luigifcruz/AndroidStudioProjects/Camera/client/src/resample.c
+ /home/luigifcruz/AndroidStudioProjects/Camera/client/src/resample.h
+ /usr/include/x86_64-linux-gnu/libavcodec/avcodec.h
+ /usr/include/x86_64-linux-gnu/libavcodec/version.h
+ /usr/include/x86_64-linux-gnu/libavformat/avformat.h
+ /usr/include/x86_64-linux-gnu/libavformat/avio.h
+ /usr/include/x86_64-linux-gnu/libavformat/version.h
+ /usr/include/x86_64-linux-gnu/libavutil/attributes.h
+ /usr/include/x86_64-linux-gnu/libavutil/avconfig.h
+ /usr/include/x86_64-linux-gnu/libavutil/avutil.h
+ /usr/include/x86_64-linux-gnu/libavutil/buffer.h
+ /usr/include/x86_64-linux-gnu/libavutil/channel_layout.h
+ /usr/include/x86_64-linux-gnu/libavutil/common.h
+ /usr/include/x86_64-linux-gnu/libavutil/cpu.h
+ /usr/include/x86_64-linux-gnu/libavutil/dict.h
+ /usr/include/x86_64-linux-gnu/libavutil/error.h
+ /usr/include/x86_64-linux-gnu/libavutil/frame.h
+ /usr/include/x86_64-linux-gnu/libavutil/hwcontext.h
+ /usr/include/x86_64-linux-gnu/libavutil/intfloat.h
+ /usr/include/x86_64-linux-gnu/libavutil/log.h
+ /usr/include/x86_64-linux-gnu/libavutil/macros.h
+ /usr/include/x86_64-linux-gnu/libavutil/mathematics.h
+ /usr/include/x86_64-linux-gnu/libavutil/mem.h
+ /usr/include/x86_64-linux-gnu/libavutil/pixfmt.h
+ /usr/include/x86_64-linux-gnu/libavutil/rational.h
+ /usr/include/x86_64-linux-gnu/libavutil/samplefmt.h
+ /usr/include/x86_64-linux-gnu/libavutil/version.h
+ /usr/include/x86_64-linux-gnu/libswscale/swscale.h
 CMakeFiles/camera.dir/src/socket.c.o
  /home/luigifcruz/AndroidStudioProjects/Camera/client/src/socket.c
  /home/luigifcruz/AndroidStudioProjects/Camera/client/src/socket.h
