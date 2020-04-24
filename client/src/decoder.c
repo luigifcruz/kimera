@@ -48,8 +48,18 @@ void close_decoder(DecoderState* decoder) {
 }
 
 bool parse_packet(DecoderState* decoder, AVPacket* packet) {
+    uint8_t *out_data = NULL;
+    int out_len = 0;
+    int r = av_parser_parse2(decoder->parser_ctx, decoder->codec_ctx,
+                             &out_data, &out_len, packet->data, packet->size,
+                             AV_NOPTS_VALUE, AV_NOPTS_VALUE, -1);
+
+    assert(r == packet->size);
+    (void) r;
+    assert(out_len == packet->size);
+
     if (decoder->parser_ctx->key_frame == 1) {
-        packet->flags |= AV_PKT_FLAG_CORRUPT;
+        packet->flags |= AV_PKT_FLAG_KEY;
     }
 
     int ret;
@@ -74,7 +84,7 @@ bool decoder_push(DecoderState* decoder, char* buf, uint32_t len, uint64_t pts) 
     av_init_packet(packet);
     packet->data = buf;
     packet->size = len;
-    packet->pts = pts != NO_PTS ? pts : AV_NOPTS_VALUE;
+    packet->pts = pts;
 
     if (decoder->retard != NULL || packet->pts == AV_NOPTS_VALUE) {
         decoder->retard = av_packet_alloc();
@@ -111,13 +121,9 @@ bool decoder_push(DecoderState* decoder, char* buf, uint32_t len, uint64_t pts) 
 
         if (!ok) {
             printf("Error parsing AVPacket.\n");
+            status = false;
             goto cleanup;
         }
-    } else {
-        parse_packet(decoder, packet);
-        printf("Config packet.\n");
-        status = false;
-        goto cleanup;
     }
 
 cleanup:

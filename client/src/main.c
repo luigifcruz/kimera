@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 
     // Start Socket Client. 
     int socketfd = -1; 
-    if ((socketfd = open_socket(SOCKNAME_VS)) < 0) {
+    if ((socketfd = open_socket("cam")) < 0) {
         return 1;
     }
 
@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
             free(packet);
             continue;
         }
-
+        
         if (decoder_push(&decoder, packet, len, pts)) {
             if (oopt == DISPLAY) {
                 display_draw(&display, decoder.frame);
@@ -103,9 +103,7 @@ int main(int argc, char *argv[]) {
             if (oopt == LOOPBACK) {
                 loopback_push_frame(&loopback, decoder.frame);
             }
-        } else {
-            printf("NOK\n");
-        };
+        }
         
         free(packet);
 

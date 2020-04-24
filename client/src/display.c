@@ -8,7 +8,7 @@ bool start_display(DisplayState* state) {
 
 	if ((state->win = SDL_CreateWindow(
 					  "Camera Loopback", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
-                      960, 540, SDL_WINDOW_SHOWN)) == NULL) {
+                      540, 1108, SDL_WINDOW_SHOWN)) == NULL) {
 		printf("[SDL] Window error: %s\n", SDL_GetError());
 		goto cleanup;
 	}
@@ -20,7 +20,7 @@ bool start_display(DisplayState* state) {
 	}
 
 	if ((state->tex = SDL_CreateTexture(state->ren, SDL_PIXELFORMAT_YV12,
-					  SDL_TEXTUREACCESS_STREAMING, 1920, 1080)) == NULL) {
+					  SDL_TEXTUREACCESS_STREAMING, 1080, 2216)) == NULL) {
 		printf("[SDL] Error: %s\n", SDL_GetError());
 		goto cleanup;
 	}

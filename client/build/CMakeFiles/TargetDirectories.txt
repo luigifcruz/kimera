@@ -1,6 +1,6 @@
 /home/luigifcruz/AndroidStudioProjects/Camera/client/build/CMakeFiles/rebuild_cache.dir
-/home/luigifcruz/AndroidStudioProjects/Camera/client/build/CMakeFiles/camera.dir
 /home/luigifcruz/AndroidStudioProjects/Camera/client/build/CMakeFiles/edit_cache.dir
+/home/luigifcruz/AndroidStudioProjects/Camera/client/build/CMakeFiles/camera.dir
 /home/luigifcruz/AndroidStudioProjects/Camera/client/build/lib/ffmpeg/CMakeFiles/rebuild_cache.dir
 /home/luigifcruz/AndroidStudioProjects/Camera/client/build/lib/ffmpeg/CMakeFiles/edit_cache.dir
 /home/luigifcruz/AndroidStudioProjects/Camera/client/build/lib/sdl/CMakeFiles/rebuild_cache.dir

@@ -15,6 +15,9 @@
 ########################
 
 //Path to a program.
+CMAKE_ADDR2LINE:FILEPATH=/usr/bin/addr2line
+
+//Path to a program.
 CMAKE_AR:FILEPATH=/usr/bin/ar
 
 //Choose the type of build, options are: None Debug Release RelWithDebInfo
@@ -75,6 +78,9 @@ CMAKE_C_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
 
 //Flags used by the C compiler during RELWITHDEBINFO builds.
 CMAKE_C_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
+
+//Path to a program.
+CMAKE_DLLTOOL:FILEPATH=CMAKE_DLLTOOL-NOTFOUND
 
 //Flags used by the linker during all build types.
 CMAKE_EXE_LINKER_FLAGS:STRING=
@@ -143,6 +149,9 @@ CMAKE_PROJECT_NAME:STATIC=camera
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=/usr/bin/ranlib
+
+//Path to a program.
+CMAKE_READELF:FILEPATH=/usr/bin/readelf
 
 //Flags used by the linker during the creation of shared libraries
 // during all build types.
@@ -420,6 +429,8 @@ AVUTIL_libavutil_INCLUDEDIR:INTERNAL=
 AVUTIL_libavutil_LIBDIR:INTERNAL=
 AVUTIL_libavutil_PREFIX:INTERNAL=
 AVUTIL_libavutil_VERSION:INTERNAL=
+//ADVANCED property for variable: CMAKE_ADDR2LINE
+CMAKE_ADDR2LINE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_AR
 CMAKE_AR-ADVANCED:INTERNAL=1
 //This is the directory where this CMakeCache.txt was created
@@ -427,9 +438,9 @@ CMAKE_CACHEFILE_DIR:INTERNAL=/home/luigifcruz/AndroidStudioProjects/Camera/clien
 //Major version of cmake used to create the current loaded cache
 CMAKE_CACHE_MAJOR_VERSION:INTERNAL=3
 //Minor version of cmake used to create the current loaded cache
-CMAKE_CACHE_MINOR_VERSION:INTERNAL=13
+CMAKE_CACHE_MINOR_VERSION:INTERNAL=16
 //Patch version of cmake used to create the current loaded cache
-CMAKE_CACHE_PATCH_VERSION:INTERNAL=4
+CMAKE_CACHE_PATCH_VERSION:INTERNAL=3
 //ADVANCED property for variable: CMAKE_COLOR_MAKEFILE
 CMAKE_COLOR_MAKEFILE-ADVANCED:INTERNAL=1
 //Path to CMake executable.
@@ -470,6 +481,8 @@ CMAKE_C_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1
 CMAKE_C_FLAGS_RELEASE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_C_FLAGS_RELWITHDEBINFO
 CMAKE_C_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_DLLTOOL
+CMAKE_DLLTOOL-ADVANCED:INTERNAL=1
 //Executable file format
 CMAKE_EXECUTABLE_FORMAT:INTERNAL=ELF
 //ADVANCED property for variable: CMAKE_EXE_LINKER_FLAGS
@@ -525,8 +538,10 @@ CMAKE_OBJDUMP-ADVANCED:INTERNAL=1
 CMAKE_PLATFORM_INFO_INITIALIZED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_RANLIB
 CMAKE_RANLIB-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_READELF
+CMAKE_READELF-ADVANCED:INTERNAL=1
 //Path to CMake installation.
-CMAKE_ROOT:INTERNAL=/usr/share/cmake-3.13
+CMAKE_ROOT:INTERNAL=/usr/share/cmake-3.16
 //ADVANCED property for variable: CMAKE_SHARED_LINKER_FLAGS
 CMAKE_SHARED_LINKER_FLAGS-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_SHARED_LINKER_FLAGS_DEBUG
@@ -679,5 +694,21 @@ __pkg_config_checked_AVUTIL:INTERNAL=1
 __pkg_config_checked_SDL2:INTERNAL=1
 __pkg_config_checked_SWRESAMPLE:INTERNAL=1
 __pkg_config_checked_SWSCALE:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_AVCODEC_avcodec
+pkgcfg_lib_AVCODEC_avcodec-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_AVDEVICE_avdevice
+pkgcfg_lib_AVDEVICE_avdevice-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_AVFILTER_avfilter
+pkgcfg_lib_AVFILTER_avfilter-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_AVFORMAT_avformat
+pkgcfg_lib_AVFORMAT_avformat-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_AVUTIL_avutil
+pkgcfg_lib_AVUTIL_avutil-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_SDL2_SDL2
+pkgcfg_lib_SDL2_SDL2-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_SWRESAMPLE_swresample
+pkgcfg_lib_SWRESAMPLE_swresample-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: pkgcfg_lib_SWSCALE_swscale
+pkgcfg_lib_SWSCALE_swscale-ADVANCED:INTERNAL=1
 prefix_result:INTERNAL=/usr/lib/x86_64-linux-gnu
 
