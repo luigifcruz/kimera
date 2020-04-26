@@ -6,6 +6,12 @@ bool start_display(DisplayState* state) {
 		goto cleanup;
 	}
 
+	if (TTF_Init() != 0) {
+		printf("[SDL] TTF init error.\n");
+		state->font = NULL;
+	}
+	state->font = TTF_OpenFont("./OxygenMono.ttf", 50);
+
 	if ((state->win = SDL_CreateWindow(
 					  "Camera Loopback", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
                       1920/2, 1080/2, SDL_WINDOW_SHOWN)) == NULL) {
@@ -44,14 +50,39 @@ void close_display(DisplayState* state) {
 	if (state->win != NULL)
 		SDL_DestroyWindow(state->win);
 	SDL_Quit();
+	TTF_Quit();
 }
 
 bool display_draw(DisplayState* state, AVFrame* frame) {
-	SDL_RenderClear(state->ren);		
+	SDL_Event e;
+    while(SDL_PollEvent(&e)){
+        switch(e.type){
+            case SDL_QUIT:
+                return false;
+        }
+    }
+
+	SDL_RenderClear(state->ren);
+	
 	SDL_UpdateYUVTexture(state->tex, NULL,
-            frame->data[0], frame->linesize[0],
-            frame->data[1], frame->linesize[1],
-            frame->data[2], frame->linesize[2]);
+						 frame->data[0], frame->linesize[0],
+						 frame->data[1], frame->linesize[1],
+						 frame->data[2], frame->linesize[2]);
 	SDL_RenderCopy(state->ren, state->tex, NULL, NULL);
+
+	if (state->font != NULL) {
+		char buffer[32];
+		sprintf((char*)&buffer, "%ld", frame->pts);
+		SDL_Color textColor = { 255, 255, 255, 255 };
+
+		SDL_Surface *textSurface = TTF_RenderText_Solid(state->font, buffer, textColor);
+		SDL_Texture *textTexture = SDL_CreateTextureFromSurface(state->ren, textSurface);
+		
+		SDL_Rect textRect = { 0, 0, textSurface->w, textSurface->h };
+		SDL_RenderCopy(state->ren, textTexture, NULL, &textRect);
+		SDL_DestroyTexture(textTexture);
+	}
+	
 	SDL_RenderPresent(state->ren);
+	return true;
 }

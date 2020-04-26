@@ -92,7 +92,8 @@ int main(int argc, char *argv[]) {
         
         if (decoder_push(&decoder, packet, len, pts)) {
             if (oopt == DISPLAY) {
-                display_draw(&display, decoder.frame);
+                if (!display_draw(&display, decoder.frame))
+                    break;
             }
 
             if (oopt == LOOPBACK) {
