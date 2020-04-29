@@ -5,13 +5,13 @@ bool open_loopback(LoopbackState* state, char* interface) {
 
     state->dev_fd = open(interface, O_RDWR);
 	if (state->dev_fd == -1) {
-        printf("[LOOPBACK] Couldn't open interface.\n");
+        printf("[LINUX_LOOPBACK] Couldn't open interface.\n");
         return false;
 	}
 
 	v.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
 	if (ioctl(state->dev_fd, VIDIOC_G_FMT, &v) == -1){
-        printf("[LOOPBACK] Couldn't open interface.\n");
+        printf("[LINUX_LOOPBACK] Couldn't open interface.\n");
         return false;
 	}
 
@@ -21,13 +21,13 @@ bool open_loopback(LoopbackState* state, char* interface) {
 	v.fmt.pix.sizeimage = v.fmt.pix.width * v.fmt.pix.height * (3 / 2);
 	v.fmt.pix.field = V4L2_FIELD_NONE;
 	if (ioctl(state->dev_fd, VIDIOC_S_FMT, &v) == -1){
-        printf("[LOOPBACK] Couldn't open interface.\n");
+        printf("[LINUX_LOOPBACK] Couldn't open interface.\n");
         return false;
 	}
 
     state->buffer = (uint8_t*)malloc(v.fmt.pix.sizeimage);
     if (!state->buffer) {
-        printf("[LOOPBACK] Couldn't allocate loopback buffer.\n");
+        printf("[LINUX_LOOPBACK] Couldn't allocate loopback buffer.\n");
         return false;
     }
 

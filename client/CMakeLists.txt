@@ -13,8 +13,10 @@ list(APPEND SOURCES
   src/main.c
   src/decoder.h
   src/decoder.c
-  src/socket.h
-  src/socket.c
+  src/unix_socket.h
+  src/unix_socket.c
+  src/tcp_socket.h
+  src/tcp_socket.c
   src/display.h
   src/display.c
   src/config.h

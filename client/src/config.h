@@ -8,5 +8,7 @@
 #define VIDEO_CODEC AV_CODEC_ID_HEVC
 #define HEADER_SIZE 12
 #define NO_PTS UINT64_C(-1)
+#define SERVER_IP "192.168.0.15"
+#define SERVER_PORT 8080
 
 #endif

@@ -1,7 +1,8 @@
 #include "loopback.h"
 
 bool open_loopback(LoopbackState* state, char* interface) {
-    return true;
+    printf("[MACOS_LOOPBACK] This isn't supported yet.\n");
+    return false;
 }
 
 void close_loopback(LoopbackState* state) {

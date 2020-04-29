@@ -6,7 +6,8 @@
 #include <signal.h>
 
 #include "utils.h"
-#include "socket.h"
+#include "unix_socket.h"
+#include "tcp_socket.h"
 #include "decoder.h"
 #include "loopback.h"
 #include "display.h"
@@ -14,6 +15,7 @@
 
 volatile sig_atomic_t stop;
 typedef enum { STDOUT, DISPLAY, LOOPBACK } output_t;
+typedef enum { UNIX, TCP } input_t;
 
 void inthand(int signum) {
     if (stop == 1) {
@@ -25,11 +27,14 @@ void inthand(int signum) {
 int main(int argc, char *argv[]) {
     // Set options.
     output_t oopt = DISPLAY;
+    input_t iopt = TCP;
 
     // Open ADB tunneling connection with the device.
-    adb_open_tunnel(SOCKNAME_VS, APP_DOMAIN);
-    adb_open_tunnel(SOCKNAME_AS, APP_DOMAIN);
-
+    if (iopt == UNIX) {
+        adb_open_tunnel(SOCKNAME_VS, APP_DOMAIN);
+        adb_open_tunnel(SOCKNAME_AS, APP_DOMAIN);
+    }
+    
     // Setup signaling to exit safely.
     signal(SIGINT, inthand);
 
@@ -56,8 +61,16 @@ int main(int argc, char *argv[]) {
 
     // Start Socket Client. 
     int socketfd = -1; 
-    if ((socketfd = open_socket(SOCKNAME_VS)) < 0) {
-        return 1;
+    switch (iopt) {
+        case UNIX:
+            socketfd = open_unix_socket(SOCKNAME_VS);
+            break;
+        case TCP:
+            socketfd = open_tcp_socket(SOCKNAME_VS, SERVER_IP, SERVER_PORT);
+            break;
+    }
+    if (socketfd < 0) {
+        goto cleanup;
     }
 
     // Start Decoder Loop.
@@ -65,13 +78,13 @@ int main(int argc, char *argv[]) {
     char header[HEADER_SIZE];
 
     while (!stop) { 
-        out = socket_read_all(socketfd, (char*)&header, HEADER_SIZE); 
+        out = recv(socketfd, (char*)&header, HEADER_SIZE, MSG_WAITALL);
         if (out < HEADER_SIZE) {
             continue;
         }
 
-        uint64_t pts = buffer_read64be((char*)header);
-        uint32_t len = buffer_read32be(&header[8]);
+        uint64_t pts = buffer_read64be((uint8_t*)header);
+        uint32_t len = buffer_read32be((uint8_t*)&header[8]);
         assert(pts == NO_PTS || (pts & 0x8000000000000000) == 0);
         assert(len);
 
@@ -81,7 +94,7 @@ int main(int argc, char *argv[]) {
             goto cleanup;
         }
        
-        out = socket_read_all(socketfd, packet, len); 
+        out = recv(socketfd, packet, len, MSG_WAITALL); 
         assert(out == len);
         
         if (oopt == STDOUT) {
@@ -106,7 +119,15 @@ int main(int argc, char *argv[]) {
 
 cleanup:
     close_decoder(&decoder);
-    close_socket(socketfd);
+    
+    switch (iopt) {
+        case UNIX:
+            close_unix_socket(socketfd);
+            break;
+        case TCP:
+            close_tcp_socket(socketfd);
+            break;
+    }
 
     if (oopt == LOOPBACK)
         close_loopback(&loopback);

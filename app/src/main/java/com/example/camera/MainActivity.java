@@ -22,7 +22,13 @@ import androidx.core.app.ActivityCompat;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     private String cameraId = null;
     private CameraDevice cameraDevice = null;
-    private LocalServerSocket serverSocket = null;
+    private ServerSocket serverSocket = null;
     private final ByteBuffer headerBuffer = ByteBuffer.allocate(12);
     private long ptsOrigin;
 
@@ -51,14 +57,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    serverSocket = new LocalServerSocket("com.example.camera.video_stream");
+                    serverSocket = new ServerSocket(8080);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
                 while (true) {
                     try {
-                        final LocalSocket connection = serverSocket.accept();
+                        final Socket connection = serverSocket.accept();
                         runOnUiThread(new Runnable() {
                             public void run() {
                                 try {
@@ -80,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
     // Camera Methods
     //
 
-    public void openCamera(final LocalSocket connection) throws CameraAccessException {
+    public void openCamera(final Socket connection) throws CameraAccessException {
         CameraManager manager = (CameraManager) getSystemService(CAMERA_SERVICE);
 
         for (String id : manager.getCameraIdList()) {
@@ -170,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
         return format;
     }
 
-    public void makeDecoder(final LocalSocket connection) {
+    public void makeDecoder(final Socket connection) {
         String videoCodecName = "video/hevc";
         String audioCodecName = "mp4a-latm";
 
@@ -222,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void encoderLoop(final MediaCodec codec, final LocalSocket connection) {
+    public void encoderLoop(final MediaCodec codec, final Socket connection) {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -234,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
 
                     try {
                         if (outputBufferId >= 0) {
-                            FileDescriptor fd = connection.getFileDescriptor();
+                            WritableByteChannel stream = Channels.newChannel(connection.getOutputStream());
                             ByteBuffer codecBuffer = codec.getOutputBuffer(outputBufferId);
 
                             headerBuffer.clear();
@@ -248,9 +254,6 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 pts = bufferInfo.presentationTimeUs - ptsOrigin;
                             }
-                            Log.e(TAG, String.valueOf(bufferInfo.size));
-                            Log.e(TAG, String.valueOf(codecBuffer.remaining()));
-
 
                             //textView.setText(String.valueOf(pts));
 
@@ -258,10 +261,10 @@ public class MainActivity extends AppCompatActivity {
                             headerBuffer.putInt(codecBuffer.remaining());
                             headerBuffer.flip();
 
-                            Os.write(fd, headerBuffer);
-                            Os.write(fd, codecBuffer);
+                            stream.write(headerBuffer);
+                            stream.write(codecBuffer);
                         }
-                    } catch (ErrnoException | IOException e) {
+                    } catch (IOException e) {
                         break;
                     } finally {
                         if (outputBufferId >= 0) {
