@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
 
         char* packet = (char*)malloc(len);
         if (packet == NULL) {
-            printf("Couldn't allocate packet.");
+            printf("[MAIN] Couldn't allocate packet.");
             goto cleanup;
         }
        

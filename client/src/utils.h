@@ -20,7 +20,7 @@ int adb_open_tunnel(char* sname, char* domain) {
     char cmd[128];
     sprintf(cmd, "adb forward localfilesystem:%s localabstract:%s.%s",
             sname, domain, sname);
-    printf("[OPEN_SOCKET] %s\n", cmd);
+    printf("[ADB] %s\n", cmd);
     return system(cmd);
 }
 

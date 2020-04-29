@@ -1,28 +1,28 @@
 #include "decoder.h"
 
 bool start_decoder(DecoderState* decoder) {
-    AVCodec *codec = avcodec_find_decoder(VIDEO_CODEC);
-    if (codec == NULL) {
-        printf("Selected decoder not found.\n");
+    AVCodec *codec = avcodec_find_decoder(AV_CODEC_ID_HEVC);
+    if (!codec) {
+        printf("[DECODER] Selected decoder not found.\n");
         return false;
     }
 
     decoder->codec_ctx = avcodec_alloc_context3(codec);
     if (!decoder->codec_ctx) {
-        printf("Couldn't allocate codec context.\n");
+        printf("[DECODER] Couldn't allocate codec context.\n");
         close_decoder(decoder);
         return false;
     }
 
     if (avcodec_open2(decoder->codec_ctx, codec, NULL) < 0) {
-        printf("Couldn't open codec.\n");
+        printf("[DECODER] Couldn't open codec.\n");
         close_decoder(decoder);
         return false;
     }
 
     decoder->parser_ctx = av_parser_init(VIDEO_CODEC);
     if (!decoder->parser_ctx) {
-        printf("Couldn't initialize parser.\n");
+        printf("[DECODER] Couldn't initialize parser.\n");
         close_decoder(decoder);
         return false;
     }
@@ -35,15 +35,15 @@ bool start_decoder(DecoderState* decoder) {
 }
 
 void close_decoder(DecoderState* decoder) {
-    if (decoder == NULL)
+    if (decoder)
         return;
-    if (decoder->frame != NULL)
+    if (decoder->frame)
         av_frame_free(&decoder->frame);
-    if (decoder->parser_ctx != NULL)
+    if (decoder->parser_ctx)
         av_parser_close(decoder->parser_ctx);
-    if (decoder->codec_ctx != NULL)
+    if (decoder->codec_ctx)
         avcodec_free_context(&decoder->codec_ctx);
-    if (decoder->retard != NULL)
+    if (decoder->retard)
         av_packet_free(&decoder->retard);
 }
 
@@ -64,13 +64,13 @@ bool parse_packet(DecoderState* decoder, AVPacket* packet) {
 
     int ret;
     if ((ret = avcodec_send_packet(decoder->codec_ctx, packet)) < 0) {
-        printf("Couldn't send video packet: %d\n", ret);
+        printf("[DECODER] Couldn't send video packet: %d\n", ret);
         return false;
     }
 
     ret = avcodec_receive_frame(decoder->codec_ctx, decoder->frame);
     if (ret < 0) {
-        printf("Couldn't receive video frame: %d\n", ret);
+        printf("[DECODER] Couldn't receive video frame: %d\n", ret);
         return false;
     }
 
@@ -86,19 +86,19 @@ bool decoder_push(DecoderState* decoder, char* buf, uint32_t len, uint64_t pts) 
     packet->size = len;
     packet->pts = pts;
 
-    if (decoder->retard != NULL || packet->pts == AV_NOPTS_VALUE) {
+    if (decoder->retard || packet->pts == AV_NOPTS_VALUE) {
         decoder->retard = av_packet_alloc();
         
         size_t offset = 0;
-        if (decoder->retard != NULL) {
+        if (decoder->retard) {
             offset = decoder->retard->size;
             if (av_grow_packet(decoder->retard, packet->size)) {
-                printf("Couldn't grow packet.\n");
+                printf("[DECODER] Couldn't grow packet.\n");
                 goto cleanup;
             }
         } else {
             if (av_new_packet(decoder->retard, packet->size)) {
-                printf("Couldn't create packet.\n");
+                printf("[DECODER] Couldn't create packet.\n");
                 goto cleanup;
             }
         }
@@ -116,14 +116,17 @@ bool decoder_push(DecoderState* decoder, char* buf, uint32_t len, uint64_t pts) 
     if (packet->pts != AV_NOPTS_VALUE) {
         bool ok = parse_packet(decoder, packet);
 
-        if (decoder->retard != NULL)
+        if (decoder->retard)
             decoder->retard = NULL;
 
         if (!ok) {
-            printf("Error parsing AVPacket.\n");
+            printf("[DECODER] Error parsing AVPacket.\n");
             status = false;
             goto cleanup;
         }
+    } else {
+        printf("[DECODER] Config packet.\n");
+        goto cleanup;
     }
 
 cleanup:

@@ -12,21 +12,21 @@ bool start_display(DisplayState* state) {
 	}
 	state->font = TTF_OpenFont("./OxygenMono.ttf", 50);
 
-	if ((state->win = SDL_CreateWindow(
+	if (!(state->win = SDL_CreateWindow(
 					  "Camera Loopback", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
-                      1920/2, 1080/2, SDL_WINDOW_SHOWN)) == NULL) {
+                      1920/2, 1080/2, SDL_WINDOW_SHOWN))) {
 		printf("[SDL] Window error: %s\n", SDL_GetError());
 		goto cleanup;
 	}
 	
-	if ((state->ren = SDL_CreateRenderer(state->win, -1, 
-					  SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC)) == NULL) {
+	if (!(state->ren = SDL_CreateRenderer(state->win, -1, 
+					  SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC))) {
 		printf("[SDL] Renderer error: %s\n", SDL_GetError());
 		goto cleanup;
 	}
 
-	if ((state->tex = SDL_CreateTexture(state->ren, SDL_PIXELFORMAT_YV12,
-					  SDL_TEXTUREACCESS_STREAMING, 1920, 1080)) == NULL) {
+	if (!(state->tex = SDL_CreateTexture(state->ren, SDL_PIXELFORMAT_YV12,
+					  SDL_TEXTUREACCESS_STREAMING, 1920, 1080))) {
 		printf("[SDL] Error: %s\n", SDL_GetError());
 		goto cleanup;
 	}
@@ -43,11 +43,11 @@ cleanup:
 }
 
 void close_display(DisplayState* state) {
-	if (state->tex != NULL)
+	if (state->tex)
 		SDL_DestroyTexture(state->tex);
-	if (state->ren != NULL)
+	if (state->ren)
 		SDL_DestroyRenderer(state->ren);
-	if (state->win != NULL)
+	if (state->win)
 		SDL_DestroyWindow(state->win);
 	SDL_Quit();
 	TTF_Quit();
