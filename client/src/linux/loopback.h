@@ -11,7 +11,7 @@
 #include <libavcodec/avcodec.h>
 #include <sys/uio.h>
 
-#include "decoder.h"
+#include "../decoder.h"
 
 typedef struct {
     int dev_fd;
