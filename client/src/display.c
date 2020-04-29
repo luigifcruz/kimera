@@ -2,7 +2,7 @@
 
 bool start_display(DisplayState* state) {
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-		printf("[SDL] Init error: %s\n", SDL_GetError());
+		printf("[SDL] Init error: %s.\n", SDL_GetError());
 		goto cleanup;
 	}
 
@@ -70,7 +70,7 @@ bool display_draw(DisplayState* state, AVFrame* frame) {
 						 frame->data[2], frame->linesize[2]);
 	SDL_RenderCopy(state->ren, state->tex, NULL, NULL);
 
-	if (state->font != NULL) {
+	if (state->font) {
 		char buffer[32];
 		sprintf((char*)&buffer, "%ld", (int64_t)frame->pts);
 		SDL_Color textColor = { 255, 255, 255, 255 };

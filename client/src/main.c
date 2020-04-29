@@ -69,9 +69,8 @@ int main(int argc, char *argv[]) {
             socketfd = open_tcp_socket(SOCKNAME_VS, SERVER_IP, SERVER_PORT);
             break;
     }
-    if (socketfd < 0) {
+    if (socketfd < 0)
         goto cleanup;
-    }
 
     // Start Decoder Loop.
     size_t out = 0;
