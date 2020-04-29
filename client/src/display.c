@@ -72,7 +72,7 @@ bool display_draw(DisplayState* state, AVFrame* frame) {
 
 	if (state->font != NULL) {
 		char buffer[32];
-		sprintf((char*)&buffer, "%ld", frame->pts);
+		sprintf((char*)&buffer, "%lld", frame->pts);
 		SDL_Color textColor = { 255, 255, 255, 255 };
 
 		SDL_Surface *textSurface = TTF_RenderText_Solid(state->font, buffer, textColor);

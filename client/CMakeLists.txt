@@ -19,10 +19,9 @@ list(APPEND SOURCES
   src/display.c
   src/config.h
   src/utils.h
-  src/loopback.h
-  src/loopback.c
   src/resample.h
   src/resample.c
+  src/loopback.h
 )
 
 add_executable(camera ${SOURCES})

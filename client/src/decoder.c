@@ -82,7 +82,7 @@ bool decoder_push(DecoderState* decoder, char* buf, uint32_t len, uint64_t pts) 
 
     AVPacket* packet = av_packet_alloc();
     av_init_packet(packet);
-    packet->data = buf;
+    packet->data = (uint8_t*)buf;
     packet->size = len;
     packet->pts = pts;
 

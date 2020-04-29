@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
             continue;
         }
 
-        uint64_t pts = buffer_read64be(header);
+        uint64_t pts = buffer_read64be((char*)header);
         uint32_t len = buffer_read32be(&header[8]);
         assert(pts == NO_PTS || (pts & 0x8000000000000000) == 0);
         assert(len);
