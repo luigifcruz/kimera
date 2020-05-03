@@ -19,5 +19,5 @@ bool loopback_pull_frame(LoopbackState* loopback) {
 }
 
 void close_loopback(LoopbackState* loopback) {
-    return false;
+    return;
 }

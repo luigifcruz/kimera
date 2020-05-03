@@ -1,6 +1,6 @@
 #include "receiver.h"
 
-int receiver(State* state) {
+void receiver(State* state) {
     // Start HEVC Decoder.
     DecoderState decoder;
     if (state->source == DISPLAY || state->source == LOOPBACK) {
@@ -25,12 +25,15 @@ int receiver(State* state) {
     // Start Socket Client. 
     int socketfd = -1; 
     switch (state->source) {
-        case UNIX:
-            socketfd = open_unix_socket(state);
-            break;
-        case TCP:
-            socketfd = open_tcp_socket(state);
-            break;
+    case UNIX:
+        socketfd = open_unix_socket(state);
+        break;
+    case TCP:
+        socketfd = open_tcp_socket(state);
+        break;
+    default:
+        socketfd = -1;
+        break;
     }
     if (socketfd < 0)
         goto cleanup;
@@ -83,12 +86,14 @@ cleanup:
     close_decoder(&decoder);
     
     switch (state->source) {
-        case UNIX:
-            close_unix_socket(socketfd);
-            break;
-        case TCP:
-            close_tcp_socket(socketfd);
-            break;
+    case UNIX:
+        close_unix_socket(socketfd);
+        break;
+    case TCP:
+        close_tcp_socket(socketfd);
+        break;
+    default:
+        break;
     }
 
     if (state->source == LOOPBACK)

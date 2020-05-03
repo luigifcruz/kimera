@@ -19,7 +19,7 @@
 #define DEFAULT_WIDTH       1920
 #define DEFAULT_HEIGHT      1080
 #define DEFAULT_BITRATE     5000000
-#define DEFAULT_CODEC       "hevc"
+#define DEFAULT_CODEC       "libx265"
 #define DEFAULT_FORMAT      AV_PIX_FMT_YUV420P
 
 //

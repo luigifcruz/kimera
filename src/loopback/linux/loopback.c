@@ -1,6 +1,6 @@
 #include "loopback.h"
 
-bool open_loopback_sink(LoopbackState* loopback, State* state) {
+static bool open_loopback_sink(LoopbackState* loopback, State* state) {
 	if ((loopback->dev_fd = open(state->loopback, O_RDWR)) < 0) {
         printf("[LOOPBACK] Couldn't open interface.\n");
         return false;
@@ -31,7 +31,7 @@ bool open_loopback_sink(LoopbackState* loopback, State* state) {
         return false;
 	}
 
-    loopback->buffer = (uint8_t*)malloc(loopback->format.fmt.pix.sizeimage);
+    loopback->buffer = (char*)malloc(loopback->format.fmt.pix.sizeimage);
     if (!loopback->buffer) {
         printf("[LOOPBACK] Couldn't allocate loopback buffer.\n");
         return false;
@@ -40,7 +40,7 @@ bool open_loopback_sink(LoopbackState* loopback, State* state) {
 	return true;
 }
 
-bool open_loopback_source(LoopbackState* loopback, State* state) {
+static bool open_loopback_source(LoopbackState* loopback, State* state) {
 	if ((loopback->dev_fd = open(state->loopback, O_RDWR)) < 0) {
         printf("[LOOPBACK] Couldn't open interface.\n");
         return false;
@@ -104,7 +104,7 @@ bool open_loopback_source(LoopbackState* loopback, State* state) {
 	return true;
 }
 
-bool loopback_push_frame(LoopbackState* state, AVFrame* frame) {
+static bool loopback_push_frame(LoopbackState* state, AVFrame* frame) {
     size_t y_len = (frame->linesize[0] * frame->height);
     size_t u_len = (frame->linesize[1] * frame->height) / 2;
     size_t v_len = (frame->linesize[2] * frame->height) / 2;
@@ -121,7 +121,7 @@ bool loopback_push_frame(LoopbackState* state, AVFrame* frame) {
     return true;
 }
 
-bool loopback_pull_frame(LoopbackState* state) {
+static bool loopback_pull_frame(LoopbackState* state) {
     if (ioctl(state->dev_fd, VIDIOC_DQBUF, &state->info) < 0) {
         printf("[LOOPBACK] Error dequeuing stream.\n");
         return false;
@@ -135,7 +135,7 @@ bool loopback_pull_frame(LoopbackState* state) {
     return true;
 }
 
-void close_loopback(LoopbackState* state) {
+static void close_loopback(LoopbackState* state) {
     if (state->buffer)
         free(state->buffer);
     if (state->format.type == V4L2_BUF_TYPE_VIDEO_CAPTURE) 

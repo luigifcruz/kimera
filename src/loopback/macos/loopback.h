@@ -7,27 +7,19 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include <sys/ioctl.h>
-#include <linux/videodev2.h>
-#include <libavcodec/avcodec.h>
-#include <sys/uio.h>
-#include <sys/mman.h>
 
 #include "../../config.h"
 
 typedef struct {
     int dev_fd;
-    uint8_t* buffer;
-    struct v4l2_buffer info;
-    struct v4l2_format format;
-    struct v4l2_requestbuffers req;
+    char* buffer;
 } LoopbackState;
 
-bool open_loopback_sink(LoopbackState*, State*);
-bool open_loopback_source(LoopbackState*, State*);
+static bool open_loopback_sink(LoopbackState*, State*);
+static bool open_loopback_source(LoopbackState*, State*);
 
-bool loopback_push_frame(LoopbackState*, AVFrame*);
-bool loopback_pull_frame(LoopbackState*);
+static bool loopback_push_frame(LoopbackState*, AVFrame*);
+static bool loopback_pull_frame(LoopbackState*);
 
-void close_loopback(LoopbackState*);
+static void close_loopback(LoopbackState*);
 #endif

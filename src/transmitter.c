@@ -1,16 +1,19 @@
 #include "transmitter.h"
 
-int transmitter(State* state) {
+void transmitter(State* state) {
 /*
     // Start Socket Client. 
     int socketfd = -1; 
     switch (iopt) {
-        case UNIX:
-            socketfd = open_unix_socket(SOCKNAME_VS);
-            break;
-        case TCP:
-            socketfd = open_tcp_socket(SOCKNAME_VS, SERVER_IP, SERVER_PORT);
-            break;
+    case UNIX:
+        socketfd = open_unix_socket(SOCKNAME_VS);
+        break;
+    case TCP:
+        socketfd = open_tcp_socket(SOCKNAME_VS, SERVER_IP, SERVER_PORT);
+        break;
+    default:
+        socketfd = -1;
+        break;
     }
     if (socketfd < 0)
         goto cleanup;
@@ -45,12 +48,14 @@ int transmitter(State* state) {
 cleanup:
 /*    
     switch (oopt) {
-        case UNIX:
-            close_unix_socket(socketfd);
-            break;
-        case TCP:
-            close_tcp_socket(socketfd);
-            break;
+    case UNIX:
+        close_unix_socket(socketfd);
+        break;
+    case TCP:
+        close_tcp_socket(socketfd);
+        break;
+    default:
+        break;
     }
 */
 

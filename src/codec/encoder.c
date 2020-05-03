@@ -3,7 +3,7 @@
 bool start_encoder(EncoderState* encoder, State* state) {
     AVCodec *codec = avcodec_find_encoder_by_name(state->codec);
     if (!codec) {
-        printf("[ENCODER] Selected encoder not found.\n");
+        printf("[ENCODER] Selected encoder (%s) not found.\n", state->codec);
         return false;
     }
 

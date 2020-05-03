@@ -13,8 +13,10 @@ void inthand(int signum) {
     stop = 1;
 }
 
+int main(int argc, char *argv[]) {
+    // Register signal handler.
+    signal(SIGINT, inthand);
 
-State* init_state() {
     State *state = malloc(sizeof(State));
 
     state->width     = DEFAULT_WIDTH;
@@ -31,16 +33,9 @@ State* init_state() {
     case AV_PIX_FMT_YUV420P:
         state->frame_size = (state->width*state->height*3/2);
         break;
+    default:
+        return -1;
     }
 
-    return state;
-}
-
-int main(int argc, char *argv[]) {
-  // Register signal handler.
-  signal(SIGINT, inthand);
-
-  State* state = init_state();
-
-  transmitter(state);
+    transmitter(state);
 }

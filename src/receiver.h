@@ -10,6 +10,6 @@
 #include "loopback/loopback.h"
 #include "display.h"
 
-int receiver(State*);
+void receiver(State*);
 
 #endif

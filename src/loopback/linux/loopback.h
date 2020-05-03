@@ -17,18 +17,18 @@
 
 typedef struct {
     int dev_fd;
-    uint8_t* buffer;
+    char* buffer;
     struct v4l2_buffer info;
     struct v4l2_format format;
     struct v4l2_requestbuffers req;
 } LoopbackState;
 
-bool open_loopback_sink(LoopbackState*, State*);
-bool open_loopback_source(LoopbackState*, State*);
+static bool open_loopback_sink(LoopbackState*, State*);
+static bool open_loopback_source(LoopbackState*, State*);
 
-bool loopback_push_frame(LoopbackState*, AVFrame*);
-bool loopback_pull_frame(LoopbackState*);
+static bool loopback_push_frame(LoopbackState*, AVFrame*);
+static bool loopback_pull_frame(LoopbackState*);
 
-void close_loopback(LoopbackState*);
+static void close_loopback(LoopbackState*);
 
 #endif
