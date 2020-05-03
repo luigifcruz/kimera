@@ -15,7 +15,6 @@
 
 volatile sig_atomic_t stop;
 typedef enum { UNIX, TCP, STDOUT } output_t;
-typedef enum { LOOPBACK } input_t;
 
 void inthand(int signum) {
     if (stop == 1) {
@@ -26,23 +25,11 @@ void inthand(int signum) {
 
 int main(int argc, char *argv[]) {
     // Set options.
-    input_t iopt = LOOPBACK;
     output_t oopt = STDOUT;
     
     // Setup signaling to exit safely.
     signal(SIGINT, inthand);
-
-    // Start Encoder.
-    EncoderState encoder;
-    if (!start_encoder(&encoder))
-            goto cleanup;
-
-    // Start Loopback Ouput.
-    LoopbackState loopback;
-    if (oopt == LOOPBACK) {
-        if (!open_loopback(&loopback, LOOPBACK_DEVICE))
-            goto cleanup;
-    }
+    
 /*
     // Start Socket Client. 
     int socketfd = -1; 
@@ -57,12 +44,22 @@ int main(int argc, char *argv[]) {
     if (socketfd < 0)
         goto cleanup;
 */
+
+    // Start Encoder.
+    EncoderState encoder;
+    if (!start_encoder(&encoder))
+            goto cleanup;
+
+    // Start Loopback Input.
+    LoopbackState loopback;
+    if (!open_loopback(&loopback, LOOPBACK_DEVICE))
+        goto cleanup;
+
     // Start Decoder Loop.
-    char buffer[FRAME_BUFFER_SIZE_YUV420];
-    while (!stop) {
+    while (loopback_pull_frame(&loopback) || !stop) {
         // Receive frame buffer from input device.
 
-        if (encoder_push(&encoder, buffer)) {
+        if (encoder_push(&encoder, loopback.buffer)) {
             if (oopt == STDOUT) {
                 fwrite(
                     encoder.packet->data, sizeof(char),
@@ -74,7 +71,6 @@ int main(int argc, char *argv[]) {
     }
 
 cleanup:
-    close_encoder(&encoder);
 /*    
     switch (oopt) {
         case UNIX:
@@ -85,6 +81,7 @@ cleanup:
             break;
     }
 */
-    if (iopt == LOOPBACK)
-        close_loopback(&loopback);
+
+    close_loopback(&loopback);
+    close_encoder(&encoder);
 }

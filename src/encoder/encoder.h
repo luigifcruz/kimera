@@ -14,7 +14,6 @@ typedef struct {
     AVCodecContext *codec_ctx;
     AVPacket* packet;
     AVFrame* frame;
-    uint64_t pts;
 } EncoderState;
 
 bool start_encoder(EncoderState*);
