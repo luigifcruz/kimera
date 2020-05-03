@@ -1,7 +1,7 @@
 #include "encoder.h"
 
-bool start_encoder(EncoderState* encoder) {
-    AVCodec *codec = avcodec_find_encoder_by_name("hevc_nvenc");
+bool start_encoder(EncoderState* encoder, State* state) {
+    AVCodec *codec = avcodec_find_encoder_by_name(state->codec);
     if (!codec) {
         printf("[ENCODER] Selected encoder not found.\n");
         return false;
@@ -14,14 +14,14 @@ bool start_encoder(EncoderState* encoder) {
         return false;
     }
 
-    encoder->codec_ctx->bit_rate = 50000;
-    encoder->codec_ctx->width = 1920;
-    encoder->codec_ctx->height = 1080;
-    encoder->codec_ctx->time_base = (AVRational){1, 60};
-    encoder->codec_ctx->framerate = (AVRational){60, 1};
+    encoder->codec_ctx->bit_rate = state->bitrate;
+    encoder->codec_ctx->width = state->width;
+    encoder->codec_ctx->height = state->height;
+    encoder->codec_ctx->time_base = (AVRational){1, state->framerate};
+    encoder->codec_ctx->framerate = (AVRational){state->framerate, 1};
     encoder->codec_ctx->gop_size = 10;
     encoder->codec_ctx->max_b_frames = 0;
-    encoder->codec_ctx->pix_fmt = AV_PIX_FMT_YUV420P;
+    encoder->codec_ctx->pix_fmt = state->format;
 
     if (avcodec_open2(encoder->codec_ctx, codec, NULL) < 0) {
         printf("[ENCODER] Couldn't open codec.\n");
@@ -30,19 +30,17 @@ bool start_encoder(EncoderState* encoder) {
     }
 
     encoder->frame = av_frame_alloc();
-    encoder->packet = av_packet_alloc();
-
     encoder->frame->width = encoder->codec_ctx->width;
     encoder->frame->height = encoder->codec_ctx->height;
     encoder->frame->format = encoder->codec_ctx->pix_fmt;
     encoder->frame->pts = 0;
-
     if (av_frame_get_buffer(encoder->frame, 0) < 0){
         printf("[ENCODER] Couldn't allocate frame.\n");
         close_encoder(encoder);
         return false;
     }
 
+    encoder->packet = av_packet_alloc();
     if (!encoder->packet) {
         printf("[ENCODER] Couldn't allocate packet.\n");
         close_encoder(encoder);

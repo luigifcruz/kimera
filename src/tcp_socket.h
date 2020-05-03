@@ -9,9 +9,11 @@
 #include <sys/socket.h>
 #include <arpa/inet.h> 
 
+#include "config.h"
+
 typedef struct sockaddr_in tcp_addr;
 
-int open_tcp_socket(char*, char*, int);
+int open_tcp_socket(State*);
 void close_tcp_socket(int);
 
 #endif

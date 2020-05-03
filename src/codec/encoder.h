@@ -1,5 +1,5 @@
-#ifndef ENCODER_H
-#define ENCODER_H
+#ifndef ENCODER_CODEC_H
+#define ENCODER_CODEC_H
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -8,7 +8,7 @@
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 
-#include "config.h"
+#include "../config.h"
 
 typedef struct {
     AVCodecContext *codec_ctx;
@@ -16,7 +16,7 @@ typedef struct {
     AVFrame* frame;
 } EncoderState;
 
-bool start_encoder(EncoderState*);
+bool start_encoder(EncoderState*, State*);
 void close_encoder(EncoderState*);
 bool encoder_push(EncoderState*, char*);
 

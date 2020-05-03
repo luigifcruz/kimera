@@ -8,7 +8,18 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 add_subdirectory(lib/ffmpeg)
 add_subdirectory(lib/sdl)
-#add_subdirectory(src/decoder)
-add_subdirectory(src/encoder)
 
-target_link_libraries(kenc ffmpeg sdl ${EXTRA_LIBS})
+list(APPEND SOURCES
+  src/kimera.c
+  src/codec/decoder.c
+  src/codec/encoder.c
+  src/transmitter.c
+  src/receiver.c
+  src/unix_socket.c
+  src/tcp_socket.c
+  src/display.c
+  src/resample.c
+)
+
+add_executable(kimera ${SOURCES})
+target_link_libraries(kimera ffmpeg sdl ${EXTRA_LIBS})

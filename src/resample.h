@@ -8,8 +8,6 @@
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
 
-#include "decoder.h"
-
 typedef struct {
     struct SwsContext* sws_ctx;
 } ResampleState;

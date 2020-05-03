@@ -1,6 +1,6 @@
 #include "tcp_socket.h"
 
-int open_tcp_socket(char* socketaddr, char* server_ip, int server_port) {
+int open_tcp_socket(State* state) {
     int socketfd;
     tcp_addr server;
 
@@ -10,14 +10,14 @@ int open_tcp_socket(char* socketaddr, char* server_ip, int server_port) {
     }
 
     server.sin_family = AF_INET;
-    server.sin_port = htons(server_port);
+    server.sin_port = htons(state->port);
 
-    if (inet_pton(AF_INET, server_ip, &server.sin_addr) < 0) { 
+    if (inet_pton(AF_INET, state->address, &server.sin_addr) < 0) { 
         printf("[TCP_SOCKET] Invalid address.\n"); 
         return -1; 
     } 
 
-    if (connect(socketfd, (struct sockaddr *)&server, sizeof(tcp_addr)) < 0) {
+    if (connect(socketfd, (struct sockaddr*)&server, sizeof(tcp_addr)) < 0) {
         printf("[TCP_SOCKET] Couldn't connect to server.\n");
         return -1;
     }

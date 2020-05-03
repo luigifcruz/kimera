@@ -1,6 +1,6 @@
 #include "unix_socket.h"
 
-int open_unix_socket(char* socketaddr) {
+int open_unix_socket(State* state) {
     int socketfd;
     unix_addr server;
 
@@ -10,7 +10,7 @@ int open_unix_socket(char* socketaddr) {
     }
 
     server.sun_family = AF_UNIX;
-    strcpy(server.sun_path, socketaddr);
+    strcpy(server.sun_path, state->address);
 
     if (connect(socketfd, (struct sockaddr *)&server, sizeof(unix_addr)) < 0) {
         printf("[UNIX_SOCKET] Couldn't connect to server.\n");

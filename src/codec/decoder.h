@@ -1,5 +1,5 @@
-#ifndef DECODER_H
-#define DECODER_H
+#ifndef DECODER_CODEC_H
+#define DECODER_CODEC_H
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -8,7 +8,7 @@
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 
-#include "config.h"
+#include "../config.h"
 
 typedef struct {
     AVCodecContext *codec_ctx;

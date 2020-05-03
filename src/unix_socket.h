@@ -9,9 +9,11 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
+#include "config.h"
+
 typedef struct sockaddr_un unix_addr;
 
-int open_unix_socket(char*);
+int open_unix_socket(State*);
 void close_unix_socket(int);
 
 #endif
