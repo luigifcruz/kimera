@@ -1,10 +1,13 @@
-cmake_minimum_required(VERSION 3.13)
-project(kimera C)
+cmake_minimum_required(VERSION 3.15)
+project(kimera VERSION 1.0 LANGUAGES C)
 
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_C_FLAGS_DEBUG "-g -DDEBUG")
-set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug)
+endif()
+
+set(CMAKE_C_FLAGS "-Wall -Wextra -Wno-unused-function -Wno-unused-parameter")
+set(CMAKE_C_FLAGS_DEBUG "-g")
+set(CMAKE_C_FLAGS_RELEASE "-O3")
 
 add_subdirectory(lib/ffmpeg)
 add_subdirectory(lib/sdl)
