@@ -1,10 +1,10 @@
 #import "CameraAdapter.h"
 
- @implementation StringCounter
+@implementation StringCounter
 
- - (void)hellow
- {
+- (void)hellow
+{
 
- }
+}
 
- @end
+@end

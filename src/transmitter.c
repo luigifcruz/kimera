@@ -1,23 +1,16 @@
 #include "transmitter.h"
 
 void transmitter(State* state) {
-/*
     // Start Socket Client. 
-    int socketfd = -1; 
-    switch (iopt) {
-    case UNIX:
-        socketfd = open_unix_socket(SOCKNAME_VS);
-        break;
+    TCPSocketState socket;
+    switch (state->sink) {
     case TCP:
-        socketfd = open_tcp_socket(SOCKNAME_VS, SERVER_IP, SERVER_PORT);
+        if (!open_tcp_server(&socket, state))
+            goto cleanup;
         break;
     default:
-        socketfd = -1;
-        break;
-    }
-    if (socketfd < 0)
         goto cleanup;
-*/
+    }
 
     // Start Encoder.
     EncoderState encoder;
@@ -34,30 +27,24 @@ void transmitter(State* state) {
         // Receive frame buffer from input device.
 
         if (encoder_push(&encoder, loopback.buffer)) {
-            if (state->sink == STDOUT) {
+            if (state->sink & STDOUT) {
                 fwrite(
                     encoder.packet->data, sizeof(char),
                     encoder.packet->size, stdout);
                 continue;
             }
 
-
         }
     }
 
 cleanup:
-/*    
-    switch (oopt) {
-    case UNIX:
-        close_unix_socket(socketfd);
-        break;
+    switch (state->sink) {
     case TCP:
-        close_tcp_socket(socketfd);
+        close_tcp(&socket);
         break;
     default:
         break;
     }
-*/
 
     close_loopback(&loopback);
     close_encoder(&encoder);

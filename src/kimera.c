@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
+#include <stdbool.h>
+#include <unistd.h>
+#include <string.h>
 
 #include "config.h"
 #include "transmitter.h"
@@ -17,6 +20,7 @@ int main(int argc, char *argv[]) {
     // Register signal handler.
     signal(SIGINT, inthand);
 
+    // Declare Default Settings
     State *state = malloc(sizeof(State));
 
     state->width     = DEFAULT_WIDTH;
@@ -29,6 +33,26 @@ int main(int argc, char *argv[]) {
     state->format    = DEFAULT_FORMAT;
     state->framerate = DEFAULT_FRAMERATE;
 
+    // Parse Arguments
+    enum { RECEIVE, TRANSMIT } mode = RECEIVE;
+
+    if (argc < 2) {
+        printf("Flags\n");
+        return -1;
+    }
+
+    if (!strcmp(argv[1], "tx") || !strcmp(argv[1], "transmit")) {
+        state->source = LOOPBACK;
+        state->sink = TCP;
+        mode = TRANSMIT;
+    } else if (!strcmp(argv[1], "rx") || !strcmp(argv[1], "receive")) {
+        state->source = TCP;
+        state->sink = DISPLAY;
+        mode = RECEIVE;
+    } else {
+        printf("Not such flag (%s)\n", argv[1]);
+    }
+
     switch (state->format) {
     case AV_PIX_FMT_YUV420P:
         state->frame_size = (state->width*state->height*3/2);
@@ -37,5 +61,14 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    transmitter(state);
+    switch (mode) {
+    case RECEIVE:
+        receiver(state);
+        break;
+    case TRANSMIT:
+        transmitter(state);
+        break;
+    }
+
+    return 0;
 }

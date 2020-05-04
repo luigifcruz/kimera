@@ -11,7 +11,7 @@
 #define HEADER_SIZE         12
 #define NO_PTS              UINT64_C(-1)
 
-#define DEFAULT_PORT        8080
+#define DEFAULT_PORT        8081
 #define DEFAULT_ADDRESS     "127.0.0.1"
 #define DEFAULT_LOOPBACK    "/dev/video0"
 
@@ -29,11 +29,11 @@
 volatile sig_atomic_t stop;
 
 typedef enum {
-    UNIX,
-    TCP,
-    STDOUT,
-    DISPLAY,
-    LOOPBACK
+    UNIX     = 1 << 0,
+    TCP      = 1 << 1,
+    STDOUT   = 1 << 2,
+    DISPLAY  = 1 << 3,
+    LOOPBACK = 1 << 4
 } Interfaces;
 
 typedef struct {
