@@ -1,7 +1,7 @@
 #include "decoder.h"
 
-bool start_decoder(DecoderState* decoder) {
-    AVCodec *codec = avcodec_find_decoder_by_name("hevc_cuvid");
+bool start_decoder(DecoderState* decoder, State* state) {
+    AVCodec *codec = avcodec_find_decoder_by_name(state->codec);
     if (!codec) {
         printf("[DECODER] Selected decoder not found.\n");
         return false;
@@ -14,6 +14,14 @@ bool start_decoder(DecoderState* decoder) {
         return false;
     }
 
+    decoder->codec_ctx->bit_rate = state->bitrate;
+    decoder->codec_ctx->width = state->width;
+    decoder->codec_ctx->height = state->height;
+    decoder->codec_ctx->time_base = (AVRational){1, state->framerate};
+    decoder->codec_ctx->framerate = (AVRational){state->framerate, 1};
+    decoder->codec_ctx->gop_size = 10;
+    decoder->codec_ctx->max_b_frames = 0;
+    decoder->codec_ctx->pix_fmt = state->format;
     if (avcodec_open2(decoder->codec_ctx, codec, NULL) < 0) {
         printf("[DECODER] Couldn't open codec.\n");
         close_decoder(decoder);
@@ -28,6 +36,7 @@ bool start_decoder(DecoderState* decoder) {
     }
 
     decoder->parser_ctx->flags |= PARSER_FLAG_COMPLETE_FRAMES;
+    decoder->parser_ctx->format = state->format;
     decoder->retard = NULL;
     decoder->frame = av_frame_alloc();
 

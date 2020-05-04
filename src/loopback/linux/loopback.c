@@ -140,8 +140,10 @@ static bool loopback_pull_frame(LoopbackState* state) {
 }
 
 static void close_loopback(LoopbackState* state) {
-    if (state->buffer)
-        free(&state->buffer);
-    if (state->format.type == V4L2_BUF_TYPE_VIDEO_CAPTURE) 
+    if (state->format.type == V4L2_BUF_TYPE_VIDEO_CAPTURE) {
         ioctl(state->dev_fd, VIDIOC_STREAMOFF, &state->info.type);
+    } else {
+        if (state->buffer)
+            free(state->buffer);
+    }
 }

@@ -43,11 +43,13 @@ int main(int argc, char *argv[]) {
 
     if (!strcmp(argv[1], "tx") || !strcmp(argv[1], "transmit")) {
         state->source = LOOPBACK;
-        state->sink = TCP;
+        state->sink = UNIX;
+        state->codec = "hevc_nvenc";
         mode = TRANSMIT;
     } else if (!strcmp(argv[1], "rx") || !strcmp(argv[1], "receive")) {
-        state->source = TCP;
+        state->source = UNIX;
         state->sink = DISPLAY;
+        state->codec = "hevc";
         mode = RECEIVE;
     } else {
         printf("Not such flag (%s)\n", argv[1]);

@@ -17,7 +17,7 @@ typedef struct {
     AVFrame* frame;
 } DecoderState;
 
-bool start_decoder(DecoderState*);
+bool start_decoder(DecoderState*, State*);
 void close_decoder(DecoderState*);
 bool decoder_push(DecoderState*, char*, uint32_t, uint64_t);
 

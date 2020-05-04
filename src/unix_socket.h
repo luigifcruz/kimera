@@ -3,17 +3,15 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/un.h>
 
 #include "config.h"
+#include "socket.h"
 
-typedef struct sockaddr_un unix_addr;
-
-int open_unix_socket(State*);
-void close_unix_socket(int);
+bool open_unix_client(SocketState*, State*);
+bool open_unix_server(SocketState*, State*);
+void close_unix(SocketState*);
 
 #endif

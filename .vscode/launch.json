@@ -9,6 +9,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "kimera",
+            "arguments": "tx",
             "cwd": "${workspaceRoot}/build",
             "valuesFormatting": "parseText"
         }

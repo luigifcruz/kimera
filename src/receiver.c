@@ -3,8 +3,8 @@
 void receiver(State* state) {
     // Start HEVC Decoder.
     DecoderState decoder;
-    if (state->source & DISPLAY || state->source & LOOPBACK) {
-        if (!start_decoder(&decoder))
+    if (state->sink & DISPLAY || state->sink & LOOPBACK) {
+        if (!start_decoder(&decoder,state))
             goto cleanup;
     }
 
@@ -23,20 +23,25 @@ void receiver(State* state) {
     }
     
     // Start Socket Client. 
-    TCPSocketState socket;
+    SocketState socket;
     switch (state->source) {
     case TCP:
-        open_tcp_client(&socket, state);
+        if(!open_tcp_client(&socket, state))
+            goto cleanup;
+        break;
+    case UNIX:
+        if(!open_unix_client(&socket, state))
+            goto cleanup;
         break;
     default:
         goto cleanup;
     }   
-
+ 
     // Start Decoder Loop.
     size_t out = 0;
     char header[HEADER_SIZE];
 
-    while (stop) { 
+    while (!stop) {
         out = recv(socket.server_fd, (char*)&header, HEADER_SIZE, MSG_WAITALL);
         if (out < HEADER_SIZE) {
             continue;
@@ -44,8 +49,6 @@ void receiver(State* state) {
 
         uint64_t pts = buffer_read64be((uint8_t*)header);
         uint32_t len = buffer_read32be((uint8_t*)&header[8]);
-        assert(pts == NO_PTS || (pts & 0x8000000000000000) == 0);
-        assert(len);
 
         char* packet = (char*)malloc(len);
         if (packet == NULL) {
@@ -55,20 +58,22 @@ void receiver(State* state) {
        
         out = recv(socket.server_fd, packet, len, MSG_WAITALL); 
         assert(out == len);
-        
+
         if (state->sink & STDOUT) {
             fwrite(packet, sizeof(char), len, stdout);
             free(packet);
             continue;
         }
-        
+
         if (decoder_push(&decoder, packet, len, pts)) {
             if (state->sink & DISPLAY) {
+                printf("sinkd %d %d\n", decoder.frame->format, AV_PIX_FMT_NV12);
                 if (!display_draw(&display, decoder.frame))
                     break;
             }
 
             if (state->sink & LOOPBACK) {
+                printf("sinkl\n");
                 loopback_push_frame(&loopback, decoder.frame);
             }
         }
@@ -83,12 +88,15 @@ cleanup:
     case TCP:
         close_tcp(&socket);
         break;
+    case UNIX:
+        close_unix(&socket);
+        break;
     default:
         break;
     }
 
-    if (state->source == LOOPBACK)
+    if (state->sink == LOOPBACK)
         close_loopback(&loopback);
-    if (state->source == DISPLAY)
+    if (state->sink == DISPLAY)
         close_display(&display);
 }
