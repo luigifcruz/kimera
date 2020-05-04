@@ -8,8 +8,8 @@
             "name": "Debug",
             "type": "gdb",
             "request": "launch",
-            "target": "camera",
-            "cwd": "${workspaceRoot}/client/build",
+            "target": "kimera",
+            "cwd": "${workspaceRoot}/build",
             "valuesFormatting": "parseText"
         }
     ]

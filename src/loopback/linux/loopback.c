@@ -1,6 +1,8 @@
 #include "loopback.h"
 
 static bool open_loopback_sink(LoopbackState* loopback, State* state) {
+    loopback->buffer = NULL;
+
 	if ((loopback->dev_fd = open(state->loopback, O_RDWR)) < 0) {
         printf("[LOOPBACK] Couldn't open interface.\n");
         return false;
@@ -41,6 +43,8 @@ static bool open_loopback_sink(LoopbackState* loopback, State* state) {
 }
 
 static bool open_loopback_source(LoopbackState* loopback, State* state) {
+    loopback->buffer = NULL;
+
 	if ((loopback->dev_fd = open(state->loopback, O_RDWR)) < 0) {
         printf("[LOOPBACK] Couldn't open interface.\n");
         return false;
@@ -137,7 +141,7 @@ static bool loopback_pull_frame(LoopbackState* state) {
 
 static void close_loopback(LoopbackState* state) {
     if (state->buffer)
-        free(state->buffer);
+        free(&state->buffer);
     if (state->format.type == V4L2_BUF_TYPE_VIDEO_CAPTURE) 
         ioctl(state->dev_fd, VIDIOC_STREAMOFF, &state->info.type);
 }
