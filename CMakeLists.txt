@@ -9,9 +9,6 @@ set(CMAKE_C_FLAGS "-Wall -Wextra -Wno-unused-function -Wno-unused-parameter")
 set(CMAKE_C_FLAGS_DEBUG "-g")
 set(CMAKE_C_FLAGS_RELEASE "-O3")
 
-add_subdirectory(lib/ffmpeg)
-add_subdirectory(lib/sdl)
-
 list(APPEND SOURCES
   src/kimera.c
   src/codec/decoder.c
@@ -22,7 +19,26 @@ list(APPEND SOURCES
   src/tcp_socket.c
   src/display.c
   src/resample.c
+  src/loopback/loopback.h
 )
 
-add_executable(kimera ${SOURCES})
+add_executable(kimera MACOSX_BUNDLE ${SOURCES})
+
+add_subdirectory(lib/ffmpeg)
+add_subdirectory(lib/sdl)
+
+if(APPLE)
+  add_subdirectory(lib/v4m)
+  list(APPEND EXTRA_LIBS v4m)
+
+  configure_file(
+      ${CMAKE_CURRENT_SOURCE_DIR}/assets/MacOSXBundleInfo.plist.in
+      ${CMAKE_CURRENT_BINARY_DIR}/assets/MacOSXBundleInfo.plist
+  )
+
+  set_target_properties(kimera PROPERTIES
+      MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_BINARY_DIR}/assets/MacOSXBundleInfo.plist
+  )
+endif()
+
 target_link_libraries(kimera ffmpeg sdl ${EXTRA_LIBS})

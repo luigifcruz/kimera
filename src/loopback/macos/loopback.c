@@ -1,12 +1,13 @@
 #include "loopback.h"
 
 bool open_loopback_sink(LoopbackState* loopback, State* state) {
-    printf("[MACOS_LOOPBACK] This isn't supported yet.\n");
+    printf("[LOOPBACK] This isn't supported yet.\n");
     return false;
 }
 
 bool open_loopback_source(LoopbackState* loopback, State* state) {
-    printf("[MACOS_LOOPBACK] This isn't supported yet.\n");
+    printf("[LOOPBACK] This isn't supported yet.\n");
+    hello();
     return false;
 }
 
