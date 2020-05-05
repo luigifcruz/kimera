@@ -17,7 +17,7 @@ void receiver(State* state) {
 
     // Add resampler.
     ResamplerState resampler;
-    resampler.frame = NULL;
+    open_resampler(&resampler, state->format);
 
     // Start Display Screen.
     DisplayState display;
@@ -70,12 +70,7 @@ void receiver(State* state) {
         }
 
         if (decoder_push(&decoder, packet, len, pts)) {
-            if (resampler.frame == NULL) {
-                if (!open_resampler(&resampler, state, decoder.frame))
-                    goto cleanup;
-            }
-
-            if (!resampler_push_frame(&resampler, decoder.frame)) {
+            if (!resampler_push_frame(&resampler, state, decoder.frame)) {
                 continue;
             }
 

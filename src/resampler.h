@@ -12,13 +12,15 @@
 #include "config.h"
 
 typedef struct {
+    bool configured;
+    enum AVPixelFormat format;
     struct SwsContext* ctx;
     AVFrame* frame;
 } ResamplerState;
 
-bool open_resampler(ResamplerState*, State* state, AVFrame* frame);
+void open_resampler(ResamplerState*, enum AVPixelFormat);
 void close_resampler(ResamplerState*);
 
-bool resampler_push_frame(ResamplerState*, AVFrame*);
+bool resampler_push_frame(ResamplerState*, State*, AVFrame*);
 
 #endif

@@ -3,7 +3,7 @@
 bool start_decoder(DecoderState* decoder, State* state) {
     AVCodec *codec = avcodec_find_decoder_by_name(state->codec);
     if (!codec) {
-        printf("[DECODER] Selected decoder not found.\n");
+        printf("[DECODER] Selected decoder (%s) not found.\n", state->codec);
         return false;
     }
 
