@@ -87,7 +87,7 @@ bool parse_packet(DecoderState* decoder, AVPacket* packet) {
 }
 
 bool decoder_push(DecoderState* decoder, char* buf, uint32_t len, uint64_t pts) {
-    bool status = true;
+    bool status = false;
 
     AVPacket* packet = av_packet_alloc();
     av_init_packet(packet);
@@ -130,9 +130,10 @@ bool decoder_push(DecoderState* decoder, char* buf, uint32_t len, uint64_t pts) 
 
         if (!ok) {
             printf("[DECODER] Error parsing AVPacket.\n");
-            status = false;
             goto cleanup;
         }
+
+        status = true;
     } else {
         printf("[DECODER] Config packet.\n");
         goto cleanup;

@@ -48,8 +48,9 @@ int main(int argc, char *argv[]) {
         mode = TRANSMIT;
     } else if (!strcmp(argv[1], "rx") || !strcmp(argv[1], "receive")) {
         state->source = UNIX;
-        state->sink = DISPLAY;
-        state->codec = "hevc";
+        state->sink = LOOPBACK;
+        state->codec = "hevc_cuvid";
+        state->loopback = "/dev/video4";
         mode = RECEIVE;
     } else {
         printf("Not such flag (%s)\n", argv[1]);

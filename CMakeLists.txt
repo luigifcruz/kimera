@@ -18,7 +18,7 @@ list(APPEND SOURCES
   src/unix_socket.c
   src/tcp_socket.c
   src/display.c
-  src/resample.c
+  src/resampler.c
   src/loopback/loopback.h
 )
 
@@ -40,5 +40,11 @@ if(APPLE)
       MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_BINARY_DIR}/assets/MacOSXBundleInfo.plist
   )
 endif()
+
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/assets/CourierPrime-Regular.ttf
+  ${CMAKE_CURRENT_SOURCE_DIR}/build/CourierPrime-Regular.ttf
+  COPYONLY
+)
 
 target_link_libraries(kimera ffmpeg sdl ${EXTRA_LIBS})

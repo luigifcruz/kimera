@@ -15,6 +15,13 @@ void transmitter(State* state) {
             goto cleanup;
     }
 
+    // Start Display Screen.
+    DisplayState display;
+    if (state->sink & DISPLAY) {
+        if (!start_display(&display))
+            goto cleanup;
+    }
+
     // Start Encoder.
     EncoderState encoder;
     if (!start_encoder(&encoder, state))
@@ -27,9 +34,12 @@ void transmitter(State* state) {
 
     // Start Decoder Loop.
     while (loopback_pull_frame(&loopback)) {
-        // Receive frame buffer from input device.
-
         if (encoder_push(&encoder, loopback.buffer)) {
+            if (state->sink & DISPLAY) {
+                if (!display_draw(&display, encoder.frame))
+                    break;
+            }
+
             if (state->sink & STDOUT) {
                 fwrite(
                     encoder.packet->data, sizeof(char),
@@ -52,13 +62,14 @@ void transmitter(State* state) {
     }
 
 cleanup:
-    if (state->sink & TCP) {
+    if (state->sink & TCP)
         close_tcp(&tcp_socket);
-    }
 
-    if (state->sink & UNIX) {
+    if (state->sink & UNIX)
         close_unix(&unix_socket);
-    }
+
+    if (state->sink & DISPLAY)
+        close_display(&display);
 
     close_loopback(&loopback);
     close_encoder(&encoder);

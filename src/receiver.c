@@ -15,6 +15,10 @@ void receiver(State* state) {
             goto cleanup;
     }
 
+    // Add resampler.
+    ResamplerState resampler;
+    resampler.frame = NULL;
+
     // Start Display Screen.
     DisplayState display;
     if (state->sink & DISPLAY) {
@@ -66,15 +70,22 @@ void receiver(State* state) {
         }
 
         if (decoder_push(&decoder, packet, len, pts)) {
+            if (resampler.frame == NULL) {
+                if (!open_resampler(&resampler, state, decoder.frame))
+                    goto cleanup;
+            }
+
+            if (!resampler_push_frame(&resampler, decoder.frame)) {
+                continue;
+            }
+
             if (state->sink & DISPLAY) {
-                printf("sinkd %d %d\n", decoder.frame->format, AV_PIX_FMT_NV12);
-                if (!display_draw(&display, decoder.frame))
+                if (!display_draw(&display, resampler.frame))
                     break;
             }
 
             if (state->sink & LOOPBACK) {
-                printf("sinkl\n");
-                loopback_push_frame(&loopback, decoder.frame);
+                loopback_push_frame(&loopback, resampler.frame);
             }
         }
         
@@ -82,6 +93,7 @@ void receiver(State* state) {
     }
 
 cleanup:
+    close_resampler(&resampler);
     close_decoder(&decoder);
     
     switch (state->source) {
@@ -95,8 +107,9 @@ cleanup:
         break;
     }
 
-    if (state->sink == LOOPBACK)
+    if (state->sink & LOOPBACK)
         close_loopback(&loopback);
-    if (state->sink == DISPLAY)
+
+    if (state->sink & DISPLAY)
         close_display(&display);
 }

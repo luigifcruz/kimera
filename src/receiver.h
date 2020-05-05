@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "utils.h"
+#include "resampler.h"
 #include "unix_socket.h"
 #include "tcp_socket.h"
 #include "codec/decoder.h"

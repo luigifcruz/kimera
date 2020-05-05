@@ -10,7 +10,7 @@ bool start_display(DisplayState* state) {
 		printf("[SDL] TTF init error.\n");
 		state->font = NULL;
 	}
-	state->font = TTF_OpenFont("./OxygenMono.ttf", 50);
+	state->font = TTF_OpenFont("CourierPrime-Regular.ttf", 50);
 
 	if (!(state->win = SDL_CreateWindow(
 					  "Camera Loopback", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 

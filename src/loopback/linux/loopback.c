@@ -1,17 +1,17 @@
 #include "loopback.h"
 
 static bool open_loopback_sink(LoopbackState* loopback, State* state) {
-    loopback->buffer = NULL;
-
+    //loopback->buffer = NULL;
+    
 	if ((loopback->dev_fd = open(state->loopback, O_RDWR)) < 0) {
         printf("[LOOPBACK] Couldn't open interface.\n");
         return false;
 	}
 
 	loopback->format.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
-	if (ioctl(loopback->dev_fd, VIDIOC_G_FMT, &state->format) < 0) {
+	if (ioctl(loopback->dev_fd, VIDIOC_G_FMT, state->format) < 0) {
         printf("[LOOPBACK] Couldn't open interface.\n");
-        return false;
+        //return false;
 	}
 
 	loopback->format.fmt.pix.width = state->width;
