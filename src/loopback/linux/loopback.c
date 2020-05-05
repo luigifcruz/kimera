@@ -1,7 +1,7 @@
 #include "loopback.h"
 
 static bool open_loopback_sink(LoopbackState* loopback, State* state) {
-    //loopback->buffer = NULL;
+    loopback->buffer = NULL;
     
 	if ((loopback->dev_fd = open(state->loopback, O_RDWR)) < 0) {
         printf("[LOOPBACK] Couldn't open interface.\n");
