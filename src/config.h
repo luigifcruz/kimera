@@ -12,7 +12,7 @@
 #define NO_PTS              UINT64_C(-1)
 
 #define DEFAULT_PORT        8080
-#define DEFAULT_ADDRESS     "./hello"
+#define DEFAULT_ADDRESS     "127.0.0.1"
 #define DEFAULT_LOOPBACK    "/dev/video0"
 
 #define DEFAULT_FRAMERATE   25

@@ -34,12 +34,12 @@ void transmitter(State* state) {
 
     // Start Decoder Loop.
     while (loopback_pull_frame(&loopback)) {
-        if (encoder_push(&encoder, loopback.frame)) {
-            if (state->sink & DISPLAY) {
-                if (!display_draw(&display, loopback.frame))
-                    break;
-            }
+        if (state->sink & DISPLAY) {
+            if (!display_draw(&display, loopback.frame))
+                break;
+        }
 
+        if (encoder_push(&encoder, loopback.frame)) {
             if (state->sink & STDOUT) {
                 fwrite(
                     encoder.packet->data, sizeof(char),
@@ -48,8 +48,8 @@ void transmitter(State* state) {
             }
 
             if (state->sink & TCP) {
-                write(tcp_socket.client_fd, (char*)loopback.frame->pts, sizeof(loopback.frame->pts));
-                write(tcp_socket.client_fd, (char*)encoder.packet->size, sizeof(encoder.packet->size)); 
+                write(tcp_socket.client_fd, (char*)&loopback.frame->pts, sizeof(loopback.frame->pts));
+                write(tcp_socket.client_fd, (char*)&encoder.packet->size, sizeof(encoder.packet->size)); 
                 write(tcp_socket.client_fd, encoder.packet->data, encoder.packet->size); 
             }
 

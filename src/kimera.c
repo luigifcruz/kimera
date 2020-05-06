@@ -43,14 +43,13 @@ int main(int argc, char *argv[]) {
 
     if (!strcmp(argv[1], "tx") || !strcmp(argv[1], "transmit")) {
         state->source = LOOPBACK;
-        state->sink = UNIX;
+        state->sink = TCP;
         state->codec = "h264_videotoolbox";
         mode = TRANSMIT;
     } else if (!strcmp(argv[1], "rx") || !strcmp(argv[1], "receive")) {
-        state->source = UNIX;
+        state->source = TCP;
         state->sink = DISPLAY;
         state->codec = "h264";
-        state->loopback = "/dev/video4";
         mode = RECEIVE;
     } else {
         printf("Not such flag (%s)\n", argv[1]);
