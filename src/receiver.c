@@ -22,7 +22,7 @@ void receiver(State* state) {
     // Start Display Screen.
     DisplayState display;
     if (state->sink & DISPLAY) {
-        if (!start_display(&display))
+        if (!start_display(&display, state))
             goto cleanup;
     }
     

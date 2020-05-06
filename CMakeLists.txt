@@ -28,8 +28,8 @@ add_subdirectory(lib/ffmpeg)
 add_subdirectory(lib/sdl)
 
 if(APPLE)
-  add_subdirectory(lib/v4m)
-  list(APPEND EXTRA_LIBS v4m)
+  add_subdirectory(lib/avfoundation)
+  list(APPEND EXTRA_LIBS avfoundation)
 
   configure_file(
       ${CMAKE_CURRENT_SOURCE_DIR}/assets/MacOSXBundleInfo.plist.in

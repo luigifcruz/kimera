@@ -8,6 +8,8 @@
 #include <SDL_ttf.h>
 #include <libavcodec/avcodec.h>
 
+#include "config.h"
+
 typedef struct {
     SDL_Window* win;
     SDL_Renderer* ren;
@@ -15,7 +17,7 @@ typedef struct {
     TTF_Font* font;
 } DisplayState;
 
-bool start_display(DisplayState*);
+bool start_display(DisplayState*, State*);
 void close_display(DisplayState*);
 bool display_draw(DisplayState*, AVFrame*);
 

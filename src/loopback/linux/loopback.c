@@ -33,7 +33,7 @@ static bool open_loopback_sink(LoopbackState* loopback, State* state) {
         return false;
 	}
 
-    loopback->buffer = (char*)malloc(loopback->format.fmt.pix.sizeimage);
+    loopback->buffer = (char*)malloc(state->frame_size);
     if (!loopback->buffer) {
         printf("[LOOPBACK] Couldn't allocate loopback buffer.\n");
         return false;

@@ -44,12 +44,12 @@ int main(int argc, char *argv[]) {
     if (!strcmp(argv[1], "tx") || !strcmp(argv[1], "transmit")) {
         state->source = LOOPBACK;
         state->sink = UNIX;
-        state->codec = "hevc_nvenc";
+        state->codec = "h264_videotoolbox";
         mode = TRANSMIT;
     } else if (!strcmp(argv[1], "rx") || !strcmp(argv[1], "receive")) {
         state->source = UNIX;
-        state->sink = LOOPBACK;
-        state->codec = "hevc_cuvid";
+        state->sink = DISPLAY;
+        state->codec = "h264";
         state->loopback = "/dev/video4";
         mode = RECEIVE;
     } else {

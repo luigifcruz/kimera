@@ -7,13 +7,13 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include <v4m.h>
+#include <avfoundation.h>
 
 #include "../../config.h"
 
 typedef struct {
-    int dev_fd;
     char* buffer;
+    avfoundation_state state;
 } LoopbackState;
 
 static bool open_loopback_sink(LoopbackState*, State*);
@@ -23,4 +23,5 @@ static bool loopback_push_frame(LoopbackState*, AVFrame*);
 static bool loopback_pull_frame(LoopbackState*);
 
 static void close_loopback(LoopbackState*);
+
 #endif
