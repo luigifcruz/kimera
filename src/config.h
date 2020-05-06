@@ -36,6 +36,11 @@ typedef enum {
     LOOPBACK = 1 << 4
 } Interfaces;
 
+typedef enum {
+    TRANSMITTER = 1 << 0,
+    RECEIVER    = 1 << 1
+} Mode;
+
 typedef struct {
     int width;
     int height;
@@ -49,6 +54,7 @@ typedef struct {
     char* address;
     char* loopback;
 
+    Mode mode;
     Interfaces sink;
     Interfaces source;
 } State;

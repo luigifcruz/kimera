@@ -34,8 +34,6 @@ int main(int argc, char *argv[]) {
     state->framerate = DEFAULT_FRAMERATE;
 
     // Parse Arguments
-    enum { RECEIVE, TRANSMIT } mode = RECEIVE;
-
     if (argc < 2) {
         printf("Flags\n");
         return -1;
@@ -43,14 +41,14 @@ int main(int argc, char *argv[]) {
 
     if (!strcmp(argv[1], "tx") || !strcmp(argv[1], "transmit")) {
         state->source = LOOPBACK;
-        state->sink = TCP;
+        state->sink = TCP | DISPLAY;
         state->codec = "h264_videotoolbox";
-        mode = TRANSMIT;
+        state->mode = TRANSMITTER;
     } else if (!strcmp(argv[1], "rx") || !strcmp(argv[1], "receive")) {
         state->source = TCP;
         state->sink = DISPLAY;
         state->codec = "h264";
-        mode = RECEIVE;
+        state->mode = RECEIVER;
     } else {
         printf("Not such flag (%s)\n", argv[1]);
     }
@@ -63,11 +61,11 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    switch (mode) {
-    case RECEIVE:
+    switch (state->mode) {
+    case RECEIVER:
         receiver(state);
         break;
-    case TRANSMIT:
+    case TRANSMITTER:
         transmitter(state);
         break;
     }

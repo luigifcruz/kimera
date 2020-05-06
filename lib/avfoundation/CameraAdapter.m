@@ -33,7 +33,6 @@
     }
 
     if ([ctx.device lockForConfiguration:nil]) {
-        NSLog(@"selected format:%@", selectedFormat);
         ctx.device.activeFormat = selectedFormat;
         ctx.device.activeVideoMinFrameDuration = CMTimeMake(1, (int32_t)desiredFPS);
         ctx.device.activeVideoMaxFrameDuration = CMTimeMake(1, (int32_t)desiredFPS);
@@ -88,7 +87,7 @@
             NSLog(@"[LOOPBACK] Could not lock base address.");
             return false;
         }
-        
+
         if (CVPixelBufferIsPlanar(image_buffer)) {
             size_t bufferHeight = CVPixelBufferGetHeight(image_buffer);
             

@@ -12,8 +12,18 @@ bool start_display(DisplayState* display, State* state) {
 	}
 	display->font = TTF_OpenFont("CourierPrime-Regular.ttf", 50);
 
+	char* name[32];
+	switch (state->mode) {
+		case TRANSMITTER:
+			sprintf((char*)name, "Kimera - Transmitter Display");
+			break;
+		case RECEIVER:
+			sprintf((char*)name, "Kimera - Receiver Display");
+			break;
+	}	
+
 	if (!(display->win = SDL_CreateWindow(
-					  "Camera Loopback", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
+					  (char*)name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
                       state->width/2, state->height/2, SDL_WINDOW_SHOWN))) {
 		printf("[SDL] Window error: %s\n", SDL_GetError());
 		goto cleanup;
