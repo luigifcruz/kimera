@@ -14,10 +14,12 @@
   ReceiverContext ctx;
 }
 
-- (bool)startCapture;
-- (void)stopCapture;
+- (bool) startCapture;
+- (void) stopCapture;
 
-- (bool)pullFrame: (char*)buffer;
+- (bool) YPlane: (void*)Y
+         UPlane: (void*)U
+         VPlane: (void*)V;
 
 @end
 

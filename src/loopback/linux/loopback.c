@@ -105,6 +105,16 @@ static bool open_loopback_source(LoopbackState* loopback, State* state) {
         return false;
     }
 
+    loopback->frame = av_frame_alloc();
+    loopback->frame->width = state->width;
+    loopback->frame->height = state->height;
+    loopback->frame->format = state->format;
+    loopback->frame->pts = 0;
+    if (av_frame_get_buffer(loopback->frame, 0) < 0){
+        printf("[LOOPBACK] Couldn't allocate frame.\n");
+        return false;
+    }
+
 	return true;
 }
 
@@ -131,6 +141,14 @@ static bool loopback_pull_frame(LoopbackState* state) {
         return false;
     }
 
+    size_t y_len = (loopback->frame->linesize[0] * loopback->frame->height);
+    size_t u_len = (loopback->frame->linesize[1] * loopback->frame->height) / 2;
+    size_t v_len = (loopback->frame->linesize[2] * loopback->frame->height) / 2;
+
+    memcpy(loopback->frame->data[0], loopback->buffer, y_len);
+    memcpy(loopback->frame->data[1], loopback->buffer + y_len, u_len);
+    memcpy(loopback->frame->data[2], loopback->buffer + u_len + y_len, v_len);
+
     if (ioctl(state->dev_fd, VIDIOC_QBUF, &state->info) < 0) {
         printf("[LOOPBACK] Error queueing stream.\n");
         return false;
@@ -142,6 +160,8 @@ static bool loopback_pull_frame(LoopbackState* state) {
 static void close_loopback(LoopbackState* state) {
     if (state->format.type == V4L2_BUF_TYPE_VIDEO_CAPTURE) {
         ioctl(state->dev_fd, VIDIOC_STREAMOFF, &state->info.type);
+        if (loopback->frame)
+            av_frame_free(&loopback->frame);
     } else {
         if (state->buffer)
             free(state->buffer);

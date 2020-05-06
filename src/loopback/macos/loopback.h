@@ -12,7 +12,7 @@
 #include "../../config.h"
 
 typedef struct {
-    char* buffer;
+    AVFrame* frame;
     avfoundation_state state;
 } LoopbackState;
 

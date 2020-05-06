@@ -11,6 +11,6 @@ typedef struct {
 bool avfoundation_open_source(avfoundation_state*);
 void avfoundation_close_source(avfoundation_state*);
 
-bool avfoundation_pull_frame(avfoundation_state*, char*);
+bool avfoundation_pull_frame(avfoundation_state*, void* Y, void* U, void* V);
 
 #endif

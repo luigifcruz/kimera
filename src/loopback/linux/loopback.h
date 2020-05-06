@@ -18,6 +18,7 @@
 typedef struct {
     int dev_fd;
     char* buffer;
+    AVFrame* frame;
     struct v4l2_buffer info;
     struct v4l2_format format;
     struct v4l2_requestbuffers req;

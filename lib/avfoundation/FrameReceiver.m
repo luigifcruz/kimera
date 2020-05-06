@@ -14,7 +14,6 @@
   didOutputSampleBuffer:(CMSampleBufferRef)videoFrame
          fromConnection:(AVCaptureConnection *)connection
 {
-    NSLog(@"Frame");
     pthread_mutex_lock(&_context->frame_lock);
 
     if (_context->current_frame != nil) {

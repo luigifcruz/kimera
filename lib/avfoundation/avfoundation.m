@@ -10,6 +10,6 @@ void avfoundation_close_source(avfoundation_state* state) {
     [(id)state->adapter stopCapture];
 }
 
-bool avfoundation_pull_frame(avfoundation_state* state, char* buffer) {
-    return [(id)state->adapter pullFrame:buffer];
+bool avfoundation_pull_frame(avfoundation_state* state, void* Y, void* U, void* V) {
+    return [(id)state->adapter YPlane:Y UPlane:U VPlane:V ];
 }

@@ -29,17 +29,6 @@ bool start_encoder(EncoderState* encoder, State* state) {
         return false;
     }
 
-    encoder->frame = av_frame_alloc();
-    encoder->frame->width = encoder->codec_ctx->width;
-    encoder->frame->height = encoder->codec_ctx->height;
-    encoder->frame->format = encoder->codec_ctx->pix_fmt;
-    encoder->frame->pts = 0;
-    if (av_frame_get_buffer(encoder->frame, 0) < 0){
-        printf("[ENCODER] Couldn't allocate frame.\n");
-        close_encoder(encoder);
-        return false;
-    }
-
     encoder->packet = av_packet_alloc();
     if (!encoder->packet) {
         printf("[ENCODER] Couldn't allocate packet.\n");
@@ -55,32 +44,14 @@ void close_encoder(EncoderState* encoder) {
         return;
     if (encoder->packet)
         av_packet_free(&encoder->packet);
-    if (encoder->frame)
-        av_frame_free(&encoder->frame);
     if (encoder->codec_ctx)
         avcodec_free_context(&encoder->codec_ctx);
 }
 
-bool encoder_push(EncoderState* encoder, char* buf) {
+bool encoder_push(EncoderState* encoder, AVFrame* frame) {
     av_packet_unref(encoder->packet);
 
-    if (av_frame_make_writable(encoder->frame) < 0) {
-        printf("[ENCODER] Frame is not writable.\n");
-        return false;
-    }
-
-    // Draw picture into frame.
-    size_t y_len = (encoder->frame->linesize[0] * encoder->frame->height);
-    size_t u_len = (encoder->frame->linesize[1] * encoder->frame->height) / 2;
-    size_t v_len = (encoder->frame->linesize[2] * encoder->frame->height) / 2;
-
-    memcpy(encoder->frame->data[0], buf, y_len);
-    memcpy(encoder->frame->data[1], buf + y_len, u_len);
-    memcpy(encoder->frame->data[2], buf + u_len + y_len, v_len);
-
-    encoder->frame->pts += 1;
-
-    if (avcodec_send_frame(encoder->codec_ctx, encoder->frame) < 0) {
+    if (avcodec_send_frame(encoder->codec_ctx, frame) < 0) {
         printf("[ENCODER] Couldn't send frame to context.\n");
         return false;
     }

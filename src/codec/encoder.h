@@ -13,11 +13,10 @@
 typedef struct {
     AVCodecContext *codec_ctx;
     AVPacket* packet;
-    AVFrame* frame;
 } EncoderState;
 
 bool start_encoder(EncoderState*, State*);
 void close_encoder(EncoderState*);
-bool encoder_push(EncoderState*, char*);
+bool encoder_push(EncoderState*, AVFrame*);
 
 #endif

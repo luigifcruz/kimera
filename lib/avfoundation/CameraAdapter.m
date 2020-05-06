@@ -73,7 +73,9 @@
     pthread_cond_destroy(&ctx.frame_wait_cond);
 }
 
-- (bool)pullFrame: (char*)buffer
+- (bool) YPlane: (void*)Y
+         UPlane: (void*)U
+         VPlane: (void*)V
 {
     pthread_mutex_lock(&ctx.frame_lock);
     pthread_cond_wait(&ctx.frame_wait_cond, &ctx.frame_lock);
@@ -89,10 +91,18 @@
         
         if (CVPixelBufferIsPlanar(image_buffer)) {
             size_t bufferHeight = CVPixelBufferGetHeight(image_buffer);
-            size_t bytesPerRow = CVPixelBufferGetBytesPerRow(image_buffer); 
-            NSLog(@"Size:%d", (bufferHeight*bytesPerRow));
-            char* ptr = CVPixelBufferGetBaseAddress(image_buffer);
-            memcpy(buffer, ptr, 1382400);
+            
+            size_t bytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(image_buffer, 0);
+            char* ptr = CVPixelBufferGetBaseAddressOfPlane(image_buffer, 0);
+            memcpy(Y, ptr, (bufferHeight*bytesPerRow));
+
+            bytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(image_buffer, 1);
+            ptr = CVPixelBufferGetBaseAddressOfPlane(image_buffer, 1);
+            memcpy(U, ptr, (bufferHeight*bytesPerRow)/2);
+
+            bytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(image_buffer, 2);
+            ptr = CVPixelBufferGetBaseAddressOfPlane(image_buffer, 2);
+            memcpy(V, ptr, (bufferHeight*bytesPerRow)/2);
         } else {
             NSLog(@"[LOOPBACK] Data buffer not planar.");
             return false;
