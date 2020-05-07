@@ -38,7 +38,7 @@ bool open_tcp_server(SocketState* sock_state, State* state) {
     server.sin_port = htons(state->port); 
 
     if (bind(sock_state->server_fd, (socket_t*)&server, sizeof(socket_in)) < 0) {
-        printf("[TCP_SOCKET] Couldn't connect to any client.\n");
+        printf("[TCP_SOCKET] Couldn't open server port.\n");
         return false;
     }
 
