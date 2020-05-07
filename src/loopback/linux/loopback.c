@@ -1,6 +1,6 @@
 #include "loopback.h"
 
-static bool open_loopback_sink(LoopbackState* loopback, State* state) {
+bool open_loopback_sink(LoopbackState* loopback, State* state) {
     loopback->buffer = NULL;
     
 	if ((loopback->dev_fd = open(state->loopback, O_RDWR)) < 0) {
@@ -42,7 +42,7 @@ static bool open_loopback_sink(LoopbackState* loopback, State* state) {
 	return true;
 }
 
-static bool open_loopback_source(LoopbackState* loopback, State* state) {
+bool open_loopback_source(LoopbackState* loopback, State* state) {
     loopback->buffer = NULL;
 
 	if ((loopback->dev_fd = open(state->loopback, O_RDWR)) < 0) {
@@ -118,25 +118,25 @@ static bool open_loopback_source(LoopbackState* loopback, State* state) {
 	return true;
 }
 
-static bool loopback_push_frame(LoopbackState* state, AVFrame* frame) {
+bool loopback_push_frame(LoopbackState* loopback, AVFrame* frame) {
     size_t y_len = (frame->linesize[0] * frame->height);
     size_t u_len = (frame->linesize[1] * frame->height) / 2;
     size_t v_len = (frame->linesize[2] * frame->height) / 2;
     size_t len = y_len + u_len + v_len;
 
-    memcpy(state->buffer, frame->data[0], y_len);
-    memcpy(state->buffer + y_len, frame->data[1], u_len);
-    memcpy(state->buffer + u_len + y_len, frame->data[2], v_len);
+    memcpy(loopback->buffer, frame->data[0], y_len);
+    memcpy(loopback->buffer + y_len, frame->data[1], u_len);
+    memcpy(loopback->buffer + u_len + y_len, frame->data[2], v_len);
 
-    if (write(state->dev_fd, state->buffer, len) < 0) {
+    if (write(loopback->dev_fd, loopback->buffer, len) < 0) {
         return false;
     }
 
     return true;
 }
 
-static bool loopback_pull_frame(LoopbackState* state) {
-    if (ioctl(state->dev_fd, VIDIOC_DQBUF, &state->info) < 0) {
+bool loopback_pull_frame(LoopbackState* loopback) {
+    if (ioctl(loopback->dev_fd, VIDIOC_DQBUF, &loopback->info) < 0) {
         printf("[LOOPBACK] Error dequeuing stream.\n");
         return false;
     }
@@ -149,7 +149,9 @@ static bool loopback_pull_frame(LoopbackState* state) {
     memcpy(loopback->frame->data[1], loopback->buffer + y_len, u_len);
     memcpy(loopback->frame->data[2], loopback->buffer + u_len + y_len, v_len);
 
-    if (ioctl(state->dev_fd, VIDIOC_QBUF, &state->info) < 0) {
+    loopback->frame->pts += 1;
+
+    if (ioctl(loopback->dev_fd, VIDIOC_QBUF, &loopback->info) < 0) {
         printf("[LOOPBACK] Error queueing stream.\n");
         return false;
     }
@@ -157,13 +159,13 @@ static bool loopback_pull_frame(LoopbackState* state) {
     return true;
 }
 
-static void close_loopback(LoopbackState* state) {
-    if (state->format.type == V4L2_BUF_TYPE_VIDEO_CAPTURE) {
-        ioctl(state->dev_fd, VIDIOC_STREAMOFF, &state->info.type);
+void close_loopback(LoopbackState* loopback) {
+    if (loopback->format.type == V4L2_BUF_TYPE_VIDEO_CAPTURE) {
+        ioctl(loopback->dev_fd, VIDIOC_STREAMOFF, &loopback->info.type);
         if (loopback->frame)
             av_frame_free(&loopback->frame);
     } else {
-        if (state->buffer)
-            free(state->buffer);
+        if (loopback->buffer)
+            free(loopback->buffer);
     }
 }

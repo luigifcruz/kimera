@@ -9,6 +9,9 @@ set(CMAKE_C_FLAGS "-Wall -Wextra -Wno-unused-function -Wno-unused-parameter -Wno
 set(CMAKE_C_FLAGS_DEBUG "-g")
 set(CMAKE_C_FLAGS_RELEASE "-O3")
 
+add_subdirectory(lib/ffmpeg)
+add_subdirectory(lib/sdl)
+
 list(APPEND SOURCES
   src/kimera.c
   src/codec/decoder.c
@@ -19,10 +22,9 @@ list(APPEND SOURCES
   src/tcp_socket.c
   src/display.c
   src/resampler.c
-  src/loopback/loopback.h
 )
 
-if(LINUX)
+if(UNIX AND NOT APPLE)
   list(APPEND SOURCES
     src/loopback/linux/loopback.h
     src/loopback/linux/loopback.c
@@ -41,9 +43,7 @@ if(APPLE)
     src/loopback/macos/loopback.m
     src/loopback/macos/FrameReceiver.m
     src/loopback/macos/CameraAdapter.m
-  )
-
-  
+  ) 
 endif()
 
 configure_file(
@@ -51,9 +51,6 @@ configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/build/CourierPrime-Regular.ttf
   COPYONLY
 )
-
-add_subdirectory(lib/ffmpeg)
-add_subdirectory(lib/sdl)
 
 add_executable(kimera ${SOURCES})
 target_link_libraries(kimera ffmpeg sdl ${LIBS})
