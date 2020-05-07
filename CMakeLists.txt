@@ -22,23 +22,28 @@ list(APPEND SOURCES
   src/loopback/loopback.h
 )
 
-add_executable(kimera MACOSX_BUNDLE ${SOURCES})
-
-add_subdirectory(lib/ffmpeg)
-add_subdirectory(lib/sdl)
+if(LINUX)
+  list(APPEND SOURCES
+    src/loopback/linux/loopback.h
+    src/loopback/linux/loopback.c
+  )
+endif()
 
 if(APPLE)
-  add_subdirectory(lib/avfoundation)
-  list(APPEND EXTRA_LIBS avfoundation)
-
-  configure_file(
-      ${CMAKE_CURRENT_SOURCE_DIR}/assets/MacOSXBundleInfo.plist.in
-      ${CMAKE_CURRENT_BINARY_DIR}/assets/MacOSXBundleInfo.plist
+  list(APPEND LIBS 
+    "-framework Foundation"
+    "-framework AVFoundation"
+    "-framework CoreMedia"
+    "-framework CoreVideo"
   )
 
-  set_target_properties(kimera PROPERTIES
-      MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_BINARY_DIR}/assets/MacOSXBundleInfo.plist
+  list(APPEND SOURCES
+    src/loopback/macos/loopback.m
+    src/loopback/macos/FrameReceiver.m
+    src/loopback/macos/CameraAdapter.m
   )
+
+  
 endif()
 
 configure_file(
@@ -47,4 +52,8 @@ configure_file(
   COPYONLY
 )
 
-target_link_libraries(kimera ffmpeg sdl ${EXTRA_LIBS})
+add_subdirectory(lib/ffmpeg)
+add_subdirectory(lib/sdl)
+
+add_executable(kimera ${SOURCES})
+target_link_libraries(kimera ffmpeg sdl ${LIBS})

@@ -7,21 +7,20 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include <avfoundation.h>
 
 #include "../../config.h"
 
 typedef struct {
     AVFrame* frame;
-    avfoundation_state state;
+    void* state;
 } LoopbackState;
 
-static bool open_loopback_sink(LoopbackState*, State*);
-static bool open_loopback_source(LoopbackState*, State*);
+bool open_loopback_sink(LoopbackState*, State*);
+bool open_loopback_source(LoopbackState*, State*);
 
-static bool loopback_push_frame(LoopbackState*, AVFrame*);
-static bool loopback_pull_frame(LoopbackState*);
+bool loopback_push_frame(LoopbackState*, AVFrame*);
+bool loopback_pull_frame(LoopbackState*);
 
-static void close_loopback(LoopbackState*);
+void close_loopback(LoopbackState*);
 
 #endif

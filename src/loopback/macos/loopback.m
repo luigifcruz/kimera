@@ -1,16 +1,18 @@
 #include "loopback.h"
 
-static bool open_loopback_sink(LoopbackState* loopback, State* state) {
+#import "CameraAdapter.h"
+
+bool open_loopback_sink(LoopbackState* loopback, State* state) {
     printf("[LOOPBACK] Sink isn't supported yet on macOS.\n");
     return false;
 }
 
-static bool loopback_push_frame(LoopbackState* loopback, AVFrame* in) {
+bool loopback_push_frame(LoopbackState* loopback, AVFrame* in) {
     printf("[LOOPBACK] Sink isn't supported yet on macOS.\n");
     return false;
 }
 
-static bool open_loopback_source(LoopbackState* loopback, State* state) {
+bool open_loopback_source(LoopbackState* loopback, State* state) {
     loopback->frame = av_frame_alloc();
     loopback->frame->width = state->width;
     loopback->frame->height = state->height;
@@ -21,20 +23,20 @@ static bool open_loopback_source(LoopbackState* loopback, State* state) {
         return false;
     }
 
-    return avfoundation_open_source(&loopback->state);
+    loopback->state = [CameraAdapter new];
+    return [(id)loopback->state startCapture];
 }
 
-static bool loopback_pull_frame(LoopbackState* loopback) {
+bool loopback_pull_frame(LoopbackState* loopback) {
     if (av_frame_make_writable(loopback->frame) < 0) {
         printf("[LOOPBACK] Frame is not writable.\n");
         return false;
     }
 
-    if (!avfoundation_pull_frame(
-        &loopback->state,
-        (void*)loopback->frame->data[0],
-        (void*)loopback->frame->data[1],
-        (void*)loopback->frame->data[2])) {
+    if (![(id)loopback->state
+        YPlane: (void*)loopback->frame->data[0]
+        UPlane: (void*)loopback->frame->data[1]
+        VPlane: (void*)loopback->frame->data[2] ]) {
         return false;
     }
 
@@ -42,8 +44,8 @@ static bool loopback_pull_frame(LoopbackState* loopback) {
     return true;
 }
 
-static void close_loopback(LoopbackState* loopback) {
-    avfoundation_close_source(&loopback->state);
-     if (loopback->frame)
+void close_loopback(LoopbackState* loopback) {
+    [(id)loopback->state stopCapture];
+    if (loopback->frame)
         av_frame_free(&loopback->frame);
 }
