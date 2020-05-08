@@ -13,8 +13,6 @@
 
     ctx.device = [AVCaptureDevice defaultDeviceWithMediaType: AVMediaTypeVideo];
 
-    CGFloat desiredFPS = 25;
-    int32_t maxWidth = 0;
     AVCaptureDeviceFormat *selectedFormat = nil;
     AVFrameRateRange *frameRateRange = nil;
 
@@ -22,27 +20,35 @@
         for (AVFrameRateRange *range in format.videoSupportedFrameRateRanges) {
             CMFormatDescriptionRef desc = format.formatDescription;
             CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(desc);
-            int32_t width = dimensions.width;
 
-            if (range.minFrameRate <= desiredFPS && desiredFPS <= range.maxFrameRate && width >= maxWidth) {
+            if (
+                range.minFrameRate <= state->framerate  && 
+                state->framerate <= range.maxFrameRate  && 
+                dimensions.width == state->width        &&
+                dimensions.height == state->height
+            ) {
                 selectedFormat = format;
                 frameRateRange = range;
-                maxWidth = width;
             }
         }
     }
 
+    if (!selectedFormat || !frameRateRange) {
+        NSLog(@"[LOOPBACK] Device doesn't support requested settings.");
+        return false;
+    }
+
     if ([ctx.device lockForConfiguration:nil]) {
         ctx.device.activeFormat = selectedFormat;
-        ctx.device.activeVideoMinFrameDuration = CMTimeMake(1, (int32_t)desiredFPS);
-        ctx.device.activeVideoMaxFrameDuration = CMTimeMake(1, (int32_t)desiredFPS);
+        ctx.device.activeVideoMinFrameDuration = CMTimeMake(1, frameRateRange.minFrameRate);
+        ctx.device.activeVideoMaxFrameDuration = CMTimeMake(1, frameRateRange.maxFrameRate);
         [ctx.device unlockForConfiguration];
     }
     
     ctx.input = [AVCaptureDeviceInput deviceInputWithDevice: ctx.device error: &error];
 
     if (error) {
-        NSLog(@"[LOOPBACK] Error opening the device.");
+        NSLog(@"[LOOPBACK] Error opening device.");
         return false;
     }
 
