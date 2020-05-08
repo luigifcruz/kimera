@@ -15,6 +15,11 @@ void transmitter(State* state) {
             goto cleanup;
     }
 
+    // Start Loopback Input.
+    LoopbackState loopback;
+    if (!open_loopback_source(&loopback, state))
+        goto cleanup;
+
     // Start Display Screen.
     DisplayState display;
     if (state->sink & DISPLAY) {
@@ -25,11 +30,6 @@ void transmitter(State* state) {
     // Start Encoder.
     EncoderState encoder;
     if (!start_encoder(&encoder, state))
-        goto cleanup;
-
-    // Start Loopback Input.
-    LoopbackState loopback;
-    if (!open_loopback_source(&loopback, state))
         goto cleanup;
 
     // Add resampler.

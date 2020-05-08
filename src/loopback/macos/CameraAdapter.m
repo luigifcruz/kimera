@@ -4,7 +4,7 @@
 
 @implementation CameraAdapter
 
-- (bool)startCapture
+- (bool)startCapture: (State*)state
 {
     NSError* error = nil;
 
@@ -39,7 +39,6 @@
         [ctx.device unlockForConfiguration];
     }
     
-
     ctx.input = [AVCaptureDeviceInput deviceInputWithDevice: ctx.device error: &error];
 
     if (error) {
@@ -72,9 +71,7 @@
     pthread_cond_destroy(&ctx.frame_wait_cond);
 }
 
-- (bool) YPlane: (void*)Y
-         UPlane: (void*)U
-         VPlane: (void*)V
+- (bool) pullFrame: (AVFrame*)frame
 {
     pthread_mutex_lock(&ctx.frame_lock);
     pthread_cond_wait(&ctx.frame_wait_cond, &ctx.frame_lock);
@@ -82,31 +79,19 @@
     if (ctx.current_frame != nil) {
         CVImageBufferRef image_buffer = CMSampleBufferGetImageBuffer(ctx.current_frame);
 
-        int status = CVPixelBufferLockBaseAddress(image_buffer, 0);
-        if (status != kCVReturnSuccess) {
+        if (CVPixelBufferLockBaseAddress(image_buffer, 0) != kCVReturnSuccess) {
             NSLog(@"[LOOPBACK] Could not lock base address.");
             return false;
         }
 
-        if (CVPixelBufferIsPlanar(image_buffer)) {
-            size_t bufferHeight = CVPixelBufferGetHeight(image_buffer);
-            
-            size_t bytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(image_buffer, 0);
-            char* ptr = CVPixelBufferGetBaseAddressOfPlane(image_buffer, 0);
-            memcpy(Y, ptr, (bufferHeight*bytesPerRow));
-
-            bytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(image_buffer, 1);
-            ptr = CVPixelBufferGetBaseAddressOfPlane(image_buffer, 1);
-            memcpy(U, ptr, (bufferHeight*bytesPerRow)/2);
-
-            bytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(image_buffer, 2);
-            ptr = CVPixelBufferGetBaseAddressOfPlane(image_buffer, 2);
-            memcpy(V, ptr, (bufferHeight*bytesPerRow)/2);
-        } else {
-            NSLog(@"[LOOPBACK] Data buffer not planar.");
-            return false;
+        size_t plane_count = CVPixelBufferGetPlaneCount(image_buffer);
+        for (size_t i = 0; i < plane_count; i++) {
+            memcpy(
+                frame->data[i],
+                CVPixelBufferGetBaseAddressOfPlane(image_buffer, i),
+                frame->linesize[i] * CVPixelBufferGetHeightOfPlane(image_buffer, i));
         }
-        
+
         CVPixelBufferUnlockBaseAddress(image_buffer, 0);
     }
     

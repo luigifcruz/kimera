@@ -8,18 +8,19 @@
 #import "FrameReceiver.h"
 
 #include <pthread.h>
+#include <libavcodec/avcodec.h>
+#include <libavutil/imgutils.h>
+
+#include "../../config.h"
 
 @interface CameraAdapter : NSObject
 {
   ReceiverContext ctx;
 }
 
-- (bool) startCapture;
+- (bool) startCapture: (State*)state;
 - (void) stopCapture;
-
-- (bool) YPlane: (void*)Y
-         UPlane: (void*)U
-         VPlane: (void*)V;
+- (bool) pullFrame: (AVFrame*)frame;
 
 @end
 

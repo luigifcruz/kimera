@@ -13,18 +13,24 @@ bool loopback_push_frame(LoopbackState* loopback, AVFrame* in) {
 }
 
 bool open_loopback_source(LoopbackState* loopback, State* state) {
+    loopback->state = [CameraAdapter new];
+
+    if (![(id)loopback->state startCapture:state]) {
+        return false;
+    }
+
     loopback->frame = av_frame_alloc();
     loopback->frame->width = state->width;
     loopback->frame->height = state->height;
-    loopback->frame->format = state->format;
+    loopback->frame->format = state->in_format;
     loopback->frame->pts = 0;
+
     if (av_frame_get_buffer(loopback->frame, 0) < 0){
         printf("[LOOPBACK] Couldn't allocate frame.\n");
         return false;
     }
 
-    loopback->state = [CameraAdapter new];
-    return [(id)loopback->state startCapture];
+    return true;
 }
 
 bool loopback_pull_frame(LoopbackState* loopback) {
@@ -33,10 +39,7 @@ bool loopback_pull_frame(LoopbackState* loopback) {
         return false;
     }
 
-    if (![(id)loopback->state
-        YPlane: (void*)loopback->frame->data[0]
-        UPlane: (void*)loopback->frame->data[1]
-        VPlane: (void*)loopback->frame->data[2] ]) {
+    if (![(id)loopback->state pullFrame: loopback->frame]) {
         return false;
     }
 

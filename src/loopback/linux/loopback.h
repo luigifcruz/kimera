@@ -33,7 +33,4 @@ bool loopback_pull_frame(LoopbackState*);
 
 void close_loopback(LoopbackState*);
 
-unsigned int ff_to_v4l(enum AVPixelFormat);
-enum AVPixelFormat v4l_to_ff(unsigned int);
-
 #endif
