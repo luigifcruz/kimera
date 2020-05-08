@@ -1,5 +1,43 @@
 #include "loopback.h"
 
+unsigned int ff_to_v4l(enum AVPixelFormat input) {
+    switch (input) {
+    case AV_PIX_FMT_YUV420P: return V4L2_PIX_FMT_YUV420;
+    case AV_PIX_FMT_YUV422P: return V4L2_PIX_FMT_YUV422P;
+    case AV_PIX_FMT_YUYV422: return V4L2_PIX_FMT_YUYV;
+    default:
+        printf("[LOOPBACK] Selected pixel format not supported by Linux loopback.\n");
+        return -1;
+    }
+}
+
+enum AVPixelFormat v4l_to_ff(unsigned int input) {
+    switch (input) {
+    case V4L2_PIX_FMT_YUV420:   return AV_PIX_FMT_YUV420P;
+    case V4L2_PIX_FMT_YUV422P:  return AV_PIX_FMT_YUV422P;
+    case V4L2_PIX_FMT_YUYV:     return AV_PIX_FMT_YUYV422;
+    default:
+        printf("[LOOPBACK] Selected pixel format not supported by Linux loopback.\n");
+        return -1;
+    }
+}
+
+unsigned int find_v4l_format(int fd, unsigned int preferred) {
+    struct v4l2_fmtdesc fmtdesc;
+    unsigned int opt = 0;
+    memset(&fmtdesc, 0, sizeof(fmtdesc));
+    fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+
+    while(ioctl(fd, VIDIOC_ENUM_FMT, &fmtdesc) == 0) {  
+        printf("[LOOPBACK] Device Format: %s\n", fmtdesc.description);  
+        opt = fmtdesc.pixelformat;
+        if (fmtdesc.pixelformat == preferred)
+            return fmtdesc.pixelformat;
+        fmtdesc.index++;
+    }
+    return opt;
+}
+
 bool open_loopback_sink(LoopbackState* loopback, State* state) {
     loopback->buffer = NULL;
     
@@ -11,18 +49,9 @@ bool open_loopback_sink(LoopbackState* loopback, State* state) {
 	loopback->format.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
 	loopback->format.fmt.pix.width = state->width;
 	loopback->format.fmt.pix.height = state->height;
-
-    switch (state->format) {
-    case AV_PIX_FMT_YUV420P:
-        loopback->format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUV420;
-        break;
-    default:
-        printf("[LOOPBACK] Selected pixel format not supported by Linux loopback.\n");
-        return false;
-    }
-    
-	loopback->format.fmt.pix.sizeimage = state->frame_size;
+	loopback->format.fmt.pix.sizeimage = ff_to_v4l(state->frame_size);
 	loopback->format.fmt.pix.field = V4L2_FIELD_NONE;
+    
 	if (ioctl(loopback->dev_fd, VIDIOC_S_FMT, &loopback->format) < 0) {
         printf("[LOOPBACK] Couldn't open interface.\n");
         return false;
@@ -45,24 +74,24 @@ bool open_loopback_source(LoopbackState* loopback, State* state) {
         return false;
 	}
 
+    state->in_format = v4l_to_ff(
+        find_v4l_format(loopback->dev_fd, ff_to_v4l(state->in_format)));
+
     loopback->format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	loopback->format.fmt.pix.width = state->width;
 	loopback->format.fmt.pix.height = state->height;
+    loopback->format.fmt.pix.field = V4L2_FIELD_ANY;    
+    loopback->format.fmt.pix.pixelformat = ff_to_v4l(state->in_format);
 
-    switch (state->format) {
-    case AV_PIX_FMT_YUV420P:
-        loopback->format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUV420;
-        break;
-    default:
-        printf("[LOOPBACK] Selected pixel format not supported by Linux loopback.\n");
-        return false;
-    }
-	
-	loopback->format.fmt.pix.sizeimage = state->frame_size;
 	if (ioctl(loopback->dev_fd, VIDIOC_S_FMT, &loopback->format) < 0) {
         printf("[LOOPBACK] Couldn't open interface.\n");
         return false;
 	}
+
+    if (loopback->format.fmt.pix.field == V4L2_FIELD_INTERLACED) {
+        printf("[LOOPBACK] The V4L2 driver changed field to interleaved.\n");
+        return false;
+    }
     
     loopback->req.count = 1;
     loopback->req.memory = V4L2_MEMORY_MMAP;
@@ -95,6 +124,11 @@ bool open_loopback_source(LoopbackState* loopback, State* state) {
 
     memset(loopback->buffer, 0, loopback->info.length);
 
+    if (ioctl(loopback->dev_fd, VIDIOC_QBUF, &loopback->info) < 0) {
+        printf("[LOOPBACK] Error queueing stream.\n");
+        return false;
+    }
+
     if (ioctl(loopback->dev_fd, VIDIOC_STREAMON, &loopback->info.type) < 0) {
         printf("[LOOPBACK] Error starting the stream.\n");
         return false;
@@ -103,7 +137,7 @@ bool open_loopback_source(LoopbackState* loopback, State* state) {
     loopback->frame = av_frame_alloc();
     loopback->frame->width = state->width;
     loopback->frame->height = state->height;
-    loopback->frame->format = state->format;
+    loopback->frame->format = state->in_format;
     loopback->frame->pts = 0;
     if (av_frame_get_buffer(loopback->frame, 0) < 0){
         printf("[LOOPBACK] Couldn't allocate frame.\n");
@@ -114,19 +148,16 @@ bool open_loopback_source(LoopbackState* loopback, State* state) {
 }
 
 bool loopback_push_frame(LoopbackState* loopback, AVFrame* frame) {
-    size_t y_len = (frame->linesize[0] * frame->height);
-    size_t u_len = (frame->linesize[1] * frame->height) / 2;
-    size_t v_len = (frame->linesize[2] * frame->height) / 2;
-    size_t len = y_len + u_len + v_len;
-
-    memcpy(loopback->buffer, frame->data[0], y_len);
-    memcpy(loopback->buffer + y_len, frame->data[1], u_len);
-    memcpy(loopback->buffer + u_len + y_len, frame->data[2], v_len);
-
-    if (write(loopback->dev_fd, loopback->buffer, len) < 0) {
+    if (av_image_copy_to_buffer((uint8_t*)loopback->buffer, loopback->info.length,
+            (const uint8_t* const*)frame->data, frame->linesize,
+            frame->format, frame->width, frame->height, 1) < 0) {
         return false;
     }
-
+    
+    if (write(loopback->dev_fd, loopback->buffer, loopback->info.length) < 0) {
+        return false;
+    }
+ 
     return true;
 }
 
@@ -136,13 +167,11 @@ bool loopback_pull_frame(LoopbackState* loopback) {
         return false;
     }
 
-    size_t y_len = (loopback->frame->linesize[0] * loopback->frame->height);
-    size_t u_len = (loopback->frame->linesize[1] * loopback->frame->height) / 2;
-    size_t v_len = (loopback->frame->linesize[2] * loopback->frame->height) / 2;
-
-    memcpy(loopback->frame->data[0], loopback->buffer, y_len);
-    memcpy(loopback->frame->data[1], loopback->buffer + y_len, u_len);
-    memcpy(loopback->frame->data[2], loopback->buffer + u_len + y_len, v_len);
+    if (av_image_fill_arrays(loopback->frame->data, loopback->frame->linesize,
+            (uint8_t*)loopback->buffer, loopback->frame->format,
+            loopback->frame->width, loopback->frame->height, 1) < 0) {
+        return false;
+    }
 
     loopback->frame->pts += 1;
 

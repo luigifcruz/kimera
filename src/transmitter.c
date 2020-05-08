@@ -32,14 +32,23 @@ void transmitter(State* state) {
     if (!open_loopback_source(&loopback, state))
         goto cleanup;
 
+    // Add resampler.
+    ResamplerState resampler;
+    open_resampler(&resampler, state->out_format);
+
     // Start Decoder Loop.
     while (loopback_pull_frame(&loopback)) {
-        if (state->sink & DISPLAY) {
-            if (!display_draw(&display, loopback.frame))
-                break;
+
+        if (!resampler_push_frame(&resampler, state, loopback.frame)) {
+            continue;
         }
 
-        if (encoder_push(&encoder, loopback.frame)) {
+        if (state->sink & DISPLAY) {
+            if (!display_draw(&display, resampler.frame))
+                break;
+        }
+        
+        if (encoder_push(&encoder, resampler.frame)) {
             if (state->sink & STDOUT) {
                 fwrite(
                     encoder.packet->data, sizeof(char),
@@ -48,13 +57,13 @@ void transmitter(State* state) {
             }
 
             if (state->sink & TCP) {
-                write(tcp_socket.client_fd, (char*)&loopback.frame->pts, sizeof(loopback.frame->pts));
+                write(tcp_socket.client_fd, (char*)&resampler.frame->pts, sizeof(resampler.frame->pts));
                 write(tcp_socket.client_fd, (char*)&encoder.packet->size, sizeof(encoder.packet->size)); 
                 write(tcp_socket.client_fd, encoder.packet->data, encoder.packet->size); 
             }
 
             if (state->sink & UNIX) {
-                write(unix_socket.client_fd, (char*)&loopback.frame->pts, sizeof(loopback.frame->pts));
+                write(unix_socket.client_fd, (char*)&resampler.frame->pts, sizeof(resampler.frame->pts));
                 write(unix_socket.client_fd, (char*)&encoder.packet->size, sizeof(encoder.packet->size)); 
                 write(unix_socket.client_fd, encoder.packet->data, encoder.packet->size); 
             }

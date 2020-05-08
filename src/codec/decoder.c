@@ -21,7 +21,7 @@ bool start_decoder(DecoderState* decoder, State* state) {
     decoder->codec_ctx->framerate = (AVRational){state->framerate, 1};
     decoder->codec_ctx->gop_size = 10;
     decoder->codec_ctx->max_b_frames = 0;
-    decoder->codec_ctx->pix_fmt = state->format;
+    decoder->codec_ctx->pix_fmt = state->in_format;
     if (avcodec_open2(decoder->codec_ctx, codec, NULL) < 0) {
         printf("[DECODER] Couldn't open codec.\n");
         close_decoder(decoder);
@@ -36,7 +36,7 @@ bool start_decoder(DecoderState* decoder, State* state) {
     }
 
     decoder->parser_ctx->flags |= PARSER_FLAG_COMPLETE_FRAMES;
-    decoder->parser_ctx->format = state->format;
+    decoder->parser_ctx->format = state->in_format;
     decoder->retard = NULL;
     decoder->frame = av_frame_alloc();
 

@@ -23,15 +23,16 @@ int main(int argc, char *argv[]) {
     // Declare Default Settings
     State *state = malloc(sizeof(State));
 
-    state->width     = DEFAULT_WIDTH;
-    state->height    = DEFAULT_HEIGHT;
-    state->bitrate   = DEFAULT_BITRATE;
-    state->port      = DEFAULT_PORT;
-    state->address   = DEFAULT_ADDRESS;
-    state->codec     = DEFAULT_CODEC;
-    state->loopback  = DEFAULT_LOOPBACK;
-    state->format    = DEFAULT_FORMAT;
-    state->framerate = DEFAULT_FRAMERATE;
+    state->width        = DEFAULT_WIDTH;
+    state->height       = DEFAULT_HEIGHT;
+    state->bitrate      = DEFAULT_BITRATE;
+    state->port         = DEFAULT_PORT;
+    state->address      = DEFAULT_ADDRESS;
+    state->codec        = DEFAULT_CODEC;
+    state->loopback     = DEFAULT_LOOPBACK;
+    state->in_format    = DEFAULT_FORMAT;
+    state->out_format   = DEFAULT_FORMAT;
+    state->framerate    = DEFAULT_FRAMERATE;
 
     // Parse Arguments
     if (argc < 2) {
@@ -42,18 +43,18 @@ int main(int argc, char *argv[]) {
     if (!strcmp(argv[1], "tx") || !strcmp(argv[1], "transmit")) {
         state->source = LOOPBACK;
         state->sink = TCP | DISPLAY;
-        state->codec = "h264_videotoolbox";
+        state->codec = "h264_nvenc";
         state->mode = TRANSMITTER;
     } else if (!strcmp(argv[1], "rx") || !strcmp(argv[1], "receive")) {
         state->source = TCP;
         state->sink = DISPLAY;
-        state->codec = "h264";
+        state->codec = "h264_cuvid";
         state->mode = RECEIVER;
     } else {
         printf("Not such flag (%s)\n", argv[1]);
     }
 
-    switch (state->format) {
+    switch (state->out_format) {
     case AV_PIX_FMT_YUV420P:
         state->frame_size = (state->width*state->height*3/2);
         break;

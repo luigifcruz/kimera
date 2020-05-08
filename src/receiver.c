@@ -17,7 +17,7 @@ void receiver(State* state) {
 
     // Add resampler.
     ResamplerState resampler;
-    open_resampler(&resampler, state->format);
+    open_resampler(&resampler, state->out_format);
 
     // Start Display Screen.
     DisplayState display;

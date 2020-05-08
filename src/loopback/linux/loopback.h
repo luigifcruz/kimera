@@ -10,6 +10,7 @@
 #include <sys/ioctl.h>
 #include <linux/videodev2.h>
 #include <libavcodec/avcodec.h>
+#include <libavutil/imgutils.h>
 #include <sys/uio.h>
 #include <sys/mman.h>
 
@@ -31,5 +32,8 @@ bool loopback_push_frame(LoopbackState*, AVFrame*);
 bool loopback_pull_frame(LoopbackState*);
 
 void close_loopback(LoopbackState*);
+
+unsigned int ff_to_v4l(enum AVPixelFormat);
+enum AVPixelFormat v4l_to_ff(unsigned int);
 
 #endif

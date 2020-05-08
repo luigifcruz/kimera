@@ -12,13 +12,13 @@
 #define NO_PTS              UINT64_C(-1)
 
 #define DEFAULT_PORT        8080
-#define DEFAULT_ADDRESS     "127.0.0.1"
-#define DEFAULT_LOOPBACK    "/dev/video0"
+#define DEFAULT_ADDRESS     "0.0.0.0"
+#define DEFAULT_LOOPBACK    "/dev/video2"
 
-#define DEFAULT_FRAMERATE   25
-#define DEFAULT_WIDTH       1280
-#define DEFAULT_HEIGHT      720
-#define DEFAULT_BITRATE     5000000
+#define DEFAULT_FRAMERATE   60
+#define DEFAULT_WIDTH       1920
+#define DEFAULT_HEIGHT      1080
+#define DEFAULT_BITRATE     3000000
 #define DEFAULT_CODEC       "libx265"
 #define DEFAULT_FORMAT      AV_PIX_FMT_YUV420P
 
@@ -48,15 +48,14 @@ typedef struct {
     int bitrate;
     int framerate;
     int frame_size;
-    enum AVPixelFormat format;
-
     int port;
     char* address;
     char* loopback;
-
     Mode mode;
     Interfaces sink;
     Interfaces source;
+    enum AVPixelFormat in_format;
+    enum AVPixelFormat out_format;
 } State;
 
 #endif

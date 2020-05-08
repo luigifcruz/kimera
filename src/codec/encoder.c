@@ -21,7 +21,7 @@ bool start_encoder(EncoderState* encoder, State* state) {
     encoder->codec_ctx->framerate = (AVRational){state->framerate, 1};
     encoder->codec_ctx->gop_size = 10;
     encoder->codec_ctx->max_b_frames = 0;
-    encoder->codec_ctx->pix_fmt = state->format;
+    encoder->codec_ctx->pix_fmt = state->out_format;
     encoder->codec_ctx->flags |= AV_CODEC_FLAG_LOW_DELAY;
     if (avcodec_open2(encoder->codec_ctx, codec, NULL) < 0) {
         printf("[ENCODER] Couldn't open codec.\n");
