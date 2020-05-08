@@ -54,8 +54,9 @@ bool resampler_push_frame(ResamplerState* resampler, State* state, AVFrame* in) 
     }
 
     resampler->frame->pts = in->pts;
-    if (sws_scale(resampler->ctx, in->data, in->linesize, 0, in->height,
-                  resampler->frame->data, resampler->frame->linesize) < 0) {
+    if (sws_scale(
+            resampler->ctx, (const unsigned char* const*)in->data, in->linesize, 0,
+            in->height, resampler->frame->data, resampler->frame->linesize) < 0) {
         printf("[RESAMPLER] Can't convert this frame.\n");
         return false;
     }
