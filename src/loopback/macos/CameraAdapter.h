@@ -11,7 +11,7 @@
 #include <libavcodec/avcodec.h>
 #include <libavutil/imgutils.h>
 
-#include "../../config.h"
+#include "config.h"
 
 @interface CameraAdapter : NSObject
 {

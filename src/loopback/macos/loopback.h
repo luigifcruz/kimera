@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 
-#include "../../config.h"
+#include "config.h"
 
 typedef struct {
     AVFrame* frame;
