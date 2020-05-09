@@ -8,7 +8,7 @@
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 
-#include "../config.h"
+#include "config.h"
 
 typedef struct {
     AVCodecContext *codec_ctx;

@@ -1,0 +1,22 @@
+rpi4_picam_v1:
+  width: 1280
+  height: 720
+  fps: 60
+  bitrate: 5M
+  
+  transmitter:
+    input: loopback
+    device: /dev/video0
+    output:
+      - tcp
+    host: 0.0.0.0
+    port: 8080
+    codec: h264_omx
+  
+  receiver:
+    input: tcp
+    output:
+      - display
+    host: 192.168.0.20
+    port: 8080
+    codec: h264_cuvid

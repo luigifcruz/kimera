@@ -46,10 +46,19 @@ bool open_loopback_sink(LoopbackState* loopback, State* state) {
         return false;
 	}
 
+    unsigned int frame_size = 0;
+    switch (state->out_format) {
+    case AV_PIX_FMT_YUV420P:
+        frame_size = (state->width*state->height*3/2);
+        break;
+    default:
+        return false;
+    }
+
 	loopback->format.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
 	loopback->format.fmt.pix.width = state->width;
 	loopback->format.fmt.pix.height = state->height;
-	loopback->format.fmt.pix.sizeimage = ff_to_v4l(state->frame_size);
+	loopback->format.fmt.pix.sizeimage = frame_size;
 	loopback->format.fmt.pix.field = V4L2_FIELD_NONE;
     
 	if (ioctl(loopback->dev_fd, VIDIOC_S_FMT, &loopback->format) < 0) {
@@ -57,7 +66,7 @@ bool open_loopback_sink(LoopbackState* loopback, State* state) {
         return false;
 	}
 
-    loopback->buffer = (char*)malloc(state->frame_size);
+    loopback->buffer = (char*)malloc(frame_size);
     if (!loopback->buffer) {
         printf("[LOOPBACK] Couldn't allocate loopback buffer.\n");
         return false;

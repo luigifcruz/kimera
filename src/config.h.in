@@ -5,6 +5,13 @@
 #include <signal.h>
 
 //
+// CMake Defined Setting
+//
+
+#define kimera_VERSION_MAJOR @kimera_VERSION_MAJOR@
+#define kimera_VERSION_MINOR @kimera_VERSION_MINOR@
+
+//
 // Default Settings
 //
 
@@ -13,11 +20,11 @@
 
 #define DEFAULT_PORT        8080
 #define DEFAULT_ADDRESS     "0.0.0.0"
-#define DEFAULT_LOOPBACK    "/dev/video2"
+#define DEFAULT_LOOPBACK    "/dev/video0"
 
 #define DEFAULT_FRAMERATE   30
-#define DEFAULT_WIDTH       1280
-#define DEFAULT_HEIGHT      720
+#define DEFAULT_WIDTH       640
+#define DEFAULT_HEIGHT      480
 #define DEFAULT_BITRATE     3000000
 #define DEFAULT_CODEC       "libx265"
 #define DEFAULT_FORMAT      AV_PIX_FMT_YUV420P

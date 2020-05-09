@@ -14,7 +14,7 @@
 #include <sys/uio.h>
 #include <sys/mman.h>
 
-#include "../../config.h"
+#include "config.h"
 
 typedef struct {
     int dev_fd;

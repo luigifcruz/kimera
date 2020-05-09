@@ -5,11 +5,14 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
 
+configure_file(src/config.h.in config.h)
+
 set(CMAKE_C_FLAGS "-Wall -Wextra -Wno-unused-function -Wno-unused-parameter -Wno-int-to-pointer-cast")
 set(CMAKE_C_FLAGS_DEBUG "-g")
 set(CMAKE_C_FLAGS_RELEASE "-O3")
 
 add_subdirectory(lib/ffmpeg)
+add_subdirectory(lib/yaml)
 add_subdirectory(lib/sdl)
 
 list(APPEND SOURCES
@@ -52,5 +55,12 @@ configure_file(
   COPYONLY
 )
 
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/assets/config.yml
+  ${CMAKE_CURRENT_SOURCE_DIR}/build/config.yml
+  COPYONLY
+)
+
 add_executable(kimera ${SOURCES})
-target_link_libraries(kimera ffmpeg sdl ${LIBS})
+target_include_directories(kimera PUBLIC "${PROJECT_BINARY_DIR}")
+target_link_libraries(kimera ffmpeg sdl yaml ${LIBS})
