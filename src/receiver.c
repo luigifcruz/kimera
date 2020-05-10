@@ -56,13 +56,12 @@ void receiver(State* state) {
 
     while (!stop) {
         out = recv(socket.server_fd, (char*)&header, HEADER_SIZE, MSG_WAITALL);
-        if (out < HEADER_SIZE) {
-            continue;
-        }
+        if (out == 0) break;
+        if (out < HEADER_SIZE) continue;
 
         uint64_t pts = buffer_read64be((uint8_t*)header);
         uint32_t len = buffer_read32be((uint8_t*)&header[8]);
-
+        
         char* packet = (char*)malloc(len);
         if (packet == NULL) {
             printf("[MAIN] Couldn't allocate packet.");
