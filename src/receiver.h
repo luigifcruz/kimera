@@ -2,6 +2,7 @@
 #define RECEIVER_H
 
 #include <stdio.h>
+#include <libavutil/pixdesc.h>
 
 #include "utils.h"
 #include "resampler.h"

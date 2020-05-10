@@ -39,7 +39,16 @@ void receiver(State* state) {
         break;
     default:
         goto cleanup;
-    }   
+    }
+
+    // Performance Degradation Check
+    if (state->in_format != state->out_format) {
+        printf("[RECEIVER] Performance Degradation:\n");
+        printf("[RECEIVER] Output pixel format is different than the input.\n");
+        printf("[RECEIVER] - Input: %s -> Output: %s\n",
+               av_get_pix_fmt_name(state->in_format),
+               av_get_pix_fmt_name(state->out_format));
+    }
  
     // Start Decoder Loop.
     size_t out = 0;

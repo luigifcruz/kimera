@@ -36,6 +36,15 @@ void transmitter(State* state) {
     ResamplerState resampler;
     open_resampler(&resampler, state->out_format);
 
+    // Performance Degradation Check
+    if (state->in_format != state->out_format) {
+        printf("[TRANSMITTER] Performance Degradation:\n");
+        printf("[TRANSMITTER] Output pixel format is different than the input.\n");
+        printf("[TRANSMITTER] - Input: %s -> Output: %s\n",
+               av_get_pix_fmt_name(state->in_format),
+               av_get_pix_fmt_name(state->out_format));
+    }
+
     // Start Decoder Loop.
     while (loopback_pull_frame(&loopback)) {
 
