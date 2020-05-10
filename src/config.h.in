@@ -5,7 +5,7 @@
 #include <signal.h>
 
 //
-// CMake Defined Setting
+// CMake Defined Settings
 //
 
 #define kimera_VERSION_MAJOR @kimera_VERSION_MAJOR@
