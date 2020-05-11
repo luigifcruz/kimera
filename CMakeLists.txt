@@ -25,6 +25,7 @@ list(APPEND SOURCES
   src/tcp_socket.c
   src/display.c
   src/resampler.c
+  src/router.c
 )
 
 if(UNIX AND NOT APPLE)
