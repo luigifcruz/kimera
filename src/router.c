@@ -68,7 +68,13 @@ bool recv_packet(RouterState* router, int fd) {
         
         out = recv(fd, router->packet->payload + offset, pkt_size, MSG_WAITALL); 
         if (out < pkt_size) return false;
-        if (router->packet->i == router->packet->n - 1) return true;
+        router->checksum += 1;
+
+        if (router->checksum == router->packet->n) {
+            if (router->packet->i != router->packet->n - 1)
+                printf("[LOOPBACK] Unaligned packet received.\n");
+            return true;
+        }
     }
 }
 
