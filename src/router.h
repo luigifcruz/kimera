@@ -23,6 +23,7 @@ typedef struct {
 } Packet;
 
 typedef struct {
+    uint32_t checksum;
     Packet* packet;
     char* buffer;
 } RouterState;

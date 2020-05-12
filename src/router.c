@@ -10,9 +10,10 @@ bool start_router(RouterState* router) {
     }
 
     router->packet->pts = (uint64_t)0;
-    router->packet->len = (uint64_t)0;
-    router->packet->i   = (uint64_t)0;
-    router->packet->n   = (uint64_t)0;
+    router->packet->len = (uint32_t)0;
+    router->packet->i   = (uint32_t)0;
+    router->packet->n   = (uint32_t)0;
+    router->checksum    = (uint32_t)0;
 
     router->packet->payload = NULL;
     return true;
@@ -49,6 +50,7 @@ bool recv_packet(RouterState* router, int fd) {
         
         if (pts > router->packet->pts) {
             free(router->packet->payload);
+            router->checksum = (uint32_t)0;
             router->packet->payload = malloc(len);
             if (router->packet->payload == NULL) {
                 printf("[ROUTER] Can't allocate payload buffer.\n");
