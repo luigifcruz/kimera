@@ -56,12 +56,6 @@ configure_file(
   COPYONLY
 )
 
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/assets/config.yml
-  ${CMAKE_CURRENT_SOURCE_DIR}/build/config.yml
-  COPYONLY
-)
-
 add_executable(kimera ${SOURCES})
 target_include_directories(kimera PUBLIC "${PROJECT_BINARY_DIR}")
 target_link_libraries(kimera ffmpeg sdl yaml ${LIBS})

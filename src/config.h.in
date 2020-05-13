@@ -55,7 +55,6 @@ typedef struct {
     char* codec;
     int bitrate;
     int framerate;
-    int frame_size;
     int port;
     char* address;
     char* loopback;

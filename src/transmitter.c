@@ -54,7 +54,6 @@ void transmitter(State* state) {
 
     // Start Decoder Loop.
     while (loopback_pull_frame(&loopback)) {
-
         if (!resampler_push_frame(&resampler, state, loopback.frame)) {
             continue;
         }
