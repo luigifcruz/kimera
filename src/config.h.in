@@ -16,7 +16,7 @@
 //
 
 #define HEADER_SIZE         20
-#define MAX_PAYLOAD         4096
+#define MAX_PAYLOAD         2048
 #define MAX_SIZE            (MAX_PAYLOAD + HEADER_SIZE)
 
 #define DEFAULT_PORT        8080

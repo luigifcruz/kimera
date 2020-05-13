@@ -31,12 +31,16 @@ void print_help() {
 
 void print_state(State* state) {
     printf(".   CURRENT STATE\n");
-    printf("├── Dimensions: (%dx%d)\n", state->width, state->height);
+    printf("├── Dimensions: %dx%d\n", state->width, state->height);
     printf("├── Framerate:  %d FPS\n", state->framerate);
     printf("└── Bitrate:    %d bps\n", state->bitrate);
 
     if (state->mode == TRANSMITTER) {
         printf("    .   TRANSMITTER\n");
+        printf("    ├── Source: ");
+        if (state->source & LOOPBACK)
+            printf(" LOOPBACK");
+        printf("\n");
         printf("    ├── Sink:   ");
         if (state->sink & TCP)
             printf(" TCP");
@@ -49,14 +53,10 @@ void print_state(State* state) {
         if (state->sink & LOOPBACK)
             printf(" LOOPBACK");
         printf("\n");
-        printf("    ├── Source: ");
-        if (state->source & LOOPBACK)
-            printf(" LOOPBACK");
-        printf("\n");
     }
     
     if (state->mode == RECEIVER) {
-        printf("    RECEIVER\n");
+        printf("    .   RECEIVER\n");
         printf("    ├── Source: ");
         if (state->source & TCP)
             printf(" TCP");

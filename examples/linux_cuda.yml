@@ -1,0 +1,23 @@
+width: 1920
+height: 1080
+framerate: 60
+bitrate: 10000000
+
+transmitter:
+  source:
+    - loopback
+  sink:
+    - tcp
+  device: /dev/video2
+  address: 0.0.0.0
+  port: 8080
+  codec: hevc_nvenc
+
+receiver:
+  source: 
+    - tcp
+  sink:
+    - display
+  address: 127.0.0.1
+  port: 8080
+  codec: hevc_cuvid
