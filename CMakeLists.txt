@@ -25,6 +25,7 @@ list(APPEND SOURCES
   src/tcp_socket.c
   src/display.c
   src/resampler.c
+  src/router.c
 )
 
 if(UNIX AND NOT APPLE)
@@ -52,12 +53,6 @@ endif()
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/assets/CourierPrime-Regular.ttf
   ${CMAKE_CURRENT_SOURCE_DIR}/build/CourierPrime-Regular.ttf
-  COPYONLY
-)
-
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/assets/config.yml
-  ${CMAKE_CURRENT_SOURCE_DIR}/build/config.yml
   COPYONLY
 )
 

@@ -15,16 +15,17 @@
 // Default Settings
 //
 
-#define HEADER_SIZE         12
-#define NO_PTS              UINT64_C(-1)
+#define HEADER_SIZE         20
+#define MAX_PAYLOAD         4096
+#define MAX_SIZE            (MAX_PAYLOAD + HEADER_SIZE)
 
 #define DEFAULT_PORT        8080
 #define DEFAULT_ADDRESS     "0.0.0.0"
 #define DEFAULT_LOOPBACK    "/dev/video0"
 
-#define DEFAULT_FRAMERATE   30
-#define DEFAULT_WIDTH       640
-#define DEFAULT_HEIGHT      480
+#define DEFAULT_FRAMERATE   25
+#define DEFAULT_WIDTH       1280
+#define DEFAULT_HEIGHT      720
 #define DEFAULT_BITRATE     3000000
 #define DEFAULT_CODEC       "libx265"
 #define DEFAULT_FORMAT      AV_PIX_FMT_YUV420P
@@ -54,7 +55,6 @@ typedef struct {
     char* codec;
     int bitrate;
     int framerate;
-    int frame_size;
     int port;
     char* address;
     char* loopback;

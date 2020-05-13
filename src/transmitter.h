@@ -11,6 +11,7 @@
 #include "resampler.h"
 #include "loopback/loopback.h"
 #include "display.h"
+#include "router.h"
 
 void transmitter(State*);
 

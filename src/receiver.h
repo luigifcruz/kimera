@@ -11,6 +11,7 @@
 #include "codec/decoder.h"
 #include "loopback/loopback.h"
 #include "display.h"
+#include "router.h"
 
 void receiver(State*);
 

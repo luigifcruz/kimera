@@ -15,6 +15,13 @@ void transmitter(State* state) {
             goto cleanup;
     }
 
+    // Start Router. 
+    RouterState router;
+    if (state->sink & UNIX || state->sink & TCP) {
+        if (!start_router(&router))
+            goto cleanup;
+    }
+
     // Start Loopback Input.
     LoopbackState loopback;
     if (!open_loopback_source(&loopback, state))
@@ -47,7 +54,6 @@ void transmitter(State* state) {
 
     // Start Decoder Loop.
     while (loopback_pull_frame(&loopback)) {
-
         if (!resampler_push_frame(&resampler, state, loopback.frame)) {
             continue;
         }
@@ -65,16 +71,11 @@ void transmitter(State* state) {
                 continue;
             }
 
-            if (state->sink & TCP) {
-                write(tcp_socket.client_fd, (char*)&resampler.frame->pts, sizeof(resampler.frame->pts));
-                write(tcp_socket.client_fd, (char*)&encoder.packet->size, sizeof(encoder.packet->size)); 
-                write(tcp_socket.client_fd, encoder.packet->data, encoder.packet->size); 
-            }
-
-            if (state->sink & UNIX) {
-                write(unix_socket.client_fd, (char*)&resampler.frame->pts, sizeof(resampler.frame->pts));
-                write(unix_socket.client_fd, (char*)&encoder.packet->size, sizeof(encoder.packet->size)); 
-                write(unix_socket.client_fd, encoder.packet->data, encoder.packet->size); 
+            while (make_packet(&router, encoder.packet, resampler.frame)) {
+                if (state->sink & TCP)
+                    send_packet(&router, tcp_socket.client_fd);
+                if (state->sink & UNIX)
+                    send_packet(&router, unix_socket.client_fd);
             }
         }
     }
@@ -85,6 +86,9 @@ cleanup:
 
     if (state->sink & UNIX)
         close_unix(&unix_socket);
+
+    if (state->sink & TCP || state->sink & UNIX)
+        close_router(&router);
 
     if (state->sink & DISPLAY)
         close_display(&display);

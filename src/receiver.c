@@ -25,6 +25,11 @@ void receiver(State* state) {
         if (!start_display(&display, state))
             goto cleanup;
     }
+
+    // Start Router. 
+    RouterState router;
+    if (!start_router(&router))
+            goto cleanup;
     
     // Start Socket Client. 
     SocketState socket;
@@ -51,33 +56,13 @@ void receiver(State* state) {
     }
  
     // Start Decoder Loop.
-    size_t out = 0;
-    char header[HEADER_SIZE];
-
-    while (!stop) {
-        out = recv(socket.server_fd, (char*)&header, HEADER_SIZE, MSG_WAITALL);
-        if (out == 0) break;
-        if (out < HEADER_SIZE) continue;
-
-        uint64_t pts = buffer_read64be((uint8_t*)header);
-        uint32_t len = buffer_read32be((uint8_t*)&header[8]);
-        
-        char* packet = (char*)malloc(len);
-        if (packet == NULL) {
-            printf("[MAIN] Couldn't allocate packet.");
-            goto cleanup;
-        }
-       
-        out = recv(socket.server_fd, packet, len, MSG_WAITALL); 
-        assert(out == len);
-
+    while (recv_packet(&router, socket.server_fd)) {
         if (state->sink & STDOUT) {
-            fwrite(packet, sizeof(char), len, stdout);
-            free(packet);
+            fwrite(router.packet->payload, sizeof(char), router.packet->len, stdout);
             continue;
         }
 
-        if (decoder_push(&decoder, packet, len, pts)) {
+        if (decoder_push(&decoder, router.packet->payload, router.packet->len, router.packet->pts)) {
             if (!resampler_push_frame(&resampler, state, decoder.frame)) {
                 continue;
             }
@@ -91,13 +76,12 @@ void receiver(State* state) {
                 loopback_push_frame(&loopback, resampler.frame);
             }
         }
-        
-        free(packet);   
     }
 
 cleanup:
     close_resampler(&resampler);
     close_decoder(&decoder);
+    close_router(&router);
     
     switch (state->source) {
     case TCP:
@@ -108,7 +92,7 @@ cleanup:
         break;
     default:
         break;
-    }
+    }   
 
     if (state->sink & LOOPBACK)
         close_loopback(&loopback);
