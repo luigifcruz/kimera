@@ -1,6 +1,6 @@
 #include "transmitter.h"
 
-void transmitter(State* state) {
+void transmitter(State* state, volatile sig_atomic_t* stop) {
     // Start TCP Server. 
     SocketState tcp_socket;
     if (state->sink & TCP) {
@@ -53,13 +53,13 @@ void transmitter(State* state) {
     }
 
     // Start Decoder Loop.
-    while (loopback_pull_frame(&loopback)) {
+    while (loopback_pull_frame(&loopback) && !(*stop)) {
         if (!resampler_push_frame(&resampler, state, loopback.frame)) {
             continue;
         }
 
         if (state->sink & DISPLAY) {
-            if (!display_draw(&display, resampler.frame))
+            if (!display_draw(&display, state, resampler.frame))
                 break;
         }
         

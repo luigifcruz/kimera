@@ -10,10 +10,13 @@
 #include "transmitter.h"
 #include "receiver.h"
 
+volatile sig_atomic_t stop;
+
 void inthand(int signum) {
     if (stop == 1) {
       exit(-1);
     }
+    printf("Safely exiting, press Crtl-C to force shutdown.\n");
     stop = 1;
 }
 
@@ -273,7 +276,7 @@ int main(int argc, char *argv[]) {
         state->mode = TRANSMITTER;
         if (!parse_config_file(state, config_path))
             return -1;
-        transmitter(state);
+        transmitter(state, &stop);
         return 0;
     }
     
@@ -281,7 +284,7 @@ int main(int argc, char *argv[]) {
         state->mode = RECEIVER;
         if (!parse_config_file(state, config_path))
             return -1;
-        receiver(state);
+        receiver(state, &stop);
         return 0;
     }
 

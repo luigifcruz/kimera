@@ -1,0 +1,24 @@
+width: 1280
+height: 720
+framerate: 25
+bitrate: 10000000
+
+transmitter:
+  source:
+    - loopback
+    - display
+  sink:
+    - tcp
+  device: 0
+  address: 127.0.0.1
+  port: 8080
+  codec: h264_videotoolbox
+
+receiver:
+  source: 
+    - tcp
+  sink:
+    - display
+  address: 127.0.0.1
+  port: 8080
+  codec: h264

@@ -13,6 +13,6 @@
 #include "display.h"
 #include "router.h"
 
-void receiver(State*);
+void receiver(State*, volatile sig_atomic_t*);
 
 #endif

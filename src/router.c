@@ -34,10 +34,10 @@ size_t get_packet_size(Packet* packet, size_t offset) {
     return pkt_size;
 }
 
-bool recv_packet(RouterState* router, int fd) {
+bool recv_packet(RouterState* router, volatile sig_atomic_t* stop, int fd) {
     char header[HEADER_SIZE];
 
-    while (1) {
+    while (!(*stop)) {
         size_t out = recv(fd, &header, HEADER_SIZE, MSG_WAITALL);
         if (out < HEADER_SIZE) return false;
 
@@ -76,6 +76,8 @@ bool recv_packet(RouterState* router, int fd) {
             return true;
         }
     }
+
+    return false;
 }
 
 bool make_packet(RouterState* router, AVPacket* packet, AVFrame* frame) {

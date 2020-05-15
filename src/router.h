@@ -31,7 +31,7 @@ typedef struct {
 bool start_router(RouterState*);
 void close_router(RouterState*);
 
-bool recv_packet(RouterState*, int);
+bool recv_packet(RouterState*, volatile sig_atomic_t*, int);
 
 bool make_packet(RouterState*, AVPacket*, AVFrame*);
 void send_packet(RouterState*, int);

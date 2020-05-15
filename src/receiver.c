@@ -1,6 +1,6 @@
 #include "receiver.h"
 
-void receiver(State* state) {
+void receiver(State* state, volatile sig_atomic_t* stop) {
     // Start HEVC Decoder.
     DecoderState decoder;
     if (state->sink & DISPLAY || state->sink & LOOPBACK) {
@@ -56,7 +56,7 @@ void receiver(State* state) {
     }
  
     // Start Decoder Loop.
-    while (recv_packet(&router, socket.server_fd)) {
+    while (recv_packet(&router, stop, socket.server_fd) && !(*stop)) {
         if (state->sink & STDOUT) {
             fwrite(router.packet->payload, sizeof(char), router.packet->len, stdout);
             continue;
@@ -68,7 +68,7 @@ void receiver(State* state) {
             }
 
             if (state->sink & DISPLAY) {
-                if (!display_draw(&display, resampler.frame))
+                if (!display_draw(&display, state, resampler.frame))
                     break;
             }
 

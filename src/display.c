@@ -1,5 +1,16 @@
 #include "display.h"
 
+int display_event_handler(void* display_ptr, SDL_Event* event) {
+	DisplayState* display = display_ptr;
+	if (event->type == SDL_QUIT)
+		exit(0);
+	if (event->type == SDL_KEYUP)
+		if (event->key.keysym.mod == KMOD_NONE &&
+			event->key.keysym.sym == SDLK_i) 
+			display->info = !display->info;
+	return 1;
+}
+
 bool start_display(DisplayState* display, State* state) {
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 		printf("[SDL] Init error: %s.\n", SDL_GetError());
@@ -10,7 +21,6 @@ bool start_display(DisplayState* display, State* state) {
 		printf("[SDL] TTF init error.\n");
 		display->font = NULL;
 	}
-	display->font = TTF_OpenFont("CourierPrime-Regular.ttf", 50);
 
 	char* name[32];
 	switch (state->mode) {
@@ -24,7 +34,7 @@ bool start_display(DisplayState* display, State* state) {
 
 	if (!(display->win = SDL_CreateWindow(
 					  (char*)name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
-                      state->width/2, state->height/2, SDL_WINDOW_SHOWN))) {
+                      state->width/1.5, state->height/1.5, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE))) {
 		printf("[SDL] Window error: %s\n", SDL_GetError());
 		goto cleanup;
 	}
@@ -35,15 +45,22 @@ bool start_display(DisplayState* display, State* state) {
 		goto cleanup;
 	}
 
+	SDL_RenderSetLogicalSize(display->ren, state->width, state->height);
+
 	if (!(display->tex = SDL_CreateTexture(display->ren, SDL_PIXELFORMAT_YV12,
 					  SDL_TEXTUREACCESS_STREAMING, state->width, state->height))) {
 		printf("[SDL] Error: %s\n", SDL_GetError());
 		goto cleanup;
 	}
 
+	SDL_AddEventWatch(display_event_handler, display);
+
 	SDL_RenderClear(display->ren);
 	SDL_RenderCopy(display->ren, display->tex, NULL, NULL);
 	SDL_RenderPresent(display->ren);
+
+	display->font = TTF_OpenFont("CourierPrime-Regular.ttf", 25);
+	display->info = false;
 
 	return true;
 
@@ -63,29 +80,30 @@ void close_display(DisplayState* display) {
 	TTF_Quit();
 }
 
-bool display_draw(DisplayState* display, AVFrame* frame) {
-	SDL_Event e;
-    while(SDL_PollEvent(&e)){
-        switch(e.type){
-            case SDL_QUIT:
-                return false;
-        }
-    }
-
+bool display_draw(DisplayState* display, State* state, AVFrame* frame) {
+	SDL_PollEvent(display->event);
 	SDL_RenderClear(display->ren);
 	
-	SDL_UpdateYUVTexture(display->tex, NULL,
-						 frame->data[0], frame->linesize[0],
-						 frame->data[1], frame->linesize[1],
-						 frame->data[2], frame->linesize[2]);
+	SDL_UpdateYUVTexture(display->tex, NULL, frame->data[0], frame->linesize[0],
+						 					 frame->data[1], frame->linesize[1],
+						 					 frame->data[2], frame->linesize[2]);
 	SDL_RenderCopy(display->ren, display->tex, NULL, NULL);
 
-	if (display->font) {
-		char buffer[32];
-		sprintf((char*)&buffer, "%ld", (int64_t)frame->pts);
-		SDL_Color textColor = { 255, 255, 255, 255 };
+	if (display->font && display->info) {
+		int width, height;
+		char buffer[512];
+		int length = 0;
 
-		SDL_Surface *textSurface = TTF_RenderText_Solid(display->font, buffer, textColor);
+		SDL_Color textColor = { 255, 255, 255, 255 };
+		SDL_GetWindowSize(display->win, &width, &height);
+
+		length += sprintf((char*)&buffer+length, "PTS: %lld, ", (long long)frame->pts);
+		length += sprintf((char*)&buffer+length, "Frame: %dx%d@%d, ", frame->width, frame->height, state->framerate);
+		length += sprintf((char*)&buffer+length, "Viewport: %dx%d, ", width, height);
+		length += sprintf((char*)&buffer+length, "Codec: %s, ", state->codec);
+		length += sprintf((char*)&buffer+length, "Pixel: %s -> %s",  av_get_pix_fmt_name(state->in_format), av_get_pix_fmt_name(state->out_format));
+
+		SDL_Surface *textSurface = TTF_RenderText_Blended_Wrapped(display->font, buffer, textColor, width);
 		SDL_Texture *textTexture = SDL_CreateTextureFromSurface(display->ren, textSurface);
 		
 		SDL_Rect textRect = { 0, 0, textSurface->w, textSurface->h };

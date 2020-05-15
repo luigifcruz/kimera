@@ -34,8 +34,6 @@
 // Variables
 //
 
-volatile sig_atomic_t stop;
-
 typedef enum {
     UNIX     = 1 << 0,
     TCP      = 1 << 1,
