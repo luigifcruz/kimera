@@ -4,10 +4,12 @@ int display_event_handler(void* display_ptr, SDL_Event* event) {
 	DisplayState* display = display_ptr;
 	if (event->type == SDL_QUIT)
 		exit(0);
-	if (event->type == SDL_KEYUP)
-		if (event->key.keysym.mod == KMOD_NONE &&
-			event->key.keysym.sym == SDLK_i) 
+	if (event->type == SDL_KEYUP) {
+		if (event->key.keysym.sym == SDLK_i) 
 			display->info = !display->info;
+		if (event->key.keysym.sym == SDLK_ESCAPE) 
+			exit(0);
+	}
 	return 1;
 }
 
