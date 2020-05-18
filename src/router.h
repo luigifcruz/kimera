@@ -23,12 +23,15 @@ typedef struct {
 } Packet;
 
 typedef struct {
+    int payload_size;
+    int header_size;
+    int packet_size;
     uint32_t checksum;
     Packet* packet;
     char* buffer;
 } RouterState;
 
-bool start_router(RouterState*);
+bool start_router(RouterState*, State*);
 void close_router(RouterState*);
 
 bool recv_packet(RouterState*, volatile sig_atomic_t*, int);

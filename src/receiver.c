@@ -28,7 +28,7 @@ void receiver(State* state, volatile sig_atomic_t* stop) {
 
     // Start Router. 
     RouterState router;
-    if (!start_router(&router))
+    if (!start_router(&router, state))
             goto cleanup;
     
     // Start Socket Client. 

@@ -18,7 +18,7 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
     // Start Router. 
     RouterState router;
     if (state->sink & UNIX || state->sink & TCP) {
-        if (!start_router(&router))
+        if (!start_router(&router, state))
             goto cleanup;
     }
 

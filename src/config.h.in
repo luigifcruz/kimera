@@ -16,8 +16,7 @@
 //
 
 #define HEADER_SIZE         20
-#define MAX_PAYLOAD         2048
-#define MAX_SIZE            (MAX_PAYLOAD + HEADER_SIZE)
+#define DEFAULT_PACKET_SIZE  1020
 
 #define DEFAULT_PORT        8080
 #define DEFAULT_ADDRESS     "0.0.0.0"
@@ -54,6 +53,7 @@ typedef struct {
     int bitrate;
     int framerate;
     int port;
+    int packet_size;
     char* address;
     char* loopback;
     Mode mode;

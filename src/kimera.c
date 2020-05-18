@@ -36,7 +36,8 @@ void print_state(State* state) {
     printf(".   CURRENT STATE\n");
     printf("├── Dimensions: %dx%d\n", state->width, state->height);
     printf("├── Framerate:  %d FPS\n", state->framerate);
-    printf("└── Bitrate:    %d bps\n", state->bitrate);
+    printf("├── Bitrate:    %d bps\n", state->bitrate);
+    printf("└── Packet Len: %d Bytes\n", state->packet_size);
 
     if (state->mode == TRANSMITTER) {
         printf("    .   TRANSMITTER\n");
@@ -157,6 +158,9 @@ bool parse_config_file(State* state, char* path) {
                     if (!strcmp((char*)event.data.scalar.value, "width"))
                         int_ptr = &state->width;
 
+                    if (!strcmp((char*)event.data.scalar.value, "packet_size"))
+                        int_ptr = &state->packet_size;
+                    
                     if (!strcmp((char*)event.data.scalar.value, "height"))
                         int_ptr = &state->height;
 
@@ -236,6 +240,7 @@ int main(int argc, char *argv[]) {
     state->in_format    = DEFAULT_FORMAT;
     state->out_format   = DEFAULT_FORMAT;
     state->framerate    = DEFAULT_FRAMERATE;
+    state->packet_size  = DEFAULT_PACKET_SIZE;
     state->sink         = 0;
     state->source       = 0;
 
