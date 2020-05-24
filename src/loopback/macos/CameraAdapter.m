@@ -18,13 +18,28 @@
 	return result;
 }
 
-- (bool)startCapture: (State*)state
+- (bool)initDisplay: (State*)state
+{
+    uint32_t num_screens = 0;
+    CGGetActiveDisplayList(0, NULL, &num_screens);
+
+    NSUInteger selectedDevice = (NSUInteger)atoi(state->loopback);
+    if (selectedDevice >= num_screens) {
+        NSLog(@"[LOOPBACK] Selected screen (%lu) doesn't exist!\n", selectedDevice);
+        return false;
+    }
+
+    ctx.displayInput = [[AVCaptureScreenInput alloc] initWithDisplayID: selectedDevice];
+    ctx.displayInput.minFrameDuration = CMTimeMake(1, state->framerate);
+    ctx.displayInput.capturesCursor = YES;
+    ctx.displayInput.capturesMouseClicks = NO;
+
+    return true;
+}
+
+- (bool)initCamera: (State*)state
 {
     NSError* error = nil;
-
-    pthread_mutex_init(&ctx.frame_lock, NULL);
-    pthread_cond_init(&ctx.frame_wait_cond, NULL);
-
     NSArray * devices = [ AVCaptureDevice devicesWithMediaType: AVMediaTypeVideo ];
     NSUInteger selectedDevice = (NSUInteger)atoi(state->loopback);
 
@@ -73,12 +88,20 @@
         [ctx.device unlockForConfiguration];
     }
     
-    ctx.input = [AVCaptureDeviceInput deviceInputWithDevice: ctx.device error: &error];
+    ctx.cameraInput = [AVCaptureDeviceInput deviceInputWithDevice: ctx.device error: &error];
 
     if (error) {
         NSLog(@"[LOOPBACK] Error opening device.");
         return false;
     }
+
+    return true;
+}
+
+- (bool)startCapture: (State*)state
+{
+    pthread_mutex_init(&ctx.frame_lock, NULL);
+    pthread_cond_init(&ctx.frame_wait_cond, NULL);
 
     ctx.output = [[AVCaptureVideoDataOutput alloc] init];
 
@@ -92,7 +115,27 @@
     dispatch_release(queue);
 
     ctx.session = [[AVCaptureSession alloc] init];
-    [ctx.session addInput: ctx.input];
+
+    switch (state->source) {
+        case DISPLAY:
+            if ([self initDisplay:state]) {
+                [ctx.session addInput: ctx.displayInput];
+            } else {
+                return false;
+            }
+            break;
+        case LOOPBACK:
+            if ([self initCamera:state]) {
+                [ctx.session addInput: ctx.cameraInput];
+            } else {
+                return false;
+            }
+            break;
+        default:
+            NSLog(@"Source not an input device.\n");
+            return false;
+    }
+    
     [ctx.session addOutput: ctx.output];
     [ctx.session startRunning];
 

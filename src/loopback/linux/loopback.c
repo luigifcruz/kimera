@@ -18,6 +18,11 @@ unsigned int find_v4l_format(int fd, unsigned int preferred) {
 
 bool open_loopback_sink(LoopbackState* loopback, State* state) {
     loopback->buffer = NULL;
+
+    if (state->source & DISPLAY) {
+        printf("[LOOPBACK] Display source isn't available in Linux yet.\n");
+        return false;
+    }
     
 	if ((loopback->dev_fd = open(state->loopback, O_RDWR)) < 0) {
         printf("[LOOPBACK] Couldn't open interface.\n");

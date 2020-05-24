@@ -16,7 +16,8 @@ typedef struct
   AVCaptureVideoDataOutput *output;
   AVCaptureDevice* device;
   AVCaptureSession* session;
-  AVCaptureDeviceInput* input;
+  AVCaptureScreenInput* displayInput;
+  AVCaptureDeviceInput* cameraInput;
 } ReceiverContext;
 
 #endif

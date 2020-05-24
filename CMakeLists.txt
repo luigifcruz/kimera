@@ -41,6 +41,7 @@ if(APPLE)
     "-framework AVFoundation"
     "-framework CoreMedia"
     "-framework CoreVideo"
+    "-framework CoreGraphics"
   )
 
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-declarations")
