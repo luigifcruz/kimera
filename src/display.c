@@ -56,6 +56,7 @@ bool start_display(DisplayState* display, State* state) {
 		goto cleanup;
 	}
 
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 	SDL_RenderSetLogicalSize(display->ren, state->width, state->height);
 
 	if (!(display->tex = SDL_CreateTexture(display->ren, SDL_PIXELFORMAT_YV12,
