@@ -5,10 +5,19 @@ int display_event_handler(void* display_ptr, SDL_Event* event) {
 	if (event->type == SDL_QUIT)
 		exit(0);
 	if (event->type == SDL_KEYUP) {
-		if (event->key.keysym.sym == SDLK_i) 
-			display->info = !display->info;
 		if (event->key.keysym.sym == SDLK_ESCAPE) 
 			exit(0);
+
+		if (event->key.keysym.sym == SDLK_i) 
+			display->info = !display->info;
+
+		if (event->key.keysym.sym == SDLK_f) {
+			display->fullscreen = !display->fullscreen;
+			if (display->fullscreen)
+				SDL_SetWindowFullscreen(display->win, SDL_WINDOW_FULLSCREEN_DESKTOP);
+			else
+				SDL_SetWindowFullscreen(display->win, 0);
+		}
 	}
 	return 1;
 }
@@ -63,6 +72,7 @@ bool start_display(DisplayState* display, State* state) {
 
 	display->font = TTF_OpenFont("CourierPrime-Regular.ttf", 25);
 	display->info = false;
+	display->fullscreen = false;
 
 	return true;
 

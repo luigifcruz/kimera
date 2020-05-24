@@ -18,6 +18,7 @@ typedef struct {
     TTF_Font* font;
     SDL_Event* event;
     bool info;
+    bool fullscreen;
 } DisplayState;
 
 bool start_display(DisplayState*, State*);
