@@ -31,8 +31,11 @@
     if (selectedDevice >= [devices count]) {
         NSLog(@"[LOOPBACK] Selected device (%lu) isn't available!\n", selectedDevice);
         NSLog(@"Available Devices:");
+
+        NSUInteger count = 0;
         for (AVCaptureDevice * device in devices) {
-            NSLog(@"    0: %@", [device localizedName]);
+            NSLog(@"    %lu: %@", count, [device localizedName]);
+            count++;
         }
         return false;
     }
