@@ -43,6 +43,8 @@ if(APPLE)
     "-framework CoreVideo"
   )
 
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-declarations")
+
   list(APPEND SOURCES
     src/loopback/macos/loopback.m
     src/loopback/macos/FrameReceiver.m

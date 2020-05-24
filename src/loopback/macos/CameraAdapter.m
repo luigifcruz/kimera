@@ -4,6 +4,20 @@
 
 @implementation CameraAdapter
 
+- (int)atoi: (char*)str
+{
+    if (!str)
+        NSLog(@"Enter valid string");
+    
+	int result = 0;
+    char *p = str;
+	while ((*p>='0') && (*p<='9')) {
+        result = result*10 + (*p - '0');
+        p++;
+    }
+	return result;
+}
+
 - (bool)startCapture: (State*)state
 {
     NSError* error = nil;
@@ -11,7 +25,18 @@
     pthread_mutex_init(&ctx.frame_lock, NULL);
     pthread_cond_init(&ctx.frame_wait_cond, NULL);
 
-    ctx.device = [AVCaptureDevice defaultDeviceWithMediaType: AVMediaTypeVideo];
+    NSArray * devices = [ AVCaptureDevice devicesWithMediaType: AVMediaTypeVideo ];
+    NSUInteger selectedDevice = (NSUInteger)atoi(state->loopback);
+
+    if (selectedDevice >= [devices count]) {
+        NSLog(@"[LOOPBACK] Selected device (%lu) isn't available!\n", selectedDevice);
+        NSLog(@"Available Devices:");
+        for (AVCaptureDevice * device in devices) {
+            NSLog(@"    0: %@", [device localizedName]);
+        }
+        return false;
+    }
+    ctx.device = devices[selectedDevice];
 
     AVCaptureDeviceFormat *selectedFormat = nil;
     AVFrameRateRange *frameRateRange = nil;
