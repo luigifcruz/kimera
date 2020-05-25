@@ -45,5 +45,6 @@ bool open_udp_server(SocketState* sock_state, State* state) {
 
 void close_udp(SocketState* sock_state) {
     close(sock_state->client_fd);
+    close(sock_state->server_fd);
     sock_state->interface = NONE;
 }
