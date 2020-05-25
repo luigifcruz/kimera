@@ -8,6 +8,13 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
             goto cleanup;
     }
 
+    // Start UDP Server. 
+    SocketState udp_socket;
+    if (state->sink & UDP) {
+        if (!open_udp_server(&udp_socket, state))
+            goto cleanup;
+    }
+
     // Start UNIX Server. 
     SocketState unix_socket;
     if (state->sink & UNIX) {
@@ -17,7 +24,7 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
 
     // Start Router. 
     RouterState router;
-    if (state->sink & UNIX || state->sink & TCP) {
+    if (state->sink & UNIX || state->sink & TCP || state->sink & UDP) {
         if (!start_router(&router, state))
             goto cleanup;
     }
@@ -73,9 +80,11 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
 
             while (make_packet(&router, encoder.packet, resampler.frame)) {
                 if (state->sink & TCP)
-                    send_packet(&router, tcp_socket.client_fd);
+                    send_packet(&router, &tcp_socket);
+                if (state->sink & UDP)
+                    send_packet(&router, &udp_socket);
                 if (state->sink & UNIX)
-                    send_packet(&router, unix_socket.client_fd);
+                    send_packet(&router, &unix_socket);
             }
         }
     }

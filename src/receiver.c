@@ -38,6 +38,10 @@ void receiver(State* state, volatile sig_atomic_t* stop) {
         if(!open_tcp_client(&socket, state))
             goto cleanup;
         break;
+    case UDP:
+        if(!open_udp_client(&socket, state))
+            goto cleanup;
+        break;
     case UNIX:
         if(!open_unix_client(&socket, state))
             goto cleanup;
@@ -56,7 +60,7 @@ void receiver(State* state, volatile sig_atomic_t* stop) {
     }
  
     // Start Decoder Loop.
-    while (recv_packet(&router, stop, socket.server_fd) && !(*stop)) {
+    while (recv_packet(&router, &socket, stop) && !(*stop)) {
         if (state->sink & STDOUT) {
             fwrite(router.packet->payload, sizeof(char), router.packet->len, stdout);
             continue;
@@ -86,6 +90,9 @@ cleanup:
     switch (state->source) {
     case TCP:
         close_tcp(&socket);
+        break;
+    case UDP:
+        close_udp(&socket);
         break;
     case UNIX:
         close_unix(&socket);

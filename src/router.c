@@ -38,17 +38,17 @@ size_t get_packet_size(RouterState* router, Packet* packet, size_t offset) {
     return pkt_size;
 }
 
-bool recv_packet(RouterState* router, volatile sig_atomic_t* stop, int fd) {
-    char header[router->header_size];
+bool recv_packet(RouterState* router, SocketState* socket, volatile sig_atomic_t* stop) {
+    char pkt[router->packet_size];
 
     while (!(*stop)) {
-        size_t out = recv(fd, &header, router->header_size, MSG_WAITALL);
-        if (out < router->header_size) return false;
+        size_t out = recv_socket(socket, &pkt, router->packet_size);
+        if (out < (size_t)router->header_size) return false;
 
-        uint64_t pts = buffer_read64be((uint8_t*)header);
-        uint32_t len = buffer_read32be((uint8_t*)&header[8]);
-        uint32_t i   = buffer_read32be((uint8_t*)&header[12]);
-        uint32_t n   = buffer_read32be((uint8_t*)&header[16]);
+        uint64_t pts = buffer_read64be((uint8_t*)&pkt[0]);
+        uint32_t len = buffer_read32be((uint8_t*)&pkt[8]);
+        uint32_t i   = buffer_read32be((uint8_t*)&pkt[12]);
+        uint32_t n   = buffer_read32be((uint8_t*)&pkt[16]);
 
         if (pts < router->packet->pts) continue;
         
@@ -62,6 +62,8 @@ bool recv_packet(RouterState* router, volatile sig_atomic_t* stop, int fd) {
             }
         }
 
+        //printf("PTS: %llu LEN: %d I: %d N: %d\n", pts, len, i, n);
+        
         router->packet->pts = pts;
         router->packet->len = len;
         router->packet->i   = i;
@@ -69,10 +71,11 @@ bool recv_packet(RouterState* router, volatile sig_atomic_t* stop, int fd) {
 
         size_t offset = router->packet->i * router->payload_size;
         size_t pkt_size = get_packet_size(router, router->packet, offset);
-        
-        out = recv(fd, router->packet->payload + offset, pkt_size, MSG_WAITALL); 
-        if (out < pkt_size) return false;
+
+        if ((out + router->header_size) < pkt_size) return false;
         router->checksum += 1;
+
+        memcpy(router->packet->payload + offset, &pkt[router->header_size], pkt_size);
 
         if (router->checksum == router->packet->n) {
             if (router->packet->i != router->packet->n - 1)
@@ -118,7 +121,7 @@ bool make_packet(RouterState* router, AVPacket* packet, AVFrame* frame) {
     return true;
 }
 
-void send_packet(RouterState* router, int fd) {
+void send_packet(RouterState* router, SocketState* socket) {
     size_t offset = 0;
     size_t pkt_size = get_packet_size(router, router->packet, router->packet->i * router->payload_size);
 
@@ -136,6 +139,6 @@ void send_packet(RouterState* router, int fd) {
 
     memcpy(router->buffer + offset, router->packet->payload, pkt_size);
     offset += pkt_size;
-
-    write(fd, router->buffer, offset);
+    
+    send_socket(socket, router->buffer, router->packet_size);
 }

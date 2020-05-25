@@ -23,6 +23,8 @@ list(APPEND SOURCES
   src/receiver.c
   src/unix_socket.c
   src/tcp_socket.c
+  src/udp_socket.c
+  src/socket.c
   src/display.c
   src/resampler.c
   src/router.c

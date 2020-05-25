@@ -129,7 +129,6 @@ bool decoder_push(DecoderState* decoder, char* buf, uint32_t len, uint64_t pts) 
             decoder->retard = NULL;
 
         if (!ok) {
-            printf("[DECODER] Error parsing AVPacket.\n");
             goto cleanup;
         }
 

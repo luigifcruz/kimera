@@ -7,6 +7,7 @@
 #include "utils.h"
 #include "unix_socket.h"
 #include "tcp_socket.h"
+#include "udp_socket.h"
 #include "codec/encoder.h"
 #include "resampler.h"
 #include "loopback/loopback.h"

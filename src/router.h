@@ -11,6 +11,7 @@
 #include <sys/socket.h>
 #include <libavcodec/avcodec.h>
 
+#include "socket.h"
 #include "utils.h"
 #include "config.h"
 
@@ -34,9 +35,9 @@ typedef struct {
 bool start_router(RouterState*, State*);
 void close_router(RouterState*);
 
-bool recv_packet(RouterState*, volatile sig_atomic_t*, int);
+bool recv_packet(RouterState*, SocketState*, volatile sig_atomic_t*);
 
 bool make_packet(RouterState*, AVPacket*, AVFrame*);
-void send_packet(RouterState*, int);
+void send_packet(RouterState*, SocketState*);
 
 #endif

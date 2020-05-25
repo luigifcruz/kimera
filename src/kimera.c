@@ -32,6 +32,25 @@ void print_help() {
     printf("Example:\n   kimera tx rpi4_picam_v1 profiles.yml\n");
 }
 
+void print_io_list(Interfaces interfaces) {
+    if (interfaces == NONE)
+        printf(" NONE");
+    if (interfaces & TCP)
+        printf(" TCP");
+    if (interfaces & UDP)
+        printf(" UDP");
+    if (interfaces & UNIX)
+        printf(" UNIX");
+    if (interfaces & STDOUT)
+        printf(" STDOUT");
+    if (interfaces & STDIN)
+        printf(" STDIN");
+    if (interfaces & DISPLAY)
+        printf(" DISPLAY");
+    if (interfaces & LOOPBACK)
+        printf(" LOOPBACK");
+}
+
 void print_state(State* state) {
     printf(".   CURRENT STATE\n");
     printf("├── Dimensions: %dx%d\n", state->width, state->height);
@@ -42,38 +61,20 @@ void print_state(State* state) {
     if (state->mode == TRANSMITTER) {
         printf("    .   TRANSMITTER\n");
         printf("    ├── Source: ");
-        if (state->source & LOOPBACK)
-            printf(" LOOPBACK");
+        print_io_list(state->source);
         printf("\n");
         printf("    ├── Sink:   ");
-        if (state->sink & TCP)
-            printf(" TCP");
-        if (state->sink & UNIX)
-            printf(" UNIX");
-        if (state->sink & STDOUT)
-            printf(" STDOUT");
-        if (state->sink & DISPLAY)
-            printf(" DISPLAY");
-        if (state->sink & LOOPBACK)
-            printf(" LOOPBACK");
+        print_io_list(state->sink);
         printf("\n");
     }
     
     if (state->mode == RECEIVER) {
         printf("    .   RECEIVER\n");
         printf("    ├── Source: ");
-        if (state->source & TCP)
-            printf(" TCP");
-        if (state->source & UNIX)
-            printf(" UNIX");
+        print_io_list(state->source);
         printf("\n");
         printf("    ├── Sink:   ");
-        if (state->sink & STDOUT)
-            printf(" STDOUT");
-        if (state->sink & DISPLAY)
-            printf(" DISPLAY");
-        if (state->sink & LOOPBACK)
-            printf(" LOOPBACK");
+        print_io_list(state->sink);
         printf("\n");
     }
 
@@ -191,6 +192,9 @@ bool parse_config_file(State* state, char* path) {
                         if (!strcmp((char*)event.data.scalar.value, "tcp"))
                             counter += TCP;
 
+                        if (!strcmp((char*)event.data.scalar.value, "udp"))
+                            counter += UDP;
+
                         if (!strcmp((char*)event.data.scalar.value, "unix"))
                             counter += UNIX;
                         
@@ -202,6 +206,9 @@ bool parse_config_file(State* state, char* path) {
 
                         if (!strcmp((char*)event.data.scalar.value, "stdout"))
                             counter += STDOUT;
+                        
+                        if (!strcmp((char*)event.data.scalar.value, "stdin"))
+                            counter += STDIN;
                         
                         if (direction == 1)
                             state->source += counter;
