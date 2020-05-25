@@ -107,7 +107,6 @@ bool display_draw(DisplayState* display, State* state, AVFrame* frame) {
 		char buffer[512];
 		int length = 0;
 
-		
 		SDL_GetWindowSize(display->win, &width, &height);
 
 		length += sprintf((char*)&buffer+length, "PTS: %lld, ", (long long)frame->pts);
