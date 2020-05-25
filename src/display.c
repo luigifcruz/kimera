@@ -107,7 +107,7 @@ bool display_draw(DisplayState* display, State* state, AVFrame* frame) {
 		char buffer[512];
 		int length = 0;
 
-		SDL_Color textColor = { 255, 255, 255, 255 };
+		
 		SDL_GetWindowSize(display->win, &width, &height);
 
 		length += sprintf((char*)&buffer+length, "PTS: %lld, ", (long long)frame->pts);
@@ -116,7 +116,9 @@ bool display_draw(DisplayState* display, State* state, AVFrame* frame) {
 		length += sprintf((char*)&buffer+length, "Codec: %s, ", state->codec);
 		length += sprintf((char*)&buffer+length, "Pixel: %s -> %s",  av_get_pix_fmt_name(state->in_format), av_get_pix_fmt_name(state->out_format));
 
-		SDL_Surface *textSurface = TTF_RenderText_Blended_Wrapped(display->font, buffer, textColor, width);
+		SDL_Color textColor = { 255, 255, 255, 255 };
+		SDL_Color shadeColor = { 0, 0, 0, 128 };
+		SDL_Surface *textSurface = TTF_RenderText_Shaded(display->font, buffer, textColor, shadeColor);
 		SDL_Texture *textTexture = SDL_CreateTextureFromSurface(display->ren, textSurface);
 		
 		SDL_Rect textRect = { 0, 0, textSurface->w, textSurface->h };
