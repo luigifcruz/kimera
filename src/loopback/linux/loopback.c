@@ -2,11 +2,6 @@
 
 bool open_loopback_sink(LoopbackState* loopback, State* state) {
     loopback->buffer = NULL;
-
-    if (state->source & DISPLAY) {
-        printf("[LOOPBACK] Display source isn't available in Linux yet.\n");
-        return false;
-    }
     
 	if ((loopback->dev_fd = open(state->loopback, O_RDWR)) < 0) {
         printf("[LOOPBACK] Couldn't open interface.\n");
@@ -44,6 +39,11 @@ bool open_loopback_sink(LoopbackState* loopback, State* state) {
 
 bool open_loopback_source(LoopbackState* loopback, State* state) {
     loopback->buffer = NULL;
+
+    if (state->source & DISPLAY) {
+        printf("[LOOPBACK] Display source isn't available on Linux yet.\n");
+        return false;
+    }
 
 	if ((loopback->dev_fd = open(state->loopback, O_RDWR)) < 0) {
         printf("[LOOPBACK] Couldn't open interface.\n");
