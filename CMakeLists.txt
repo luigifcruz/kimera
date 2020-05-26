@@ -31,9 +31,12 @@ list(APPEND SOURCES
 )
 
 if(UNIX AND NOT APPLE)
+  add_subdirectory(lib/xcb)
   list(APPEND SOURCES
     src/loopback/linux/loopback.h
     src/loopback/linux/loopback.c
+    src/loopback/linux/utils.h
+    src/loopback/linux/utils.c
   )
 endif()
 
@@ -63,4 +66,4 @@ configure_file(
 
 add_executable(kimera ${SOURCES})
 target_include_directories(kimera PUBLIC "${PROJECT_BINARY_DIR}")
-target_link_libraries(kimera ffmpeg sdl yaml ${LIBS})
+target_link_libraries(kimera ffmpeg sdl yaml xcb ${LIBS})

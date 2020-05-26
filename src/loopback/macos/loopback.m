@@ -33,7 +33,7 @@ bool open_loopback_source(LoopbackState* loopback, State* state) {
     return true;
 }
 
-bool loopback_pull_frame(LoopbackState* loopback) {
+bool loopback_pull_frame(LoopbackState* loopback, State* state) {
     if (av_frame_make_writable(loopback->frame) < 0) {
         printf("[LOOPBACK] Frame is not writable.\n");
         return false;

@@ -60,7 +60,7 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
     }
 
     // Start Decoder Loop.
-    while (loopback_pull_frame(&loopback) && !(*stop)) {
+    while (loopback_pull_frame(&loopback, state) && !(*stop)) {
         if (!resampler_push_frame(&resampler, state, loopback.frame)) {
             continue;
         }
