@@ -11,6 +11,8 @@ set(CMAKE_C_FLAGS "-Wall -Wextra -Wno-unused-function -Wno-unused-parameter -Wno
 set(CMAKE_C_FLAGS_DEBUG "-g")
 set(CMAKE_C_FLAGS_RELEASE "-O3")
 
+set(EXTRA_LIBS ffmpeg sdl yaml)
+
 add_subdirectory(lib/ffmpeg)
 add_subdirectory(lib/yaml)
 add_subdirectory(lib/sdl)
@@ -32,6 +34,7 @@ list(APPEND SOURCES
 
 if(UNIX AND NOT APPLE)
   add_subdirectory(lib/xcb)
+  list(APPEND EXTRA_LIBS xcb)
   list(APPEND SOURCES
     src/loopback/linux/loopback.h
     src/loopback/linux/loopback.c
@@ -66,4 +69,4 @@ configure_file(
 
 add_executable(kimera ${SOURCES})
 target_include_directories(kimera PUBLIC "${PROJECT_BINARY_DIR}")
-target_link_libraries(kimera ffmpeg sdl yaml xcb ${LIBS})
+target_link_libraries(kimera ${EXTRA_LIBS} ${LIBS})
