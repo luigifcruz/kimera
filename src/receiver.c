@@ -102,7 +102,7 @@ cleanup:
     }   
 
     if (state->sink & LOOPBACK)
-        close_loopback(&loopback);
+        close_loopback(&loopback, state);
 
     if (state->sink & DISPLAY)
         close_display(&display);

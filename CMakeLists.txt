@@ -36,10 +36,10 @@ if(UNIX AND NOT APPLE)
   add_subdirectory(lib/xcb)
   list(APPEND EXTRA_LIBS xcb)
   list(APPEND SOURCES
-    src/loopback/linux/loopback.h
     src/loopback/linux/loopback.c
-    src/loopback/linux/utils.h
     src/loopback/linux/utils.c
+    src/loopback/linux/v4l2.c
+    src/loopback/linux/xcb.c
   )
 endif()
 

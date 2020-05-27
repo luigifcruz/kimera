@@ -1,16 +1,17 @@
 width: 1920
 height: 1080
 framerate: 30
-bitrate: 15000000
+bitrate: 5000000
 packet_size: 8192
 
 transmitter:
   source:
-    - loopback
+    - display
   sink:
-    - tcp
-  device: /dev/video2
-  address: 0.0.0.0
+    - udp
+    - display
+  device: :1
+  address: 192.168.0.14
   port: 8080
   codec: hevc_nvenc
 
@@ -21,4 +22,5 @@ receiver:
     - display
   address: 127.0.0.1
   port: 8080
-  codec: h264
+  codec: hevc
+
