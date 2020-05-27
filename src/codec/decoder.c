@@ -22,6 +22,7 @@ bool start_decoder(DecoderState* decoder, State* state) {
     decoder->codec_ctx->gop_size = 10;
     decoder->codec_ctx->max_b_frames = 0;
     decoder->codec_ctx->pix_fmt = state->in_format;
+    decoder->codec_ctx->flags |= AV_CODEC_FLAG_LOW_DELAY;
     if (avcodec_open2(decoder->codec_ctx, codec, NULL) < 0) {
         printf("[DECODER] Couldn't open codec.\n");
         close_decoder(decoder);
