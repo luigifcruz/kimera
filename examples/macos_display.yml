@@ -1,24 +1,24 @@
-width: 1280
-height: 800
+width: 640
+height: 480
 framerate: 30
 bitrate: 5000000
 packet_size: 8192
 
 transmitter:
   source:
-    - display
+    - loopback
   sink:
-    - tcp
-  device: 0
-  address: 0.0.0.0
+    - udp
+  device: 1
+  address: 192.168.0.19
   port: 8080
   codec: h264_videotoolbox
 
 receiver:
   source: 
-    - tcp
+    - udp
   sink:
     - display
   address: 127.0.0.1
-  port: 8081
+  port: 8080
   codec: h264
