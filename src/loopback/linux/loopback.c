@@ -24,13 +24,12 @@ inline bool loopback_pull_frame(LoopbackState* loopback, State* state) {
     return false;
 }
 
-void close_loopback(LoopbackState* loopback) {
-    if (loopback->format.type == V4L2_BUF_TYPE_VIDEO_CAPTURE) {
-        ioctl(loopback->dev_fd, VIDIOC_STREAMOFF, &loopback->info.type);
-        if (loopback->frame)
-            av_frame_free(&loopback->frame);
-    } else {
-        if (loopback->buffer)
-            free(loopback->buffer);
-    }
+void close_loopback(LoopbackState* loopback, State* state) {
+    if (state->source & DISPLAY)
+        return close_xcb(loopback);
+    if (state->source & LOOPBACK)
+        return close_v4l2(loopback, state);
+
+    if (loopback->frame)
+        av_frame_free(&loopback->frame);
 }

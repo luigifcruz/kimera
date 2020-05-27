@@ -47,7 +47,7 @@ bool loopback_pull_frame(LoopbackState* loopback, State* state) {
     return true;
 }
 
-void close_loopback(LoopbackState* loopback) {
+void close_loopback(LoopbackState* loopback, State* state) {
     [(id)loopback->state stopCapture];
     if (loopback->frame)
         av_frame_free(&loopback->frame);

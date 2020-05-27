@@ -53,8 +53,8 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
     // Performance Degradation Check
     if (state->in_format != state->out_format) {
         printf("[TRANSMITTER] Performance Degradation:\n");
-        printf("[TRANSMITTER] Output pixel format is different than the input.\n");
-        printf("[TRANSMITTER] - Input: %s -> Output: %s\n",
+        printf("              Output pixel format is different than the input.\n");
+        printf("              - Input: %s -> Output: %s\n",
                av_get_pix_fmt_name(state->in_format),
                av_get_pix_fmt_name(state->out_format));
     }
@@ -88,7 +88,7 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
             }
         }
     }
-
+    
 cleanup:
     if (state->sink & TCP)
         close_tcp(&tcp_socket);
@@ -102,6 +102,6 @@ cleanup:
     if (state->sink & DISPLAY)
         close_display(&display);
 
-    close_loopback(&loopback);
+    close_loopback(&loopback, state);
     close_encoder(&encoder);
 }

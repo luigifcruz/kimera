@@ -3,10 +3,10 @@
 int display_event_handler(void* display_ptr, SDL_Event* event) {
 	DisplayState* display = display_ptr;
 	if (event->type == SDL_QUIT)
-		exit(0);
+		raise(SIGINT);
 	if (event->type == SDL_KEYUP) {
 		if (event->key.keysym.sym == SDLK_ESCAPE) 
-			exit(0);
+			raise(SIGINT);
 
 		if (event->key.keysym.sym == SDLK_i) 
 			display->info = !display->info;

@@ -1,6 +1,7 @@
 #ifndef LOOPBACK_TYPES_LINUX_H
 #define LOOPBACK_TYPES_LINUX_H
 
+#include <xcb/xcb.h>
 #include <linux/videodev2.h>
 
 typedef struct {
@@ -21,8 +22,9 @@ typedef struct {
     AVFrame* frame;
     int64_t frame_duration;
     int64_t last_frame;
-    V4L2State v4l2;
-    XCBState xcb;
+
+    V4L2State* v4l2;
+    XCBState* xcb;
 } LoopbackState;
 
 #endif
