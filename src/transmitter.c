@@ -95,13 +95,17 @@ cleanup:
 
     if (state->sink & UNIX)
         close_unix(&unix_socket);
+    
+    if (state->sink & UNIX)
+        close_udp(&udp_socket);
 
-    if (state->sink & TCP || state->sink & UNIX)
+    if (state->sink & TCP || state->sink & UNIX || state->sink & UDP)
         close_router(&router);
 
     if (state->sink & DISPLAY)
         close_display(&display);
 
+    close_resampler(&resampler);
     close_loopback(&loopback, state);
     close_encoder(&encoder);
 }

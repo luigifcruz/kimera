@@ -32,4 +32,7 @@ void close_loopback(LoopbackState* loopback, State* state) {
 
     if (loopback->frame)
         av_frame_free(&loopback->frame);
+
+    free(loopback->v4l2);
+    free(loopback->xcb);
 }
