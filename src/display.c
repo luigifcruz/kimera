@@ -5,7 +5,8 @@ int display_event_handler(void* display_ptr, SDL_Event* event) {
 	if (event->type == SDL_QUIT)
 		raise(SIGINT);
 	if (event->type == SDL_KEYUP) {
-		if (event->key.keysym.sym == SDLK_ESCAPE) 
+		if (event->key.keysym.sym == SDLK_ESCAPE ||
+			event->key.keysym.sym == SDLK_q) 
 			raise(SIGINT);
 
 		if (event->key.keysym.sym == SDLK_i) 
@@ -45,7 +46,7 @@ bool start_display(DisplayState* display, State* state) {
 
 	if (!(display->win = SDL_CreateWindow(
 					  (char*)name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 
-                      state->width/1.5, state->height/1.5, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE))) {
+                      state->width/1.5, state->height/1.5, SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE))) {
 		printf("[SDL] Window error: %s\n", SDL_GetError());
 		goto cleanup;
 	}
@@ -71,9 +72,10 @@ bool start_display(DisplayState* display, State* state) {
 	SDL_RenderCopy(display->ren, display->tex, NULL, NULL);
 	SDL_RenderPresent(display->ren);
 
-	display->font = TTF_OpenFont("CourierPrime-Regular.ttf", 25);
-	display->info = false;
+	display->font 		= TTF_OpenFont("CourierPrime-Regular.ttf", 25);
+	display->info 		= false;
 	display->fullscreen = false;
+	display->ishidden 	= true;
 
 	return true;
 
@@ -94,6 +96,9 @@ void close_display(DisplayState* display) {
 }
 
 bool display_draw(DisplayState* display, State* state, AVFrame* frame) {
+	if (display->ishidden)
+		SDL_ShowWindow(display->win);
+
 	SDL_PollEvent(display->event);
 	SDL_RenderClear(display->ren);
 	

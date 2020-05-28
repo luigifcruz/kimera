@@ -19,6 +19,7 @@ typedef struct {
     SDL_Event* event;
     bool info;
     bool fullscreen;
+    bool ishidden;
 } DisplayState;
 
 bool start_display(DisplayState*, State*);
