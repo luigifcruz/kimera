@@ -35,13 +35,17 @@ bool open_tcp_server(SocketState* sock_state, State* state) {
         printf("[TCP_SOCKET] Couldn't open stream socket.\n");
         return false;
     }
+
+    if (setsockopt(sock_state->server_fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int)) < 0) {
+        printf("[TCP_SOCKET] Failed trying to reuse socket.\n");
+    }
     
     memset(sock_state->server_in, 0, sizeof(socket_in)); 
     memset(sock_state->client_in, 0, sizeof(socket_in)); 
 
-    sock_state->server_in ->sin_family = AF_INET; 
-    sock_state->server_in ->sin_addr.s_addr = htonl(INADDR_ANY); 
-    sock_state->server_in ->sin_port = htons(state->port); 
+    sock_state->server_in->sin_family = AF_INET; 
+    sock_state->server_in->sin_addr.s_addr = htonl(INADDR_ANY); 
+    sock_state->server_in->sin_port = htons(state->port); 
 
     if (bind(sock_state->server_fd, (socket_t*)sock_state->server_in, sizeof(socket_in)) < 0) {
         printf("[TCP_SOCKET] Couldn't open server port.\n");
