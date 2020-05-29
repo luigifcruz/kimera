@@ -20,6 +20,7 @@ bool init_xcb_source(LoopbackState* loopback, State* state) {
 
     const xcb_setup_t *setup = xcb_get_setup(loopback->xcb->connection);
     loopback->xcb->screen = xcb_setup_roots_iterator(setup).data;
+    loopback->xcb->img = NULL;
     
     AVRational time_base = (AVRational){ 1, state->framerate };
     loopback->frame_duration = av_rescale_q(1, time_base, AV_TIME_BASE_Q);
@@ -42,8 +43,9 @@ bool init_xcb_source(LoopbackState* loopback, State* state) {
 bool pull_xcb_frame(LoopbackState* loopback, State* state) {
     xcb_get_image_cookie_t gi_cookie;
     xcb_generic_error_t *e = NULL;
-    
-    free(loopback->xcb->img);
+
+    if (loopback->xcb->img)
+        free(loopback->xcb->img);
 
     int64_t curtime = av_gettime();
     int64_t delay = (loopback->last_frame + loopback->frame_duration) - curtime;
