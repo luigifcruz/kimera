@@ -3,7 +3,6 @@
 
 #include <stdbool.h>
 #include <xcb/xcb.h>
-#include <xcb/composite.h>
 #include <libavutil/time.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/imgutils.h>
