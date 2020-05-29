@@ -20,23 +20,15 @@ bool init_xcb_source(LoopbackState* loopback, State* state) {
 
     const xcb_setup_t *setup = xcb_get_setup(loopback->xcb->connection);
     loopback->xcb->screen = xcb_setup_roots_iterator(setup).data;
-
-    if (loopback->xcb->screen->width_in_pixels != state->width ||
-        loopback->xcb->screen->height_in_pixels != state->height) {
-        printf("Screen size (%dx%d) mismatch from configuration file.\n",
-               loopback->xcb->screen->width_in_pixels,
-               loopback->xcb->screen->height_in_pixels);
-        return false;
-    }
-
+    
     AVRational time_base = (AVRational){ 1, state->framerate };
     loopback->frame_duration = av_rescale_q(1, time_base, AV_TIME_BASE_Q);
 
     state->in_format = AV_PIX_FMT_0RGB32;
 
     loopback->frame = av_frame_alloc();
-    loopback->frame->width = state->width;
-    loopback->frame->height = state->height;
+    loopback->frame->width = loopback->xcb->screen->width_in_pixels;
+    loopback->frame->height = loopback->xcb->screen->height_in_pixels;
     loopback->frame->format = state->in_format;
     loopback->frame->pts = 0;
     if (av_frame_get_buffer(loopback->frame, 0) < 0){

@@ -49,15 +49,6 @@ void receiver(State* state, volatile sig_atomic_t* stop) {
     default:
         goto cleanup;
     }
-
-    // Performance Degradation Check
-    if (state->in_format != state->out_format) {
-        printf("[RECEIVER] Performance Degradation:\n");
-        printf("           Output pixel format is different than the input.\n");
-        printf("           - Input: %s -> Output: %s\n",
-               av_get_pix_fmt_name(state->in_format),
-               av_get_pix_fmt_name(state->out_format));
-    }
  
     // Start Decoder Loop.
     while (recv_packet(&router, &socket, stop) && !(*stop)) {

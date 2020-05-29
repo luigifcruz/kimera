@@ -38,6 +38,26 @@ bool configure_resampler(ResamplerState* resampler, State* state, AVFrame* in) {
                                     resampler->frame->format,
                                     SWS_BICUBIC, 0, 0, 0);
 
+    // Performance Degradation Check
+    if (state->in_format != state->out_format) {
+        printf("[RESAMPLER] Performance Degradation:\n");
+        printf("              Output pixel format is different than the input.\n");
+        printf("                - Input: %s -> Output: %s\n",
+               av_get_pix_fmt_name(state->in_format),
+               av_get_pix_fmt_name(state->out_format));
+    }
+
+    if (
+        in->width != resampler->frame->width ||
+        in->height != resampler->frame->height
+    ) {
+        printf("[RESAMPLER] Performance Degradation:\n");
+        printf("              Output size is different than the input.\n");
+        printf("                - Input: %dx%d -> Output: %dx%d\n",
+               in->width, in->height,
+               resampler->frame->width, resampler->frame->height);
+    }
+
     resampler->configured = true;
     return true;
 }

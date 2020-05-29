@@ -2,7 +2,6 @@
 #define TRANSMITTER_H
 
 #include <stdio.h>
-#include <libavutil/pixdesc.h>
 
 #include "utils.h"
 #include "unix_socket.h"
