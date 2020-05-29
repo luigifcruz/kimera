@@ -43,11 +43,7 @@ bool configure_resampler(ResamplerState* resampler, State* state, AVFrame* in) {
 }
 
 bool resampler_push_frame(ResamplerState* resampler, State* state, AVFrame* in) {
-    if (!resampler->configured                  ||
-        in->width  != resampler->frame->width   ||
-        in->height != resampler->frame->height  ||
-        in->format != resampler->frame->format
-    ) {
+    if (!resampler->configured) {
         if (!configure_resampler(resampler, state, in))
             return false;
     }
