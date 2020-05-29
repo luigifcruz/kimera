@@ -1,4 +1,4 @@
-# 📺 Kimera (Work-in-Progress)
+# 🐙 Kimera (Work-in-Progress)
 ### Low-latency hardware accelerated codec based video streaming utility.
 
 ## Features
