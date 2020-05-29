@@ -76,6 +76,7 @@ This module is distributed under a [GPL-2.0 License](https://raw.githubuserconte
 ## Roadmap
 This is a list of unfinished tasks that I pretend to pursue soon. Pull requests are more than welcome!
 - [ ] Implement AVFoundation Native Sink Device.
+- [ ] Add SSL support for secure connections.
 - [ ] Write Windows Support.
 - [ ] Write Android Support.
 - [ ] Write iOS Support.

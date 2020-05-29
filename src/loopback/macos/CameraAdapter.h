@@ -18,6 +18,8 @@
   ReceiverContext ctx;
 }
 
+- (int) getFrameWidth;
+- (int) getFrameHeight;
 - (bool) startCapture: (State*)state;
 - (void) stopCapture;
 - (bool) pullFrame: (AVFrame*)frame;

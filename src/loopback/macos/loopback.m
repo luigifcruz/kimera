@@ -18,10 +18,10 @@ bool open_loopback_source(LoopbackState* loopback, State* state) {
     if (![(id)loopback->state startCapture:state]) {
         return false;
     }
-
+    
     loopback->frame = av_frame_alloc();
-    loopback->frame->width = state->width;
-    loopback->frame->height = state->height;
+    loopback->frame->width = [(id)loopback->state getFrameWidth];
+    loopback->frame->height = [(id)loopback->state getFrameHeight];
     loopback->frame->format = state->in_format;
     loopback->frame->pts = 0;
 

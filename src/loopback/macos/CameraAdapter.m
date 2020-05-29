@@ -18,6 +18,16 @@
 	return result;
 }
 
+- (int) getFrameWidth
+{
+    return ctx.width;
+}
+
+- (int) getFrameHeight
+{
+    return ctx.height;
+}
+
 - (bool)initDisplay: (State*)state
 {
     uint32_t num_screens = 0;
@@ -33,6 +43,9 @@
     ctx.displayInput.minFrameDuration = CMTimeMake(1, state->framerate);
     ctx.displayInput.capturesCursor = YES;
     ctx.displayInput.capturesMouseClicks = NO;
+
+    ctx.width = CGDisplayPixelsWide(selectedDevice);
+    ctx.height = CGDisplayPixelsHigh(selectedDevice);
 
     return true;
 }
@@ -95,6 +108,11 @@
         return false;
     }
 
+    CMFormatDescriptionRef desc = [ctx.device activeFormat].formatDescription;
+    CMVideoDimensions dims = CMVideoFormatDescriptionGetDimensions(desc);
+    ctx.width = dims.width;
+    ctx.height = dims.height;
+
     return true;
 }
 
@@ -135,7 +153,7 @@
             NSLog(@"Source not an input device.\n");
             return false;
     }
-    
+
     [ctx.session addOutput: ctx.output];
     [ctx.session startRunning];
 

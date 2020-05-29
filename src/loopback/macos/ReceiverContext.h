@@ -9,6 +9,9 @@ typedef struct
   id receiver;
   int frames_captured;
 
+  int width;
+  int height;
+
   pthread_mutex_t frame_lock;
   pthread_cond_t  frame_wait_cond;
 
