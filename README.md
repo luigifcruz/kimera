@@ -1,15 +1,16 @@
 # 📺 Kimera (Work-in-Progress)
 ### Low-latency hardware accelerated codec based video streaming utility.
 
+## Features
+- ⚡ Low-latency (~35ms).
+- 🦑 Multi-Platform (Linux, macOS, Windows).
+- 🔋 Low-overhead with Hardware Acceleration.
+- 🖼️ Works with any codec (HEVC, AVC, VP9, VP8, AV1).
+- 🧳 Supports multiple transport streams (UDP, TCP, UNIX, GNURadio).
+
 <p align="center">
 <img src="https://github.com/luigifreitas/kimera/raw/master/assets/kimera_macos.png" />
 </p>
-
-## Features
-- Low-latency (~35ms).
-- Low-overhead (Hardware Accelerated).
-- Works with any codec (HEVC, AVC, VP9, VP8, AV1).
-- Supports multiple transport streams (UDP, TCP, UNIX, GNURadio).
 
 ## Compatibility
 ### Interfacing
@@ -33,8 +34,8 @@ Pre-compiled binary packages will be available once this app reaches beta. For n
 ### Dependencies
 - SDL2
 - SDL TTF
-- LibAV - >12.3
-- CMake - >3.13
+- LibAV >12.3
+- CMake >3.13
 - XCB (For Linux)
 - Xcode Toolchain (For macOS)
 
