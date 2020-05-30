@@ -25,7 +25,7 @@ bool init_xcb_source(LoopbackState* loopback, State* state) {
     AVRational time_base = (AVRational){ 1, state->framerate };
     loopback->frame_duration = av_rescale_q(1, time_base, AV_TIME_BASE_Q);
 
-    state->in_format = AV_PIX_FMT_0RGB32;
+    state->in_format = 	AV_PIX_FMT_RGB32;
 
     loopback->frame = av_frame_alloc();
     loopback->frame->width = loopback->xcb->screen->width_in_pixels;
@@ -64,9 +64,10 @@ bool pull_xcb_frame(LoopbackState* loopback, State* state) {
     loopback->last_frame = av_gettime();
     loopback->frame->pts += 1;
 
-    if (av_image_fill_arrays(loopback->frame->data, loopback->frame->linesize,
-            xcb_get_image_data(loopback->xcb->img), loopback->frame->format,
-            state->width, state->height, 1) < 0) {
+    if (av_image_fill_arrays(
+        loopback->frame->data, loopback->frame->linesize,
+        xcb_get_image_data(loopback->xcb->img), loopback->frame->format,
+        loopback->xcb->screen->width_in_pixels, loopback->xcb->screen->height_in_pixels, 1) < 0) {
         return false;
     }
 
