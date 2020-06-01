@@ -14,5 +14,7 @@ include(cmake/yaml.cmake)
 include(cmake/sdl.cmake)
 include(cmake/xcb.cmake)
 
+include(cmake/listdirs.cmake)
+
 add_subdirectory(src)
 add_subdirectory(apps)

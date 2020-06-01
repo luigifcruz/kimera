@@ -1,7 +1,7 @@
-#include "kimera/receiver.h"
+#include "receiver.h"
 
 void receiver(State* state, volatile sig_atomic_t* stop) {
-    // Start HEVC Decoder.
+    // Start Decoder.
     DecoderState decoder;
     if (state->sink & DISPLAY || state->sink & LOOPBACK) {
         if (!start_decoder(&decoder,state))

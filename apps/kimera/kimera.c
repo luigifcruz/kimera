@@ -5,9 +5,10 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "kimera/transmitter.h"
-#include "kimera/receiver.h"
 #include "kimera/kimera.h"
+
+#include "transmitter.h"
+#include "receiver.h"
 
 volatile sig_atomic_t stop;
 

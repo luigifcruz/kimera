@@ -1,4 +1,4 @@
-#include "kimera/transmitter.h"
+#include "transmitter.h"
 
 void transmitter(State* state, volatile sig_atomic_t* stop) {
     // Start TCP Server. 
