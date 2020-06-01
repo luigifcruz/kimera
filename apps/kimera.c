@@ -20,8 +20,8 @@ void inthand(int signum) {
 }
 
 void print_version() {
-    //printf("Kimera Version: %d.%d\n", kimera_VERSION_MAJOR, kimera_VERSION_MINOR);
-    printf("AV Version: %s\n", av_version_info());
+    printf("Kimera Version: %d.%d\n", kimera_VERSION_MAJOR, kimera_VERSION_MINOR);
+    printf("FFMPEG Version: %s\n", av_version_info());
 }
 
 void print_help() {
