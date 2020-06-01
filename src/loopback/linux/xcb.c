@@ -1,4 +1,4 @@
-#include "xcb.h"
+#include "kimera/loopback/linux/xcb.h"
 
 void init_xcb(LoopbackState* loopback) {
     loopback->xcb = (XCBState*)malloc(sizeof(XCBState));

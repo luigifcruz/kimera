@@ -12,6 +12,7 @@
 .DS_Store
 /build
 /captures
+include/kimera/config.h
 .externalNativeBuild
 .cxx
 examples

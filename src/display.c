@@ -1,4 +1,4 @@
-#include "display.h"
+#include "kimera/display.h"
 
 int display_event_handler(void* display_ptr, SDL_Event* event) {
 	DisplayState* display = display_ptr;

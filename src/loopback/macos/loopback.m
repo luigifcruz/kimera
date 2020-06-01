@@ -1,6 +1,6 @@
-#include "loopback.h"
+#include "kimera/loopback/macos/loopback.h"
 
-#import "CameraAdapter.h"
+#import "kimera/loopback/macos/CameraAdapter.h"
 
 bool open_loopback_sink(LoopbackState* loopback, State* state) {
     printf("[LOOPBACK] Sink isn't supported yet on macOS.\n");

@@ -1,4 +1,4 @@
-#import "CameraAdapter.h"
+#import "kimera/loopback/macos/CameraAdapter.h"
 
 #import <AppKit/AppKit.h>
 

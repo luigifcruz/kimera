@@ -1,4 +1,4 @@
-#include "loopback.h"
+#include "kimera/loopback/linux/loopback.h"
 
 inline bool open_loopback_sink(LoopbackState* loopback, State* state) {
     return init_v4l2_sink(loopback, state);

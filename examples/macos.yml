@@ -7,7 +7,7 @@ transmitter:
   source:
     - loopback
   sink:
-    - tcp
+    - udp
     - display
   device: 0
   address: 127.0.0.1
@@ -16,7 +16,7 @@ transmitter:
 
 receiver:
   source: 
-    - tcp
+    - udp
   sink:
     - display
   address: 127.0.0.1
