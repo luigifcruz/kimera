@@ -5,15 +5,12 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "kimera/utils.h"
 #include "kimera/socket.h"
 #include "kimera/encoder.h"
 #include "kimera/decoder.h"
 #include "kimera/resampler.h"
 #include "kimera/loopback.h"
 #include "kimera/display.h"
-#include "kimera/router.h"
-
 #include "kimera/client.h"
 
 void receiver(State* state, volatile sig_atomic_t* stop) {
