@@ -12,7 +12,7 @@
 #include <libavcodec/avcodec.h>
 
 #include "kimera/utils.h"
-#include "kimera/config.h"
+#include "kimera/state.h"
 
 typedef struct {
     uint64_t pts;

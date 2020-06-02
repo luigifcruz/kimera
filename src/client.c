@@ -1,31 +1,11 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <string.h>
+#include "kimera/client.h"
 
-#include "kimera/kimera.h"
-
-#include "transmitter.h"
-#include "receiver.h"
-
-volatile sig_atomic_t stop;
-
-void inthand(int signum) {
-    if (stop == 1) {
-      exit(-1);
-    }
-    printf("Safely exiting, press Crtl-C to force shutdown.\n");
-    stop = 1;
-}
-
-void print_version() {
+void kimera_print_version() {
     printf("Kimera Version: %d.%d\n", kimera_VERSION_MAJOR, kimera_VERSION_MINOR);
-    printf("FFMPEG Version: %s\n", av_version_info());
+    printf("Ffmpeg Version: %s\n", av_version_info());
 }
 
-void print_help() {
+void kimera_print_help() {
     printf("Usage:\n   kimera [mode] [profile] [config]\n");
     printf("    - [profile] (required)  Name of the selected profile from the configuration file.\n");
     printf("    - [mode]    (required)  Operation Mode: Transmitter (tx) or Receiver (rx).\n");
@@ -42,17 +22,13 @@ void print_io_list(Interfaces interfaces) {
         printf(" UDP");
     if (interfaces & UNIX)
         printf(" UNIX");
-    if (interfaces & STDOUT)
-        printf(" STDOUT");
-    if (interfaces & STDIN)
-        printf(" STDIN");
     if (interfaces & DISPLAY)
         printf(" DISPLAY");
     if (interfaces & LOOPBACK)
         printf(" LOOPBACK");
 }
 
-void print_state(State* state) {
+void kimera_print_state(State* state) {
     printf(".   CURRENT STATE\n");
     printf("├── Dimensions: %dx%d\n", state->width, state->height);
     printf("├── Framerate:  %d FPS\n", state->framerate);
@@ -85,33 +61,44 @@ void print_state(State* state) {
     printf("    └── Codec:   %s\n", state->codec);
 }
 
-int main(int argc, char *argv[]) {
+void inthand(int signum) {
+    if (stop == 1) {
+      exit(-1);
+    }
+    printf("Safely exiting, press Crtl-C again to force shutdown.\n");
+    stop = 1;
+}
+
+int kimera_client(
+    int argc, char *argv[],
+    void(*tx)(State*, volatile sig_atomic_t*),
+    void(*rx)(State*, volatile sig_atomic_t*)) {
     // Register signal handler.
     signal(SIGINT, inthand);
 
     // Declare Default Settings
-    State* state = kimera_init();
+    State* state = kimera_state();
 
     // Parse Command-Line Arguments
     if (argc < 2) {
         printf("Not enough arguments.\n");
-        print_help();
+        kimera_print_help();
         return -1;
     }
 
     if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help")) {
-        print_help();
+        kimera_print_help();
         return 0;
     }
 
     if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version")) {
-        print_version();
+        kimera_print_version();
         return 0;
     }
 
     if (argc < 3) {
         printf("Not enough arguments.\n");
-        print_help();
+        kimera_print_help();
         return -1;
     }
 
@@ -119,17 +106,17 @@ int main(int argc, char *argv[]) {
 
     if (!strcmp(argv[1], "tx")) {
         state->mode = TRANSMITTER;
-        if (!kimera_load_state(state, config_path))
+        if (!kimera_parse_config_file(state, config_path))
             return -1;
-        transmitter(state, &stop);
+        (*tx)(state, &stop);
         return 0;
     }
     
     if (!strcmp(argv[1], "rx")) {
         state->mode = RECEIVER;
-        if (!kimera_load_state(state, config_path))
+        if (!kimera_parse_config_file(state, config_path))
             return -1;
-        receiver(state, &stop);
+        (*rx)(state, &stop);
         return 0;
     }
 

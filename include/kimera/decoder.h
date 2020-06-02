@@ -8,7 +8,7 @@
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 
-#include "kimera/config.h"
+#include "kimera/state.h"
 
 typedef struct {
     AVCodecContext *codec_ctx;

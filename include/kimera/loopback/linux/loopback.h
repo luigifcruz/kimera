@@ -1,7 +1,7 @@
 #ifndef LOOPBACK_LINUX_H
 #define LOOPBACK_LINUX_H
 
-#include "kimera/config.h"
+#include "kimera/state.h"
 
 #include "utils.h"
 #include "types.h"

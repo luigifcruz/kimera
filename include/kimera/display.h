@@ -9,7 +9,7 @@
 #include <libavcodec/avcodec.h>
 #include <libavutil/pixdesc.h>
 
-#include "kimera/config.h"
+#include "kimera/state.h"
 
 typedef struct {
     SDL_Window* win;
@@ -24,6 +24,6 @@ typedef struct {
 
 bool start_display(DisplayState*, State*);
 void close_display(DisplayState*);
-bool display_draw(DisplayState*, State*, AVFrame*);
+void display_draw(DisplayState*, State*, AVFrame*);
 
 #endif

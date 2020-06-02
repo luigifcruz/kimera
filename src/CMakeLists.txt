@@ -1,8 +1,8 @@
 set(LIBS ffmpeg sdl yaml)
 
 configure_file(
-  "${kimera_SOURCE_DIR}/include/kimera/config.h.in"
-  "${kimera_SOURCE_DIR}/include/kimera/config.h"
+  "${kimera_SOURCE_DIR}/include/kimera/state.h.in"
+  "${kimera_SOURCE_DIR}/include/kimera/state.h"
 )
 
 file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${kimera_SOURCE_DIR}/include/kimera/*.h")

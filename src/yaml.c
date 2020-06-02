@@ -1,41 +1,6 @@
-#include "kimera/kimera.h"
+#include "kimera/yaml.h"
 
-State* kimera_init() {
-    State *state = malloc(sizeof(State));
-
-    state->width        = DEFAULT_WIDTH;
-    state->height       = DEFAULT_HEIGHT;
-    state->bitrate      = DEFAULT_BITRATE;
-    state->port         = DEFAULT_PORT;
-    state->in_format    = DEFAULT_FORMAT;
-    state->out_format   = DEFAULT_FORMAT;
-    state->framerate    = DEFAULT_FRAMERATE;
-    state->packet_size  = DEFAULT_PACKET_SIZE;
-    state->sink         = 0;
-    state->source       = 0;
-
-    state->loopback = malloc(64);
-    state->address = malloc(64);
-    state->codec = malloc(64);
-
-    strcpy(state->loopback, DEFAULT_LOOPBACK);
-    strcpy(state->address, DEFAULT_ADDRESS);
-    strcpy(state->codec, DEFAULT_CODEC);
-
-    return state;
-}
-
-void kimera_free(State* state) {
-    if (!state)
-        return;
-
-    free(state->loopback);
-    free(state->address);
-    free(state->codec);
-    free(state);
-}
-
-bool kimera_load_state(State* state, char* path) {
+bool kimera_parse_config_file(State* state, char* path) {
     FILE* config_file;
     yaml_parser_t parser;
     yaml_event_t event;
@@ -60,9 +25,7 @@ bool kimera_load_state(State* state, char* path) {
     int mapping_index = 0;
     int sequence_index = 0;
 
-    // God dammit, Who Made This Library?
     while (event.type != YAML_STREAM_END_EVENT) {
-
         yaml_parser_parse(&parser, &event);
 
         switch(event.type) { 
@@ -154,12 +117,6 @@ bool kimera_load_state(State* state, char* path) {
 
                         if (!strcmp((char*)event.data.scalar.value, "display"))
                             counter += DISPLAY;
-
-                        if (!strcmp((char*)event.data.scalar.value, "stdout"))
-                            counter += STDOUT;
-                        
-                        if (!strcmp((char*)event.data.scalar.value, "stdin"))
-                            counter += STDIN;
                         
                         if (direction == 1)
                             state->source += counter;

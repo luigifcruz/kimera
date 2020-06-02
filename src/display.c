@@ -95,7 +95,7 @@ void close_display(DisplayState* display) {
 	TTF_Quit();
 }
 
-bool display_draw(DisplayState* display, State* state, AVFrame* frame) {
+void display_draw(DisplayState* display, State* state, AVFrame* frame) {
 	if (display->ishidden)
 		SDL_ShowWindow(display->win);
 
@@ -131,5 +131,4 @@ bool display_draw(DisplayState* display, State* state, AVFrame* frame) {
 	}
 	
 	SDL_RenderPresent(display->ren);
-	return true;
 }

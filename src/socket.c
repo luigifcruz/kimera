@@ -18,6 +18,7 @@ inline bool open_socket_client(SocketState* socket, State* state) {
     if (!start_router(&socket->router, state))
         return false;
 
+    socket->packet = socket->router.packet;
     return true;
 }
 
@@ -39,6 +40,7 @@ inline bool open_socket_server(SocketState* socket, State* state) {
     if (!start_router(&socket->router, state))
         return false;
 
+    socket->packet = socket->router.packet;
     return true;
 }
 
@@ -67,11 +69,11 @@ inline void socket_send_packet(SocketState* socket, AVPacket* packet) {
 }
 
 inline int socket_recv_packet(SocketState* socket) {
-    do {
+    while (1) {
         size_t out = socket_recv_buffer(socket, socket->router.buffer, socket->router.packet_size);
         if (out < (size_t)socket->router.header_size) return false;
-    } while (!router_parse_packet(&socket->router));
-    return true;
+        if (router_parse_packet(&socket->router)) return true;
+    }   
 }
 
 inline int socket_send_buffer(SocketState* socket, const void* buf, size_t len) {

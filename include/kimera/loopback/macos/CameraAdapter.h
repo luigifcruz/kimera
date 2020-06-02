@@ -11,7 +11,7 @@
 #include <libavcodec/avcodec.h>
 #include <libavutil/imgutils.h>
 
-#include "kimera/config.h"
+#include "kimera/state.h"
 
 @interface CameraAdapter : NSObject
 {

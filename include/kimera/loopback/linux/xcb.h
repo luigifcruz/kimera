@@ -10,7 +10,7 @@
 #include "types.h"
 #include "utils.h"
 
-#include "kimera/config.h"
+#include "kimera/state.h"
 
 void init_xcb(LoopbackState*);
 void close_xcb(LoopbackState*);

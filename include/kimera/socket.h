@@ -8,7 +8,7 @@
 #include <sys/un.h>
 #include <unistd.h>
 
-#include "kimera/config.h"
+#include "kimera/state.h"
 #include "kimera/router.h"
 
 typedef struct sockaddr_in socket_in;
@@ -19,7 +19,10 @@ typedef struct {
     int server_fd;
     int client_fd;
     Interfaces interface;
+
+    // Router
     RouterState router;
+    Packet* packet;
 
     // UDP & TCP Sockets
     socket_in* client_in;

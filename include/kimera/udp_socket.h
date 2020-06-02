@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "kimera/config.h"
+#include "kimera/state.h"
 #include "kimera/socket.h"
 
 bool open_udp_client(SocketState*, State*);

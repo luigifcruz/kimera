@@ -10,7 +10,7 @@
 #include <libswscale/swscale.h>
 #include <libavutil/pixdesc.h>
 
-#include "kimera/config.h"
+#include "kimera/state.h"
 
 typedef struct {
     bool configured;

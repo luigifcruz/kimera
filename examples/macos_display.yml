@@ -8,7 +8,7 @@ transmitter:
   source:
     - display
   sink:
-    - udp
+    - tcp
   device: 0
   address: 127.0.0.1
   port: 8080
@@ -16,7 +16,7 @@ transmitter:
 
 receiver:
   source: 
-    - udp
+    - tcp
   sink:
     - display
   address: 127.0.0.1

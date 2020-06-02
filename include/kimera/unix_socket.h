@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "kimera/config.h"
+#include "kimera/state.h"
 #include "socket.h"
 
 bool open_unix_client(SocketState*, State*);

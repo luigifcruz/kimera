@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 
-#include "kimera/config.h"
+#include "kimera/state.h"
 
 typedef struct {
     AVFrame* frame;

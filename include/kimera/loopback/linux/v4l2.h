@@ -11,7 +11,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-#include "kimera/config.h"
+#include "kimera/state.h"
 
 #include "types.h"
 #include "utils.h"
