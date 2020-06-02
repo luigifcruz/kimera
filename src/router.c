@@ -38,57 +38,52 @@ size_t get_packet_size(RouterState* router, Packet* packet, size_t offset) {
     return pkt_size;
 }
 
-bool recv_packet(RouterState* router, SocketState* socket, volatile sig_atomic_t* stop) {
-    char pkt[router->packet_size];
+bool router_parse_packet(RouterState* router) {
+    size_t out = router->packet_size;
 
-    while (!(*stop)) {
-        size_t out = recv_socket(socket, &pkt, router->packet_size);
-        if (out < (size_t)router->header_size) return false;
+    uint64_t pts = buffer_read64be((uint8_t*)(router->buffer+0));
+    uint32_t len = buffer_read32be((uint8_t*)(router->buffer+8));
+    uint32_t i   = buffer_read32be((uint8_t*)(router->buffer+12));
+    uint32_t n   = buffer_read32be((uint8_t*)(router->buffer+16));
 
-        uint64_t pts = buffer_read64be((uint8_t*)&pkt[0]);
-        uint32_t len = buffer_read32be((uint8_t*)&pkt[8]);
-        uint32_t i   = buffer_read32be((uint8_t*)&pkt[12]);
-        uint32_t n   = buffer_read32be((uint8_t*)&pkt[16]);
-
-        if (pts < router->packet->pts) continue;
-        
-        if (pts > router->packet->pts) {
-            free(router->packet->payload);
-            router->checksum = (uint32_t)0;
-            router->packet->payload = malloc(len);
-            if (router->packet->payload == NULL) {
-                printf("[ROUTER] Can't allocate payload buffer.\n");
-                return false;
-            }
+    if (pts < router->packet->pts) return false;
+    
+    if (pts > router->packet->pts) {
+        free(router->packet->payload);
+        router->checksum = (uint32_t)0;
+        router->packet->payload = malloc(len);
+        if (router->packet->payload == NULL) {
+            printf("[ROUTER] Can't allocate payload buffer.\n");
+            return false;
         }
+    }
 
-        //printf("PTS: %llu LEN: %d I: %d N: %d\n", pts, len, i, n);
-        
-        router->packet->pts = pts;
-        router->packet->len = len;
-        router->packet->i   = i;
-        router->packet->n   = n;
+    //printf("PTS: %llu LEN: %d I: %d N: %d\n", pts, len, i, n);
+    
+    router->packet->pts = pts;
+    router->packet->len = len;
+    router->packet->i   = i;
+    router->packet->n   = n;
 
-        size_t offset = router->packet->i * router->payload_size;
-        size_t pkt_size = get_packet_size(router, router->packet, offset);
+    size_t offset = router->packet->i * router->payload_size;
+    size_t pkt_size = get_packet_size(router, router->packet, offset);
 
-        if ((out + router->header_size) < pkt_size) return false;
-        router->checksum += 1;
+    if ((out + router->header_size) < pkt_size) return false;
+    router->checksum += 1;
 
-        memcpy(router->packet->payload + offset, &pkt[router->header_size], pkt_size);
+    memcpy(router->packet->payload + offset, (uint8_t*)(router->buffer+router->header_size), pkt_size);
 
-        if (router->checksum == router->packet->n) {
-            if (router->packet->i != router->packet->n - 1)
-                printf("[LOOPBACK] Unaligned packet received.\n");
-            return true;
-        }
+    if (router->checksum == router->packet->n) {
+        if (router->packet->i != router->packet->n - 1)
+            printf("[ROUTER] Unaligned packet received.\n");
+        return true;
     }
 
     return false;
 }
 
-bool make_packet(RouterState* router, AVPacket* packet, AVFrame* frame) {
-    bool is_new_frame = (router->packet->pts != (uint64_t)frame->pts);
+bool router_make_packet(RouterState* router, AVPacket* packet) {
+    bool is_new_frame = (router->packet->pts != (uint64_t)packet->pts);
 
     if (!is_new_frame && router->packet->i == router->packet->n - 1) {
         free(router->packet->payload);
@@ -97,7 +92,7 @@ bool make_packet(RouterState* router, AVPacket* packet, AVFrame* frame) {
     }
 
     if (is_new_frame) {
-        router->packet->pts = frame->pts;
+        router->packet->pts = packet->pts;
         router->packet->len = packet->size;
         router->packet->i = 0;
         router->packet->n = (uint32_t)(packet->size / router->payload_size);
@@ -109,7 +104,7 @@ bool make_packet(RouterState* router, AVPacket* packet, AVFrame* frame) {
 
     size_t offset = router->packet->i * router->payload_size;
     size_t pkt_size = get_packet_size(router, router->packet, offset);
-    
+
     router->packet->payload = (char*)malloc(pkt_size);
     if (router->packet->payload == NULL) {
         printf("[ROUTER] Can't allocate payload buffer.\n");
@@ -118,13 +113,11 @@ bool make_packet(RouterState* router, AVPacket* packet, AVFrame* frame) {
 
     memcpy(router->packet->payload, packet->data + offset, pkt_size);
 
-    return true;
-}
+    // TODO: Remove double copy.
+    // TODO: Remove variable length support.
+    // TODO: Remove unneccessary logic.
 
-void send_packet(RouterState* router, SocketState* socket) {
-    size_t offset = 0;
-    size_t pkt_size = get_packet_size(router, router->packet, router->packet->i * router->payload_size);
-
+    offset = 0;
     memcpy(router->buffer + offset, (char*)&router->packet->pts, sizeof(router->packet->pts));
     offset += sizeof(router->packet->pts);
 
@@ -139,6 +132,6 @@ void send_packet(RouterState* router, SocketState* socket) {
 
     memcpy(router->buffer + offset, router->packet->payload, pkt_size);
     offset += pkt_size;
-    
-    send_socket(socket, router->buffer, router->packet_size);
+
+    return true;
 }

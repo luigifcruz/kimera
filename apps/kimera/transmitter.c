@@ -1,33 +1,10 @@
 #include "transmitter.h"
 
 void transmitter(State* state, volatile sig_atomic_t* stop) {
-    // Start TCP Server. 
-    SocketState tcp_socket;
-    if (state->sink & TCP) {
-        if (!open_tcp_server(&tcp_socket, state))
-            goto cleanup;
-    }
-
-    // Start UDP Server. 
-    SocketState udp_socket;
-    if (state->sink & UDP) {
-        if (!open_udp_server(&udp_socket, state))
-            goto cleanup;
-    }
-
-    // Start UNIX Server. 
-    SocketState unix_socket;
-    if (state->sink & UNIX) {
-        if (!open_unix_server(&unix_socket, state))
-            goto cleanup;
-    }
-
-    // Start Router. 
-    RouterState router;
-    if (state->sink & UNIX || state->sink & TCP || state->sink & UDP) {
-        if (!start_router(&router, state))
-            goto cleanup;
-    }
+    // Start Socket Server. 
+    SocketState socket;
+    if (!open_socket_server(&socket, state))
+        goto cleanup;
 
     // Start Loopback Input.
     LoopbackState loopback;
@@ -69,33 +46,13 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
                 continue;
             }
 
-            while (make_packet(&router, encoder.packet, resampler.frame)) {
-                if (state->sink & TCP)
-                    send_packet(&router, &tcp_socket);
-                if (state->sink & UDP)
-                    send_packet(&router, &udp_socket);
-                if (state->sink & UNIX)
-                    send_packet(&router, &unix_socket);
-            }
+            socket_send_packet(&socket, encoder.packet);
         }
     }
     
 cleanup:
-    if (state->sink & TCP)
-        close_tcp(&tcp_socket);
-
-    if (state->sink & UNIX)
-        close_unix(&unix_socket);
-    
-    if (state->sink & UNIX)
-        close_udp(&udp_socket);
-
-    if (state->sink & TCP || state->sink & UNIX || state->sink & UDP)
-        close_router(&router);
-
-    if (state->sink & DISPLAY)
-        close_display(&display);
-
+    close_display(&display);
+    close_socket(&socket);
     close_resampler(&resampler);
     close_loopback(&loopback, state);
     close_encoder(&encoder);

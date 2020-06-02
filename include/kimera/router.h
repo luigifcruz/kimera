@@ -11,7 +11,6 @@
 #include <sys/socket.h>
 #include <libavcodec/avcodec.h>
 
-#include "kimera/socket.h"
 #include "kimera/utils.h"
 #include "kimera/config.h"
 
@@ -35,9 +34,7 @@ typedef struct {
 bool start_router(RouterState*, State*);
 void close_router(RouterState*);
 
-bool recv_packet(RouterState*, SocketState*, volatile sig_atomic_t*);
-
-bool make_packet(RouterState*, AVPacket*, AVFrame*);
-void send_packet(RouterState*, SocketState*);
+bool router_make_packet(RouterState*, AVPacket*);
+bool router_parse_packet(RouterState*);
 
 #endif

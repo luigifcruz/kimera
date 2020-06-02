@@ -3,10 +3,8 @@
 void receiver(State* state, volatile sig_atomic_t* stop) {
     // Start Decoder.
     DecoderState decoder;
-    if (state->sink & DISPLAY || state->sink & LOOPBACK) {
-        if (!start_decoder(&decoder,state))
-            goto cleanup;
-    }
+    if (!start_decoder(&decoder,state))
+        goto cleanup;
 
     // Start Loopback Ouput.
     LoopbackState loopback;
@@ -26,38 +24,21 @@ void receiver(State* state, volatile sig_atomic_t* stop) {
             goto cleanup;
     }
 
-    // Start Router. 
-    RouterState router;
-    if (!start_router(&router, state))
-            goto cleanup;
-    
-    // Start Socket Client. 
+    // Start Socket Server. 
     SocketState socket;
-    switch (state->source) {
-    case TCP:
-        if(!open_tcp_client(&socket, state))
-            goto cleanup;
-        break;
-    case UDP:
-        if(!open_udp_client(&socket, state))
-            goto cleanup;
-        break;
-    case UNIX:
-        if(!open_unix_client(&socket, state))
-            goto cleanup;
-        break;
-    default:
+    if (!open_socket_client(&socket, state))
         goto cleanup;
-    }
  
     // Start Decoder Loop.
-    while (recv_packet(&router, &socket, stop) && !(*stop)) {
+    while (socket_recv_packet(&socket) && !(*stop)) {
+        Packet* packet = socket.router.packet;
+
         if (state->sink & STDOUT) {
-            fwrite(router.packet->payload, sizeof(char), router.packet->len, stdout);
+            fwrite(packet->payload, sizeof(char), packet->len, stdout);
             continue;
         }
 
-        if (decoder_push(&decoder, router.packet->payload, router.packet->len, router.packet->pts)) {
+        if (decoder_push(&decoder, packet->payload, packet->len, packet->pts)) {
             if (!resampler_push_frame(&resampler, state, decoder.frame)) {
                 continue;
             }
@@ -74,27 +55,9 @@ void receiver(State* state, volatile sig_atomic_t* stop) {
     }
 
 cleanup:
+    close_loopback(&loopback, state);
+    close_display(&display);
     close_resampler(&resampler);
     close_decoder(&decoder);
-    close_router(&router);
-    
-    switch (state->source) {
-    case TCP:
-        close_tcp(&socket);
-        break;
-    case UDP:
-        close_udp(&socket);
-        break;
-    case UNIX:
-        close_unix(&socket);
-        break;
-    default:
-        break;
-    }   
-
-    if (state->sink & LOOPBACK)
-        close_loopback(&loopback, state);
-
-    if (state->sink & DISPLAY)
-        close_display(&display);
+    close_socket(&socket);
 }
