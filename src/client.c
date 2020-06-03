@@ -26,6 +26,7 @@ void print_io_list(Interfaces interfaces) {
         printf(" DISPLAY");
     if (interfaces & LOOPBACK)
         printf(" LOOPBACK");
+    printf("\n");
 }
 
 void kimera_print_state(State* state) {
@@ -43,10 +44,8 @@ void kimera_print_state(State* state) {
 
     printf("    ├── Source: ");
     print_io_list(state->source);
-    printf("\n");
     printf("    ├── Sink:   ");
     print_io_list(state->sink);
-    printf("\n");
 
     printf("    ├── Device:  %s\n", state->loopback);
     printf("    ├── Address: %s\n", state->address);
@@ -96,23 +95,37 @@ int kimera_client(
     State* state = kimera_state();
     char* config_path = argv[2];
 
-    if (!strcmp(argv[1], "tx")) {
-        state->mode = TRANSMITTER;
-        if (!kimera_parse_config_file(state, config_path))
+    switch (argv[1][0]) {
+        case 't':
+        case 'T':
+            state->mode = TRANSMITTER;
+            break;
+        case 'r':
+        case 'R':
+            state->mode = RECEIVER;
+            break;
+        default:
+            printf("Mode (%s) not valid.\n", argv[1]);
+            kimera_print_help();
+            kimera_free(state);
             return -1;
-        (void)(*tx)(state, &stop);
-        return 0;
     }
-    
-    if (!strcmp(argv[1], "rx")) {
-        state->mode = RECEIVER;
-        if (!kimera_parse_config_file(state, config_path))
-            return -1;
-        (void)(*rx)(state, &stop);
-        return 0;
+        
+    if (!kimera_parse_config_file(state, config_path)) {
+        kimera_free(state);
+        return -1;
+    }
+        
+    switch (state->mode) {
+        case TRANSMITTER:
+            (void)(*tx)(state, &stop);
+            break;
+        case RECEIVER:
+            (void)(*rx)(state, &stop);
+            break;
+        default: break;
     }
 
     kimera_free(state);
-    printf("Not such flag (%s).\n", argv[1]);
-    return -1;
+    return 0;
 }
