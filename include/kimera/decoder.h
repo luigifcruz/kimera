@@ -18,8 +18,11 @@ typedef struct {
     AVFrame* frame;
 } DecoderState;
 
-bool start_decoder(DecoderState*, State*);
-void close_decoder(DecoderState*);
+DecoderState* alloc_decoder();
+void free_decoder(DecoderState*);
+
+bool open_decoder(DecoderState*, State*);
+
 bool decoder_push(DecoderState*, char*, uint32_t, uint64_t);
 bool needs_parser(enum AVCodecID);
 

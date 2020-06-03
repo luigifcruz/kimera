@@ -16,8 +16,8 @@
 #include "types.h"
 #include "utils.h"
 
-void init_v4l2(LoopbackState*);
-void close_v4l2(LoopbackState*, State*);
+void alloc_v4l2(LoopbackState*);
+void free_v4l2(LoopbackState*, State*);
 
 bool init_v4l2_source(LoopbackState*, State*);
 bool init_v4l2_sink(LoopbackState*, State*);

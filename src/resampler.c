@@ -1,22 +1,32 @@
 #include "kimera/resampler.h"
 
-void open_resampler(ResamplerState* resampler, enum AVPixelFormat format) {
-    resampler->configured = false;
-    resampler->format = format;
+ResamplerState* alloc_resampler() {
+    ResamplerState* state = malloc(sizeof(ResamplerState));
+    state->ctx   = NULL;
+    state->frame = NULL;
+    return state;
 }
 
-void close_resampler(ResamplerState* resampler) {
-    if (!resampler->configured)
-        return;
+void free_resampler(ResamplerState* resampler) {
+    if (resampler->frame)
+        av_frame_free(&resampler->frame);
+    if (resampler->ctx)
+        sws_freeContext(resampler->ctx);
+    free(resampler);
+}
 
-    av_frame_free(&resampler->frame);
-    sws_freeContext(resampler->ctx);
+bool open_resampler(ResamplerState* resampler, enum AVPixelFormat format) {
     resampler->configured = false;
+    resampler->format = format;
+    return true;
 }
 
 bool configure_resampler(ResamplerState* resampler, State* state, AVFrame* in) {
-    // Destroy previous resampler (if it ever existed).
-    close_resampler(resampler);
+    // Recycle previous resampler.
+    if (resampler->frame)
+        av_frame_free(&resampler->frame);
+    if (resampler->ctx)
+        sws_freeContext(resampler->ctx);
 
     // Allocate new frame for the resampler.
     resampler->frame = av_frame_alloc();

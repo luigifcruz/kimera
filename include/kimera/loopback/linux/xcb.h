@@ -12,8 +12,8 @@
 
 #include "kimera/state.h"
 
-void init_xcb(LoopbackState*);
-void close_xcb(LoopbackState*);
+void alloc_xcb(LoopbackState*);
+void free_xcb(LoopbackState*);
 
 bool pull_xcb_frame(LoopbackState*, State*);
 bool init_xcb_source(LoopbackState*, State*);

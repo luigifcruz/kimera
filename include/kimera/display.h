@@ -22,8 +22,11 @@ typedef struct {
     bool ishidden;
 } DisplayState;
 
-bool start_display(DisplayState*, State*);
-void close_display(DisplayState*);
+DisplayState* alloc_display();
+void free_display(DisplayState*);
+
+bool open_display(DisplayState*, State*);
+
 void display_draw(DisplayState*, State*, AVFrame*);
 
 #endif

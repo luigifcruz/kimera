@@ -19,8 +19,10 @@ typedef struct {
     AVFrame* frame;
 } ResamplerState;
 
-void open_resampler(ResamplerState*, enum AVPixelFormat);
-void close_resampler(ResamplerState*);
+ResamplerState* alloc_resampler();
+void free_resampler(ResamplerState*);
+
+bool open_resampler(ResamplerState*, enum AVPixelFormat);
 
 bool resampler_push_frame(ResamplerState*, State*, AVFrame*);
 

@@ -37,10 +37,11 @@ typedef struct {
 #include "kimera/tcp_socket.h"
 #include "kimera/unix_socket.h"
 
+SocketState* alloc_socket();
+void free_socket(SocketState*);
+
 bool open_socket_server(SocketState*, State*);
 bool open_socket_client(SocketState*, State*);
-
-void close_socket(SocketState*);
 
 int socket_recv_packet(SocketState*);
 void socket_send_packet(SocketState*, AVPacket*);

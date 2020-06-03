@@ -15,8 +15,11 @@ typedef struct {
     AVPacket* packet;
 } EncoderState;
 
-bool start_encoder(EncoderState*, State*);
-void close_encoder(EncoderState*);
+EncoderState* alloc_encoder();
+void free_encoder(EncoderState*);
+
+bool open_encoder(EncoderState*, State*);
+
 bool encoder_push(EncoderState*, AVFrame*);
 
 #endif

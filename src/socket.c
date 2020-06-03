@@ -1,5 +1,35 @@
 #include "kimera/socket.h"
 
+SocketState* alloc_socket() {
+    SocketState* state = malloc(sizeof(SocketState));
+    state->packet    = NULL;
+    state->client_in = NULL;
+    state->server_in = NULL;
+    state->client_un = NULL;
+    state->server_un = NULL;
+    return state;
+}
+
+inline void free_socket(SocketState* socket) {
+    if (socket->interface != NONE)
+        close_router(&socket->router);
+
+    switch (socket->interface) {
+        case UDP:
+            close_udp(socket);
+            break;
+        case TCP:
+            close_tcp(socket);
+            break;
+        case UNIX:
+            close_unix(socket);
+            break;
+        default: break;
+    }
+
+    free(socket);
+}
+
 inline bool open_socket_client(SocketState* socket, State* state) {
     if (state->source & TCP)
         open_tcp_client(socket, state);
@@ -42,25 +72,6 @@ inline bool open_socket_server(SocketState* socket, State* state) {
 
     socket->packet = socket->router.packet;
     return true;
-}
-
-inline void close_socket(SocketState* socket) {
-    if (socket->interface != NONE)
-        close_router(&socket->router);
-
-    switch (socket->interface) {
-        case UDP:
-            close_udp(socket);
-            break;
-        case TCP:
-            close_tcp(socket);
-            break;
-        case UNIX:
-            close_unix(socket);
-            break;
-        default:
-            break;
-    }
 }
 
 inline void socket_send_packet(SocketState* socket, AVPacket* packet) {

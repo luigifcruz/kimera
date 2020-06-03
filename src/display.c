@@ -23,7 +23,31 @@ int display_event_handler(void* display_ptr, SDL_Event* event) {
 	return 1;
 }
 
-bool start_display(DisplayState* display, State* state) {
+DisplayState* alloc_display() {
+    DisplayState* state = malloc(sizeof(DisplayState));
+    state->win   = NULL;
+    state->ren   = NULL;
+    state->tex 	 = NULL;
+    state->font  = NULL;
+    state->event = NULL;
+    return state;
+}
+
+void free_display(DisplayState* display) {
+	if (display->tex)
+		SDL_DestroyTexture(display->tex);
+	if (display->ren)
+		SDL_DestroyRenderer(display->ren);
+	if (display->win)
+		SDL_DestroyWindow(display->win);
+	if (display->font)
+		TTF_CloseFont(display->font);
+	SDL_Quit();
+	TTF_Quit();
+	free(display);
+}
+
+bool open_display(DisplayState* display, State* state) {
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 		printf("[SDL] Init error: %s.\n", SDL_GetError());
 		goto cleanup;
@@ -31,7 +55,6 @@ bool start_display(DisplayState* display, State* state) {
 
 	if (TTF_Init() != 0) {
 		printf("[SDL] TTF init error.\n");
-		display->font = NULL;
 	}
 
 	char* name[32];
@@ -80,19 +103,8 @@ bool start_display(DisplayState* display, State* state) {
 	return true;
 
 cleanup:
-	close_display(display);
+	free_display(display);
 	return false;
-}
-
-void close_display(DisplayState* display) {
-	if (display->tex)
-		SDL_DestroyTexture(display->tex);
-	if (display->ren)
-		SDL_DestroyRenderer(display->ren);
-	if (display->win)
-		SDL_DestroyWindow(display->win);
-	SDL_Quit();
-	TTF_Quit();
 }
 
 void display_draw(DisplayState* display, State* state, AVFrame* frame) {
