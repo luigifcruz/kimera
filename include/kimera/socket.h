@@ -21,7 +21,7 @@ typedef struct {
     Interfaces interface;
 
     // Router
-    RouterState router;
+    RouterState* router;
     Packet* packet;
 
     // UDP & TCP Sockets

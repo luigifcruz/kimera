@@ -2,6 +2,7 @@
 
 SocketState* alloc_socket() {
     SocketState* state = malloc(sizeof(SocketState));
+    state->router    = alloc_router();
     state->packet    = NULL;
     state->client_in = NULL;
     state->server_in = NULL;
@@ -12,7 +13,7 @@ SocketState* alloc_socket() {
 
 inline void free_socket(SocketState* socket) {
     if (socket->interface != NONE)
-        close_router(&socket->router);
+        free_router(socket->router);
 
     switch (socket->interface) {
         case UDP:
@@ -45,10 +46,10 @@ inline bool open_socket_client(SocketState* socket, State* state) {
         return false;
     }
 
-    if (!start_router(&socket->router, state))
+    if (!start_router(socket->router, state))
         return false;
 
-    socket->packet = socket->router.packet;
+    socket->packet = socket->router->packet;
     return true;
 }
 
@@ -67,23 +68,23 @@ inline bool open_socket_server(SocketState* socket, State* state) {
         return false;
     }
 
-    if (!start_router(&socket->router, state))
+    if (!start_router(socket->router, state))
         return false;
 
-    socket->packet = socket->router.packet;
+    socket->packet = socket->router->packet;
     return true;
 }
 
 inline void socket_send_packet(SocketState* socket, AVPacket* packet) {
-    while (router_make_packet(&socket->router, packet))
-        socket_send_buffer(socket, socket->router.buffer, socket->router.packet_size);
+    while (router_make_packet(socket->router, packet))
+        socket_send_buffer(socket, socket->router->buffer, socket->router->packet_size);
 }
 
 inline int socket_recv_packet(SocketState* socket) {
     while (1) {
-        size_t out = socket_recv_buffer(socket, socket->router.buffer, socket->router.packet_size);
-        if (out < (size_t)socket->router.header_size) return false;
-        if (router_parse_packet(&socket->router)) return true;
+        size_t out = socket_recv_buffer(socket, socket->router->buffer, socket->router->packet_size);
+        if (out < (size_t)socket->router->header_size) return false;
+        if (router_parse_packet(socket->router)) return true;
     }   
 }
 

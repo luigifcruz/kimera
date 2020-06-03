@@ -31,8 +31,10 @@ typedef struct {
     char* buffer;
 } RouterState;
 
+RouterState* alloc_router();
+void free_router(RouterState*);
+
 bool start_router(RouterState*, State*);
-void close_router(RouterState*);
 
 bool router_make_packet(RouterState*, AVPacket*);
 bool router_parse_packet(RouterState*);

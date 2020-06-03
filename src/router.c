@@ -1,5 +1,22 @@
 #include "kimera/router.h"
 
+RouterState* alloc_router() {
+    RouterState* state = malloc(sizeof(RouterState));
+    state->packet = NULL;
+    state->buffer = NULL;
+    return state;
+}
+
+void free_router(RouterState* router) {
+    if (router->packet->payload)
+        free(router->packet->payload);
+    if (router->buffer)
+        free(router->buffer);
+    if (router->packet)
+        free(router->packet);
+    free(router);
+}
+
 bool start_router(RouterState* router, State* state) {
     router->header_size = HEADER_SIZE;
     router->packet_size = state->packet_size;
@@ -21,13 +38,6 @@ bool start_router(RouterState* router, State* state) {
 
     router->packet->payload = NULL;
     return true;
-}
-
-void close_router(RouterState* router) {
-    if (router->packet->payload != NULL)
-        free(router->packet->payload);
-    free(router->buffer);
-    free(router->packet);
 }
 
 size_t get_packet_size(RouterState* router, Packet* packet, size_t offset) {
