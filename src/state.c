@@ -26,9 +26,6 @@ State* kimera_state() {
 }
 
 void kimera_free(State* state) {
-    if (!state)
-        return;
-
     free(state->loopback);
     free(state->address);
     free(state->codec);

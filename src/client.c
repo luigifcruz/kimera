@@ -35,25 +35,18 @@ void kimera_print_state(State* state) {
     printf("├── Bitrate:    %d bps\n", state->bitrate);
     printf("└── Packet Len: %d Bytes\n", state->packet_size);
 
-    if (state->mode == TRANSMITTER) {
+    if (state->mode == TRANSMITTER)
         printf("    .   TRANSMITTER\n");
-        printf("    ├── Source: ");
-        print_io_list(state->source);
-        printf("\n");
-        printf("    ├── Sink:   ");
-        print_io_list(state->sink);
-        printf("\n");
-    }
     
-    if (state->mode == RECEIVER) {
+    if (state->mode == RECEIVER)
         printf("    .   RECEIVER\n");
-        printf("    ├── Source: ");
-        print_io_list(state->source);
-        printf("\n");
-        printf("    ├── Sink:   ");
-        print_io_list(state->sink);
-        printf("\n");
-    }
+
+    printf("    ├── Source: ");
+    print_io_list(state->source);
+    printf("\n");
+    printf("    ├── Sink:   ");
+    print_io_list(state->sink);
+    printf("\n");
 
     printf("    ├── Device:  %s\n", state->loopback);
     printf("    ├── Address: %s\n", state->address);
@@ -75,9 +68,6 @@ int kimera_client(
     void(*rx)(State*, volatile sig_atomic_t*)) {
     // Register signal handler.
     signal(SIGINT, inthand);
-
-    // Declare Default Settings
-    State* state = kimera_state();
 
     // Parse Command-Line Arguments
     if (argc < 2) {
@@ -102,13 +92,15 @@ int kimera_client(
         return -1;
     }
 
+    // Declare Default Settings
+    State* state = kimera_state();
     char* config_path = argv[2];
 
     if (!strcmp(argv[1], "tx")) {
         state->mode = TRANSMITTER;
         if (!kimera_parse_config_file(state, config_path))
             return -1;
-        (*tx)(state, &stop);
+        (void)(*tx)(state, &stop);
         return 0;
     }
     
@@ -116,7 +108,7 @@ int kimera_client(
         state->mode = RECEIVER;
         if (!kimera_parse_config_file(state, config_path))
             return -1;
-        (*rx)(state, &stop);
+        (void)(*rx)(state, &stop);
         return 0;
     }
 

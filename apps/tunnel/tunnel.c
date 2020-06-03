@@ -14,6 +14,8 @@
 #include "kimera/client.h"
 
 void receiver(State* state, volatile sig_atomic_t* stop) {
+    kimera_print_state(state);
+
     // Start Decoder.
     DecoderState decoder;
     if (!start_decoder(&decoder,state))
@@ -65,6 +67,8 @@ cleanup:
 }
 
 void transmitter(State* state, volatile sig_atomic_t* stop) {
+    kimera_print_state(state);
+
     // Start Socket Server. 
     SocketState socket;
     if (!open_socket_server(&socket, state))
