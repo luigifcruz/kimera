@@ -13,6 +13,7 @@
 typedef struct {
     AVCodecContext *codec_ctx;
     AVCodecParserContext *parser_ctx;
+    bool has_parser;
     AVPacket* retard;
     AVFrame* frame;
 } DecoderState;
@@ -20,5 +21,6 @@ typedef struct {
 bool start_decoder(DecoderState*, State*);
 void close_decoder(DecoderState*);
 bool decoder_push(DecoderState*, char*, uint32_t, uint64_t);
+bool needs_parser(enum AVCodecID);
 
 #endif

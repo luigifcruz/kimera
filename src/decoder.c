@@ -1,5 +1,16 @@
 #include "kimera/decoder.h"
 
+bool needs_parser(enum AVCodecID codec_id) {
+    switch(codec_id){
+        case AV_CODEC_ID_RAWVIDEO:
+        case AV_CODEC_ID_HUFFYUV:
+        case AV_CODEC_ID_FFVHUFF:
+            return false;
+        default:
+            return true;
+    }
+}
+
 bool start_decoder(DecoderState* decoder, State* state) {
     AVCodec *codec = avcodec_find_decoder_by_name(state->codec);
     if (!codec) {
@@ -23,23 +34,26 @@ bool start_decoder(DecoderState* decoder, State* state) {
     decoder->codec_ctx->max_b_frames = 0;
     decoder->codec_ctx->pix_fmt = state->in_format;
     decoder->codec_ctx->flags |= AV_CODEC_FLAG_LOW_DELAY;
+
     if (avcodec_open2(decoder->codec_ctx, codec, NULL) < 0) {
         printf("[DECODER] Couldn't open codec.\n");
         close_decoder(decoder);
         return false;
     }
 
-    decoder->parser_ctx = av_parser_init(codec->id);
-    if (!decoder->parser_ctx) {
-        printf("[DECODER] Couldn't initialize parser.\n");
-        close_decoder(decoder);
-        return false;
-    }
-
-    decoder->parser_ctx->flags |= PARSER_FLAG_COMPLETE_FRAMES;
-    decoder->parser_ctx->format = state->in_format;
     decoder->retard = NULL;
     decoder->frame = av_frame_alloc();
+    decoder->has_parser = needs_parser(codec->id);
+
+    if (decoder->has_parser) {
+        if (!(decoder->parser_ctx = av_parser_init(codec->id))) {
+            printf("[DECODER] Couldn't initialize parser.\n");
+            close_decoder(decoder);
+            return false;
+        }
+        decoder->parser_ctx->flags |= PARSER_FLAG_COMPLETE_FRAMES;
+        decoder->parser_ctx->format = state->in_format;
+    }
 
     return true;
 }
@@ -49,7 +63,7 @@ void close_decoder(DecoderState* decoder) {
         return;
     if (decoder->frame)
         av_frame_free(&decoder->frame);
-    if (decoder->parser_ctx)
+    if (decoder->has_parser)
         av_parser_close(decoder->parser_ctx);
     if (decoder->codec_ctx)
         avcodec_free_context(&decoder->codec_ctx);
@@ -59,17 +73,19 @@ void close_decoder(DecoderState* decoder) {
 
 bool parse_packet(DecoderState* decoder, AVPacket* packet) {
     uint8_t *out_data = NULL;
-    int out_len = 0;
-    int r = av_parser_parse2(decoder->parser_ctx, decoder->codec_ctx,
-                             &out_data, &out_len, packet->data, packet->size,
-                             AV_NOPTS_VALUE, AV_NOPTS_VALUE, -1);
 
-    assert(r == packet->size);
-    (void) r;
-    assert(out_len == packet->size);
+    if (decoder->has_parser) {
+        int out_len = 0;
+        int r = av_parser_parse2(decoder->parser_ctx, decoder->codec_ctx,
+                                &out_data, &out_len, packet->data, packet->size,
+                                AV_NOPTS_VALUE, AV_NOPTS_VALUE, -1);
 
-    if (decoder->parser_ctx->key_frame == 1) {
-        packet->flags |= AV_PKT_FLAG_KEY;
+        assert(r == packet->size);
+        assert(out_len == packet->size);
+
+        if (decoder->parser_ctx->key_frame == 1) {
+            packet->flags |= AV_PKT_FLAG_KEY;
+        }
     }
 
     int ret;
@@ -78,8 +94,7 @@ bool parse_packet(DecoderState* decoder, AVPacket* packet) {
         return false;
     }
 
-    ret = avcodec_receive_frame(decoder->codec_ctx, decoder->frame);
-    if (ret < 0) {
+    if ((ret = avcodec_receive_frame(decoder->codec_ctx, decoder->frame)) < 0) {
         printf("[DECODER] Couldn't receive video frame: %d\n", ret);
         return false;
     }
