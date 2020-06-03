@@ -23,7 +23,7 @@ DecoderState* alloc_decoder() {
 void free_decoder(DecoderState* decoder) {
     if (decoder->frame)
         av_frame_free(&decoder->frame);
-    if (decoder->has_parser)
+    if (decoder->parser_ctx)
         av_parser_close(decoder->parser_ctx);
     if (decoder->codec_ctx)
         avcodec_free_context(&decoder->codec_ctx);
@@ -42,7 +42,6 @@ bool open_decoder(DecoderState* decoder, State* state) {
     decoder->codec_ctx = avcodec_alloc_context3(codec);
     if (!decoder->codec_ctx) {
         printf("[DECODER] Couldn't allocate codec context.\n");
-        free_decoder(decoder);
         return false;
     }
 
@@ -58,7 +57,6 @@ bool open_decoder(DecoderState* decoder, State* state) {
 
     if (avcodec_open2(decoder->codec_ctx, codec, NULL) < 0) {
         printf("[DECODER] Couldn't open codec.\n");
-        free_decoder(decoder);
         return false;
     }
 
@@ -68,7 +66,6 @@ bool open_decoder(DecoderState* decoder, State* state) {
     if (decoder->has_parser) {
         if (!(decoder->parser_ctx = av_parser_init(codec->id))) {
             printf("[DECODER] Couldn't initialize parser.\n");
-            free_decoder(decoder);
             return false;
         }
         decoder->parser_ctx->flags |= PARSER_FLAG_COMPLETE_FRAMES;

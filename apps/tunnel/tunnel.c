@@ -20,14 +20,14 @@ void receiver(State* state, volatile sig_atomic_t* stop) {
     DisplayState* display = alloc_display();
 
     if (state->sink & DISPLAY)
-        ok |= open_display(display, state);
+        ok &= open_display(display, state);
 
     if (state->sink & LOOPBACK)
-        ok |= open_loopback_sink(loopback, state);
+        ok &= open_loopback_sink(loopback, state);
 
-    ok |= open_decoder(decoder,state);
-    ok |= open_socket_client(socket, state);
-    ok |= open_resampler(resampler, state->out_format);
+    ok &= open_decoder(decoder,state);
+    ok &= open_socket_client(socket, state);
+    ok &= open_resampler(resampler, state->out_format);
 
     if (!ok) goto cleanup;
 
@@ -63,14 +63,14 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
     DisplayState* display = alloc_display();
     ResamplerState* resampler = alloc_resampler();
 
-    ok |= open_socket_server(socket, state);
-    ok |= open_loopback_source(loopback, state);
+    ok &= open_socket_server(socket, state);
+    ok &= open_loopback_source(loopback, state);
 
     if (state->sink & DISPLAY)
-        ok |= open_display(display, state);
+        ok &= open_display(display, state);
     
-    ok |= open_encoder(encoder, state);
-    ok |= open_resampler(resampler, state->out_format);
+    ok &= open_encoder(encoder, state);
+    ok &= open_resampler(resampler, state->out_format);
 
     if (!ok) goto cleanup;
 

@@ -25,7 +25,6 @@ bool open_encoder(EncoderState* encoder, State* state) {
     encoder->codec_ctx = avcodec_alloc_context3(codec);
     if (!encoder->codec_ctx) {
         printf("[ENCODER] Couldn't allocate codec context.\n");
-        free_encoder(encoder);
         return false;
     }
 
@@ -40,14 +39,12 @@ bool open_encoder(EncoderState* encoder, State* state) {
     encoder->codec_ctx->flags |= AV_CODEC_FLAG_LOW_DELAY;
     if (avcodec_open2(encoder->codec_ctx, codec, NULL) < 0) {
         printf("[ENCODER] Couldn't open codec.\n");
-        free_encoder(encoder);
         return false;
     }
 
     encoder->packet = av_packet_alloc();
     if (!encoder->packet) {
         printf("[ENCODER] Couldn't allocate packet.\n");
-        free_encoder(encoder);
         return false;
     }
 
