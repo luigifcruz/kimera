@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     
-    unsigned int program = load_shader("./triangle.vs", "./triangle.fs");
+    unsigned int program = load_shader("./shaders/triangle.vs", "./shaders/triangle.fs");
     if (!program) goto cleanup;
 
     while (1) {

@@ -12,7 +12,6 @@ endif()
 include(cmake/ffmpeg.cmake)
 include(cmake/yaml.cmake)
 include(cmake/sdl.cmake)
-include(cmake/glfw.cmake)
 include(cmake/xcb.cmake)
 
 include(cmake/listdirs.cmake)

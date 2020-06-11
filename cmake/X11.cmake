@@ -6,6 +6,5 @@ if(UNIX AND NOT APPLE)
 
     add_library(X11 INTERFACE IMPORTED GLOBAL)
     target_include_directories(X11 INTERFACE ${X11_INCLUDE_DIRS})
-
     target_link_libraries(X11 INTERFACE ${X11_LDFLAGS})
 endif()
