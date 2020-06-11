@@ -4,6 +4,8 @@ if(UNIX AND NOT APPLE)
     list(APPEND LIBS dl)
 endif()
 
+set (CMAKE_C_STANDARD_LIBRARIES "-lm")
+
 file(GLOB SOURCE_LIST CONFIGURE_DEPENDS *.c render/glad/*.c)
 
 include(${CMAKE_SOURCE_DIR}/cmake/glfw.cmake)
