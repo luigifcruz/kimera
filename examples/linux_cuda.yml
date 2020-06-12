@@ -8,8 +8,8 @@ transmitter:
   source:
     - loopback
   sink:
-    - tcp
-  device: /dev/video2
+    - udp
+  device: /dev/video0
   address: 0.0.0.0
   port: 8080
   codec: hevc_nvenc

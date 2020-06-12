@@ -137,7 +137,7 @@ bool render_commit_frame(RenderState* render) {
     if (render->mode == WINDOWED) {
         eglSwapBuffers(render->display, render->surface);
         if (get_egl_error(__LINE__)) return false;
-        return adapter_poll_events(render->adapter);
+        return adapter_poll_events(render);
     }
     return true;
 }

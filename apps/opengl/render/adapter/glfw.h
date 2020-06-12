@@ -35,10 +35,11 @@ void free_adapter(void* window_ptr) {
     free(window);
 }
 
-bool adapter_poll_events(void* window_ptr) {
-    WindowState* window = (WindowState*)window_ptr;
+bool adapter_poll_events(RenderState* render) {
+    WindowState* window = (WindowState*)render->adapter;
 
     glfwPollEvents();
+    glfwGetWindowSize(window->display, &render->width, &render->height);
     return !glfwWindowShouldClose(window->display);
 }
 
@@ -47,10 +48,7 @@ bool load_adapter(RenderState* render) {
     return true;
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    // make sure the viewport matches the new window dimensions; note that width and 
-    // height will be significantly larger than specified on retina displays.
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
     glScissor(0, 0, width, height);
 }
