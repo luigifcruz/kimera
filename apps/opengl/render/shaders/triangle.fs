@@ -2,7 +2,7 @@
  * Original shader from: https://www.shadertoy.com/view/3td3DB
  */
 
-#version 300 es
+#version 330 core
 
 #ifdef GL_ES
 precision mediump float;
@@ -18,12 +18,8 @@ uniform float time;
 uniform vec2 resolution;
 uniform sampler2D texture1;
 
-// shadertoy emulation
-#define iTime time
-#define iResolution resolution
-// Blobs by @paulofalcao
+layout(location = 0) out vec3 color;
 
-#define time iTime
 
 float makePoint(float x,float y,float fx,float fy,float sx,float sy,float t){
    float xx=x+sin(t*fx)*sx;
@@ -33,7 +29,7 @@ float makePoint(float x,float y,float fx,float fy,float sx,float sy,float t){
 
 void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 
-   vec2 p=(fragCoord.xy/iResolution.x)*2.0-vec2(1.0,iResolution.y/iResolution.x);
+   vec2 p=(fragCoord.xy/resolution.x)*2.0-vec2(1.0,resolution.y/resolution.x);
 
    p=p*2.0;
    
@@ -80,5 +76,5 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 }
 
 void main( void ) {
-    mainImage(FragColor, vec2(gl_FragCoord.x, gl_FragCoord.y));
+    mainImage(color, vec2(gl_FragCoord.x, gl_FragCoord.y));
 }

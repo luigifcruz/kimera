@@ -48,11 +48,6 @@ bool load_adapter(RenderState* render) {
     return true;
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
-    glScissor(0, 0, width, height);
-}
-
 bool create_adapter(RenderState* render) {
     WindowState* window = (WindowState*)render->adapter;
     
@@ -70,8 +65,6 @@ bool create_adapter(RenderState* render) {
         glfwTerminate();
         return false;
     }
-
-    glfwSetFramebufferSizeCallback(window->display, framebuffer_size_callback);
 
     EGLNativeWindowType surface;
     

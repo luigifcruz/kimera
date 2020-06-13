@@ -41,8 +41,8 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
         1, 2, 3
     };
 
-    glEnable(GL_BLEND); 
-    glEnable(GL_MULTISAMPLE);
+    //glEnable(GL_BLEND); 
+    //glEnable(GL_MULTISAMPLE);
 
     unsigned int VBO, EBO;
 
@@ -59,17 +59,38 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    
-    unsigned int frameShader = load_shader("./shaders/triangle.vs", "./shaders/triangle.fs");
+   
+    unsigned int frameShader = load_shader("./shaders/frame.vs", "./shaders/frame.fs");
     if (!frameShader) goto cleanup;
 
+    unsigned int displayShader = load_shader("./shaders/filter.vs", "./shaders/filter.fs");
+    if (!displayShader) goto cleanup;
+
+    unsigned int FramebufferName = 1;
+    glGenFramebuffers(1, &FramebufferName);
+    glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
+
+    unsigned int renderedTexture;
+    glGenTextures(1, &renderedTexture);
+    glBindTexture(GL_TEXTURE_2D, renderedTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, state->width, state->height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderedTexture, 0);
+
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        printf("Nope.\n");
+        return;
+    }
 
     bool configured = false;
     unsigned int buffer_size = 0;
     unsigned int textures[8];
-
+    
     // Start Socket Server. 
     SocketState socket;
     if (!open_socket_server(&socket, state))
@@ -88,6 +109,8 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
     // Add resampler.
     ResamplerState resampler;
     open_resampler(&resampler, state->out_format);
+    
+    GLuint texID = glGetUniformLocation(displayShader, "renderedTexture");
 
     // Start Decoder Loop.
     while (loopback_pull_frame(&loopback, state) && !(*stop)) {
@@ -96,12 +119,15 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
 
         AVFrame* frame = resampler.frame;
 
+        glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
+        glViewport(0, 0, state->width, state->height);
+
         if (!configured) {
             for (int i = 0; i < 8; i++) {
                 if (frame->linesize[i] == 0) break;
                 buffer_size++;
             }
-            
+
             glGenTextures(buffer_size, textures);
             for (unsigned int i = 0; i < buffer_size; i++) {
                 glBindTexture(GL_TEXTURE_2D, textures[i]);
@@ -113,7 +139,6 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
             }
 
             configured = true;
-            printf("Buffer Size: %d\n", buffer_size);
         }
 
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -137,6 +162,22 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
         set_uniform2f(frameShader, "resolution", render->width, render->height);
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, render->width, render->height);
+        
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glUseProgram(displayShader);
+        
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, renderedTexture);
+
+        glUniform1i(texID, 0);
+        
+
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         
         if (!render_commit_frame(render)) break;
 
@@ -144,9 +185,9 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
             socket_send_packet(&socket, encoder.packet);
     }
 
-    glDeleteBuffers(1, &EBO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteProgram(frameShader);
+    //glDeleteBuffers(1, &EBO);
+    //glDeleteBuffers(1, &VBO);
+    //glDeleteProgram(frameShader);
 
 cleanup:
     close_socket(&socket);
