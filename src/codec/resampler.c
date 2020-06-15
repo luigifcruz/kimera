@@ -1,4 +1,4 @@
-#include "kimera/resampler.h"
+#include "kimera/codec.h"
 
 void open_resampler(ResamplerState* resampler, enum AVPixelFormat format) {
     resampler->configured = false;

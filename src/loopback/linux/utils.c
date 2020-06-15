@@ -1,4 +1,4 @@
-#include "kimera/loopback/linux/utils.h"
+#include "kimera/loopback/linux.h"
 
 unsigned int ff_to_v4l(enum AVPixelFormat input) {
     switch (input) {

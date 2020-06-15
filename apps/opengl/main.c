@@ -1,5 +1,4 @@
 
-#define KIMERA_UNIX
 #define KIMERA_WINDOW_GLFW
 
 #include <stdio.h>
@@ -7,16 +6,15 @@
 #include <assert.h>
 #include <stdbool.h>
 
-#include "render/render.h"
-#include "render/meta.h"
+#include "kimera/state.h"
 
-#include "kimera/socket.h"
-#include "kimera/encoder.h"
-#include "kimera/decoder.h"
-#include "kimera/resampler.h"
+#include "kimera/transport.h"
+#include "kimera/codec.h"
 #include "kimera/loopback.h"
 #include "kimera/display.h"
 #include "kimera/client.h"
+#include "render/render.h"
+#include "render/meta.h"
 
 void transmitter(State* state, volatile sig_atomic_t* stop) {
     kimera_print_state(state);

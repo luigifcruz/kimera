@@ -1,7 +1,7 @@
 #include "kimera/client.h"
 
 void kimera_print_version() {
-    printf("Kimera Version: %d.%d\n", kimera_VERSION_MAJOR, kimera_VERSION_MINOR);
+    printf("Kimera Version: %d.%d\n", KIMERA_VERSION_MAJOR, KIMERA_VERSION_MINOR);
     printf("Ffmpeg Version: %s\n", av_version_info());
 }
 

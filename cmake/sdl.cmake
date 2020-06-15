@@ -9,6 +9,7 @@ if(LINUX OR MACOS)
 endif()
 
 if(WINDOWS)
+    message(SEND_ERROR "SDL isn't supported on Windows yet.")
 endif()
 
 target_include_directories(sdl INTERFACE
@@ -20,3 +21,5 @@ target_link_libraries(sdl INTERFACE
     ${SDL2_LDFLAGS}
     ${SDL2_TTF_LDFLAGS}
 )
+
+set_property(GLOBAL APPEND PROPERTY GLOBAL_LIB_LIST sdl)

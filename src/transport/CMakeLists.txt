@@ -1,11 +1,3 @@
-include(${CMAKE_SOURCE_DIR}/cmake/ffmpeg.cmake)
-
-add_subdirectory(loopback)
-add_subdirectory(transport)
-add_subdirectory(display)
-add_subdirectory(codec)
-add_subdirectory(client)
-
 if(LINUX OR MACOS OR WINDOWS)
     file(GLOB TMP_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
     list(APPEND SOURCE_LIST ${TMP_LIST})

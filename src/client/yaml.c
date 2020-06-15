@@ -1,4 +1,4 @@
-#include "kimera/yaml.h"
+#include "kimera/client.h"
 
 bool kimera_parse_config_file(State* state, char* path) {
     FILE* config_file;
