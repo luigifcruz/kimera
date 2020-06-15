@@ -8,7 +8,7 @@ LoopbackState* alloc_loopback() {
     return state;
 }
 
-void close_loopback(LoopbackState* loopback, State* state) {
+void free_loopback(LoopbackState* loopback, State* state) {
     if (state->source & DISPLAY)
         return free_xcb(loopback);
     if (state->source & LOOPBACK)
