@@ -1,4 +1,4 @@
-#include "kimera/decoder.h"
+#include "kimera/codec.h"
 
 bool needs_parser(enum AVCodecID codec_id) {
     switch(codec_id){

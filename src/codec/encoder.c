@@ -1,4 +1,4 @@
-#include "kimera/encoder.h"
+#include "kimera/codec.h"
 
 bool start_encoder(EncoderState* encoder, State* state) {
     AVCodec *codec = avcodec_find_encoder_by_name(state->codec);

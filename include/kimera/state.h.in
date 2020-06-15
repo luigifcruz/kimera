@@ -8,8 +8,12 @@
 // CMake Defined Settings
 //
 
-#define kimera_VERSION_MAJOR @kimera_VERSION_MAJOR@
-#define kimera_VERSION_MINOR @kimera_VERSION_MINOR@
+#cmakedefine KIMERA_WINDOWS
+#cmakedefine KIMERA_MACOS
+#cmakedefine KIMERA_LINUX
+
+#define KIMERA_VERSION_MAJOR @kimera_VERSION_MAJOR@
+#define KIMERA_VERSION_MINOR @kimera_VERSION_MINOR@
 
 //
 // Default Settings

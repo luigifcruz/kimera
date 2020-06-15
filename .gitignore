@@ -16,3 +16,4 @@ include/kimera/state.h
 .externalNativeBuild
 .cxx
 examples
+deps

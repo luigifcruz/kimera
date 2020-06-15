@@ -8,7 +8,10 @@ if(LINUX OR MACOS)
 endif()
 
 if(WINDOWS)
+    message(SEND_ERROR "GLFW isn't supported on Windows yet.")
 endif()
 
 target_include_directories(glfw INTERFACE ${glfw_INCLUDE_DIRS})
 target_link_libraries(glfw INTERFACE ${glfw_LDFLAGS})
+
+set_property(GLOBAL APPEND PROPERTY GLOBAL_LIB_LIST glfw)

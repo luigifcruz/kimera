@@ -13,6 +13,7 @@ if(LINUX OR MACOS)
 endif()
 
 if(WINDOWS)
+    message(SEND_ERROR "FFMPEG isn't supported on Windows yet.")
 endif()
 
 target_include_directories(ffmpeg INTERFACE
@@ -32,3 +33,5 @@ target_link_libraries(ffmpeg INTERFACE
     ${SWRESAMPLE_LDFLAGS}
     ${SWSCALE_LDFLAGS}
 )
+
+set_property(GLOBAL APPEND PROPERTY GLOBAL_LIB_LIST ffmpeg)

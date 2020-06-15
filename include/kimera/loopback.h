@@ -2,7 +2,7 @@
 #define LOOPBACK_H
 
 #ifdef __unix__
-#include "kimera/loopback/linux/loopback.h"
+#include "kimera/loopback/linux.h"
 #elif __APPLE__
 #include "kimera/loopback/macos/loopback.h"
 #endif

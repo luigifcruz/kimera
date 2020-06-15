@@ -9,3 +9,5 @@ endif()
 
 target_include_directories(xcb INTERFACE ${XCB_INCLUDE_DIRS})
 target_link_libraries(xcb INTERFACE ${XCB_LDFLAGS})
+
+set_property(GLOBAL APPEND PROPERTY GLOBAL_LIB_LIST xcb)
