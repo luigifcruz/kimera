@@ -4,23 +4,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "state.h"
 #include "helper.h"
-
+#include "state.h"
 #include "kimera/state.h"
-
-#ifdef KIMERA_WINDOW_GLFW
-#include "adapter/glfw.h"
-#elif defined KIMERA_WINDOW_X11
-#include "adapter/x11.h"
-#endif
 
 RenderState* alloc_render() {
     RenderState* state = (RenderState*)malloc(sizeof(RenderState));
     state->display = NULL;
     state->surface = NULL;
     state->context = NULL;
-    state->adapter = alloc_adapter();
+    state->adapter = NULL;
     return state;
 }
 
@@ -31,8 +24,7 @@ void free_render(RenderState* render) {
         eglDestroyContext(render->display, render->context);
     if (render->display)
         eglTerminate(render->display);
-    if (render->adapter)
-        free_adapter(render->adapter);
+    glfwTerminate();
     free(render);
 }
 
@@ -45,12 +37,8 @@ bool start_render(RenderState* render, State* state) {
         return false;
     }
 
-    if (render->mode == HEADLESS)
-        render->display = eglGetDisplay(EGL_NO_DISPLAY);
+    render->display = eglGetDisplay(EGL_NO_DISPLAY);
     
-    if (render->mode == WINDOWED)
-        if (!load_adapter(render)) return false;
-
     if (!eglInitialize(render->display, NULL, NULL)) {
         printf("[RENDER] Failed to initialize EGL.\n");
         get_egl_error(__LINE__);
@@ -78,8 +66,39 @@ bool start_render(RenderState* render, State* state) {
         }
     }
 
-    if (render->mode == WINDOWED)
-        if (!create_adapter(render)) return false;
+    if (render->mode == WINDOWED) {
+        if (!glfwInit()) {
+            printf("[RENDER] Can't initiate GLFW.\n");
+            return false;
+        }
+
+        glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
+        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+
+        if (!(render->adapter = glfwCreateWindow(
+            render->width, render->height, "RENDER", NULL, NULL))) {
+            printf("[RENDER] Can't create GLFW window.\n");
+            glfwTerminate();
+            return false;
+        }
+
+        EGLNativeWindowType surface;
+    
+        #ifdef KIMERA_MACOS
+            surface = glfwGetCocoaWindow(render->adapter);
+        #elif defined KIMERA_UNIX
+            surface = glfwGetX11Window(render->adapter);
+        #elif defined KIMERA_WIN32
+            surface = glfwGetWin32Window(render->adapter);
+        #endif
+
+        render->surface = eglCreateWindowSurface(render->display, render->config, surface, 0);
+        if (!render->surface) {
+            printf("[RENDER] Failed to create window surface.\n");
+            get_egl_error(__LINE__);
+            return false;
+        };
+    }
 
     render->context = eglCreateContext(render->display, render->config, EGL_NO_CONTEXT, egl_ctx_attr);
     if (!render->context) {
@@ -108,13 +127,7 @@ bool start_render(RenderState* render, State* state) {
 
     if (get_gl_error(__LINE__) || get_egl_error(__LINE__)) return false;
 
-    render->time = mticks();
-
     return true;
-}
-
-float render_get_time(RenderState* render) {
-    return (float)((mticks() - render->time)/1000);
 }
 
 void render_push_frame(RenderState* render) {
@@ -137,7 +150,10 @@ bool render_commit_frame(RenderState* render) {
     if (render->mode == WINDOWED) {
         eglSwapBuffers(render->display, render->surface);
         if (get_egl_error(__LINE__)) return false;
-        return adapter_poll_events(render);
+        
+        glfwPollEvents();
+        glfwGetWindowSize(render->adapter, &render->width, &render->height);
+        return !glfwWindowShouldClose(render->adapter);
     }
     return true;
 }

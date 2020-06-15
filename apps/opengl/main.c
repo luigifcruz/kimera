@@ -18,78 +18,31 @@
 #include "kimera/display.h"
 #include "kimera/client.h"
 
+const float vertices[] = {
+     1.0f,  1.0f, 0.0f,  1.0f, 0.0f,
+     1.0f, -1.0f, 0.0f,  1.0f, 1.0f,
+    -1.0f, -1.0f, 0.0f,  0.0f, 1.0f,
+    -1.0f,  1.0f, 0.0f,  0.0f, 0.0f 
+};
+
+const unsigned int indices[] = {
+    0, 1, 3,
+    1, 2, 3
+};
+
 void transmitter(State* state, volatile sig_atomic_t* stop) {
     kimera_print_state(state);
 
     RenderState* render = alloc_render();
 
     render->mode = WINDOWED;
-    render->api  = EGL_OPENGL_ES_API;
+    render->api  = EGL_OPENGL_API;
 
     if (!start_render(render, state)) goto cleanup;
     render_print_meta(render);
 
-    float vertices[] = {
-         1.0f,  1.0f, 0.0f,  1.0f, 0.0f,
-         1.0f, -1.0f, 0.0f,  1.0f, 1.0f,
-        -1.0f, -1.0f, 0.0f,  0.0f, 1.0f,
-        -1.0f,  1.0f, 0.0f,  0.0f, 0.0f 
-    };
-
-    unsigned int indices[] = {
-        0, 1, 3,
-        1, 2, 3
-    };
-
     //glEnable(GL_BLEND); 
     //glEnable(GL_MULTISAMPLE);
-
-    unsigned int VBO, EBO;
-
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glGenBuffers(1, &EBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-   
-    unsigned int frameShader = load_shader("./shaders/frame.vs", "./shaders/frame.fs");
-    if (!frameShader) goto cleanup;
-
-    unsigned int displayShader = load_shader("./shaders/filter.vs", "./shaders/filter.fs");
-    if (!displayShader) goto cleanup;
-
-    unsigned int FramebufferName = 1;
-    glGenFramebuffers(1, &FramebufferName);
-    glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
-
-    unsigned int renderedTexture;
-    glGenTextures(1, &renderedTexture);
-    glBindTexture(GL_TEXTURE_2D, renderedTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, state->width, state->height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderedTexture, 0);
-
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        printf("Nope.\n");
-        return;
-    }
-
-    bool configured = false;
-    unsigned int buffer_size = 0;
-    unsigned int textures[8];
     
     // Start Socket Server. 
     SocketState socket;
@@ -110,7 +63,63 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
     ResamplerState resampler;
     open_resampler(&resampler, state->out_format);
     
-    GLuint texID = glGetUniformLocation(displayShader, "renderedTexture");
+    //
+    // OpenGL Stuff
+    //
+
+    unsigned int VBO, EBO, FBO, RT_A, RT_B;
+    
+    bool configured = false;
+    unsigned int planes = 0;
+    unsigned int textures[8];
+
+    // Generate Vertices Buffer Object
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // Generate Element Buffer Object
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+   
+    // Setup Processing FrameBuffer (this is different than the EGL PBuffer)
+    glGenFramebuffers(1, &FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+
+        glGenTextures(1, &RT_A);
+        glBindTexture(GL_TEXTURE_2D, RT_A);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, state->width, state->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, RT_A, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        glGenTextures(1, &RT_B);
+        glBindTexture(GL_TEXTURE_2D, RT_B);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, state->width, state->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, RT_B, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // Load All Shaders Programs
+    unsigned int frameShader = load_shader("./shaders/frame.vs", "./shaders/frame.fs");
+    unsigned int filterShader = load_shader("./shaders/filter.vs", "./shaders/filter.fs");
+    unsigned int displayShader = load_shader("./shaders/display.vs", "./shaders/display.fs");
+    if (!frameShader || !displayShader) goto cleanup;
 
     // Start Decoder Loop.
     while (loopback_pull_frame(&loopback, state) && !(*stop)) {
@@ -119,22 +128,27 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
 
         AVFrame* frame = resampler.frame;
 
-        glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
+        // Make Color Convertion (X to RGBA)
+        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
         glViewport(0, 0, state->width, state->height);
+        
+        set_draw_buffer(GL_COLOR_ATTACHMENT0);
 
         if (!configured) {
             for (int i = 0; i < 8; i++) {
                 if (frame->linesize[i] == 0) break;
-                buffer_size++;
+                planes++;
             }
 
-            glGenTextures(buffer_size, textures);
-            for (unsigned int i = 0; i < buffer_size; i++) {
-                glBindTexture(GL_TEXTURE_2D, textures[i]);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glGenTextures(planes, textures);
+            for (unsigned int i = 0; i < planes; i++) {
+                 glBindTexture(GL_TEXTURE_2D, textures[i]);
+
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
                 glBindTexture(GL_TEXTURE_2D, 0);
             }
 
@@ -146,36 +160,57 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
 
         glUseProgram(frameShader);
         
-        for (unsigned int i = 0; i < buffer_size; i++) {
+        char plane_id[10];
+        for (unsigned int i = 0; i < planes; i++) {
             int ratio = frame->width / frame->linesize[i];
             //printf("%d: %d %d %d\n", i, frame->linesize[i], ratio, frame->width/ratio);
             
+            sprintf(plane_id, "plane%d", i);
+            set_uniform1i(frameShader, plane_id, i);
             glActiveTexture(GL_TEXTURE0 + i);
             glBindTexture(GL_TEXTURE_2D, textures[i]);
-            glTexImage2D(
-                GL_TEXTURE_2D, 0, GL_RED, frame->width/ratio, frame->height/ratio, 
-                0, GL_RED, GL_UNSIGNED_BYTE, frame->data[i]);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, frame->width/ratio, frame->height/ratio, 
+                         0, GL_RED, GL_UNSIGNED_BYTE, frame->data[i]);
             glGenerateMipmap(GL_TEXTURE_2D);
         }
 
-        set_uniform1f(frameShader, "time", render_get_time(render));
-        set_uniform2f(frameShader, "resolution", render->width, render->height);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        // Add Custom Filter
+        glUseProgram(filterShader);
+        set_draw_buffer(GL_COLOR_ATTACHMENT1);
+
+        set_uniform1f(filterShader, "time", glfwGetTime());
+        set_uniform2f(filterShader, "resolution", state->width, state->height);
+
+        set_uniform1i(filterShader, "renderedTexture", 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, RT_A);
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+        // Draw Frame To Display
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, render->width, render->height);
-        
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(displayShader);
-        
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, renderedTexture);
 
-        glUniform1i(texID, 0);
+        float imgAspectRatio = (float)state->width / (float)state->height;
+        float viewAspectRatio = (float)render->width / (float)render->height;
+
+        float xScale = 1.0f, yScale = 1.0f;
+        if (imgAspectRatio > viewAspectRatio) {
+            yScale = viewAspectRatio / imgAspectRatio;
+        } else {
+            xScale = imgAspectRatio / viewAspectRatio;
+        }
+        set_uniform2f(displayShader, "ScaleFact", xScale, yScale);
         
+        set_uniform1i(displayShader, "renderedTexture", 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, RT_B);
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         

@@ -4,23 +4,35 @@
 #include "glad/glad.h"
 #include "glad/glad_egl.h"
 
+#ifdef KIMERA_MACOS
+#define GLFW_EXPOSE_NATIVE_COCOA
+#elif defined KIMERA_UNIX
+#define GLFW_EXPOSE_NATIVE_X11
+#define GLFW_EXPOSE_NATIVE_WAYLAND
+#include <unistd.h>
+#elif defined KIMERA_WIN32
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <Windows.h>
+#endif
+
+#include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
+
 typedef enum {
     WINDOWED = 0,
     HEADLESS = 1,
 } RenderMode;
 
 typedef struct {
-    int        width;
-    int        height;
-    double     time;
-    RenderMode mode;
-
-    void*      adapter;
-    GLenum     api;
-    EGLConfig  config;
-    EGLDisplay display;
-    EGLSurface surface;
-    EGLContext context;
+    int         width;
+    int         height;
+    RenderMode  mode;
+    GLFWwindow* adapter;
+    GLenum      api;
+    EGLConfig   config;
+    EGLDisplay  display;
+    EGLSurface  surface;
+    EGLContext  context;
 } RenderState;
 
 const int egl_attr[] = {
@@ -36,6 +48,7 @@ const int egl_attr[] = {
 
 const int egl_ctx_attr[] = {
     EGL_CONTEXT_MAJOR_VERSION, 3,
+    EGL_CONTEXT_CLIENT_VERSION, 3,
     EGL_NONE
 };
 

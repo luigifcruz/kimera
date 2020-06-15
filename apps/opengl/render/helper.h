@@ -6,6 +6,7 @@
 #include <sys/time.h>
 
 #include "glad/glad.h"
+#include "glad/glad_egl.h"
 
 size_t get_file_size(FILE* fp) {
     fseek(fp, 0L, SEEK_END);
@@ -127,6 +128,17 @@ void set_uniform2f(int program, char* name, float v0, float v1) {
 void set_uniform1f(int program, char* name, float v0) {
     int location = glGetUniformLocation(program, name);
     glUniform1f(location, v0);
+}
+
+void set_uniform1i(int program, char* name, int v0) {
+    int location = glGetUniformLocation(program, name);
+    glUniform1i(location, v0);
+}
+
+void set_draw_buffer(GLenum attachment) {
+    GLenum targets[1] = { GL_COLOR_ATTACHMENT0 };
+    targets[0] = attachment;
+    glDrawBuffers(1, targets);
 }
 
 double mticks() {
