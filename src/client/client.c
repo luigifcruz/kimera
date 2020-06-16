@@ -65,6 +65,11 @@ int kimera_client(
     int argc, char *argv[],
     void(*tx)(State*, volatile sig_atomic_t*),
     void(*rx)(State*, volatile sig_atomic_t*)) {
+    // Set Windows console to UTF-8
+#ifdef KIMERA_WINDOWS
+    system("chcp 65001");
+#endif
+
     // Register signal handler.
     signal(SIGINT, inthand);
 

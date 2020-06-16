@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/time.h>
 
 #include "glad/glad.h"
 #include "glad/glad_egl.h"
@@ -139,12 +138,6 @@ void set_draw_buffer(GLenum attachment) {
     GLenum targets[1] = { GL_COLOR_ATTACHMENT0 };
     targets[0] = attachment;
     glDrawBuffers(1, targets);
-}
-
-double mticks() {
-    struct timeval tv;
-    gettimeofday(&tv, 0);
-    return (double) tv.tv_usec / 1000 + tv.tv_sec * 1000;
 }
 
 #endif

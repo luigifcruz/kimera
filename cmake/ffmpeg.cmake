@@ -13,7 +13,8 @@ if(LINUX OR MACOS)
 endif()
 
 if(WINDOWS)
-    message(SEND_ERROR "FFMPEG isn't supported on Windows yet.")
+    file(GLOB AVCODEC_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/deps/ffmpeg*/include")
+    file(GLOB AVCODEC_LDFLAGS "${CMAKE_SOURCE_DIR}/deps/ffmpeg*/lib/*.lib" "${CMAKE_SOURCE_DIR}/deps/ffmpeg*/lib/*.dll")
 endif()
 
 target_include_directories(ffmpeg INTERFACE

@@ -8,7 +8,8 @@ if(LINUX OR MACOS)
 endif()
 
 if(WINDOWS)
-    message(SEND_ERROR "YAML isn't supported on Windows yet.")
+    file(GLOB YAML_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/deps/*yaml*/include")
+    file(GLOB YAML_LDFLAGS "${CMAKE_SOURCE_DIR}/deps/*yaml*/out/build/x64-Release/*.lib")
 endif()
 
 target_include_directories(yaml INTERFACE ${YAML_INCLUDE_DIRS})

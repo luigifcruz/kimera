@@ -76,6 +76,7 @@ bool start_display(DisplayState* display, State* state) {
 	display->info 		= false;
 	display->fullscreen = false;
 	display->ishidden 	= true;
+	display->event		= NULL;
 
 	return true;
 

@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <signal.h>
 #include <stdbool.h>
-#include <unistd.h>
 #include <string.h>
 
 #include "kimera/transport.h"

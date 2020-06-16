@@ -23,7 +23,7 @@ bool open_tcp_client(SocketState* sock_state, State* state) {
         return false;
     }
 
-    sock_state->interface = TCP;
+    sock_state->interf = TCP;
     return true;
 }
 
@@ -67,12 +67,12 @@ bool open_tcp_server(SocketState* sock_state, State* state) {
 
     printf("[TCP_SOCKET] Client connected.\n");
 
-    sock_state->interface = TCP;
+    sock_state->interf = TCP;
     return true;
 }
 
 void close_tcp(SocketState* sock_state) {
     close(sock_state->client_fd);
     close(sock_state->server_fd);
-    sock_state->interface = NONE;
+    sock_state->interf = NONE;
 }
