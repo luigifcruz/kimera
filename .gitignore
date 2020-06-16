@@ -15,5 +15,8 @@
 include/kimera/state.h
 .externalNativeBuild
 .cxx
+.vs
+out
 examples
 deps
+CMakeSettings.json

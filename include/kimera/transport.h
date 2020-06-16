@@ -1,14 +1,20 @@
 #ifndef TRANSPORT_H
 #define TRANSPORT_H
 
-#include <sys/types.h>
+#include "kimera/state.h"
+
+#ifdef KIMERA_WINDOWS
+#include <ws2tcpip.h>
+#include <afunix.h>
+#else
 #include <sys/socket.h>
-#include <arpa/inet.h> 
-#include <stdbool.h>
 #include <sys/un.h>
 #include <unistd.h>
+#include <arpa/inet.h> 
+#endif
 
-#include "kimera/state.h"
+#include <sys/types.h>
+#include <stdbool.h>
 
 typedef struct sockaddr_in socket_in;
 typedef struct sockaddr_un socket_un;
@@ -34,7 +40,7 @@ typedef struct {
 typedef struct {
     int server_fd;
     int client_fd;
-    Interfaces interface;
+    Interfaces interf;
 
     // Router
     RouterState router;

@@ -1,10 +1,14 @@
 #ifndef LOOPBACK_H
 #define LOOPBACK_H
 
-#ifdef __unix__
+#include "kimera/state.h"
+
+#if	  defined(KIMERA_LINUX)
 #include "kimera/loopback/linux.h"
-#elif __APPLE__
+#elif defined(KIMERA_MACOS)
 #include "kimera/loopback/macos/loopback.h"
+#elif defined(KIMERA_WINDOWS)
+#include "kimera/loopback/windows.h"
 #endif
 
 #endif

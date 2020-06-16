@@ -1,3 +1,5 @@
+set(CMAKE_C_FLAGS "")
+
 if(LINUX)
     include(${CMAKE_SOURCE_DIR}/cmake/xcb.cmake)
     file(GLOB TMP_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/linux/*.c")
@@ -20,7 +22,8 @@ if(MACOS)
 endif()
 
 if(WINDOWS)
-    message(SEND_ERROR "The Loopback Module doesn't support Windows yet.")
+    file(GLOB TMP_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/windows/*.c")
+    list(APPEND SOURCE_LIST ${TMP_LIST})
 endif()
 
 set_property(GLOBAL APPEND PROPERTY GLOBAL_CMAKE_C_FLAGS ${CMAKE_C_FLAGS})

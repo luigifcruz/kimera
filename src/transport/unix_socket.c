@@ -16,7 +16,7 @@ bool open_unix_client(SocketState* sock_state, State* state) {
         return false;
     }
     
-    sock_state->interface = UNIX;
+    sock_state->interf = UNIX;
     return true;
 }
 
@@ -53,12 +53,12 @@ bool open_unix_server(SocketState* sock_state, State* state) {
 
     printf("[UNIX_SOCKET] Client connected.\n");
     
-    sock_state->interface = UNIX;
+    sock_state->interf = UNIX;
     return true;
 }
 
 void close_unix(SocketState* sock_state) {
     close(sock_state->server_fd);
     close(sock_state->client_fd);
-    sock_state->interface = NONE;
+    sock_state->interf = NONE;
 }

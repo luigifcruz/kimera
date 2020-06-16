@@ -9,7 +9,10 @@ if(LINUX OR MACOS)
 endif()
 
 if(WINDOWS)
-    message(SEND_ERROR "SDL isn't supported on Windows yet.")
+    file(GLOB SDL2_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/deps/SDL2-*/include")
+    file(GLOB SDL2_TTF_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/deps/SDL2_ttf*/include")
+    file(GLOB SDL2_LDFLAGS "${CMAKE_SOURCE_DIR}/deps/SDL2-*/lib/x64/*.lib")
+    file(GLOB SDL2_TTF_LDFLAGS "${CMAKE_SOURCE_DIR}/deps/SDL2_ttf*/lib/x64/*.lib")
 endif()
 
 target_include_directories(sdl INTERFACE

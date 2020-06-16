@@ -1,4 +1,5 @@
 #include "kimera/client.h"
+#include <assert.h>
 
 bool kimera_parse_config_file(State* state, char* path) {
     FILE* config_file;
@@ -25,8 +26,11 @@ bool kimera_parse_config_file(State* state, char* path) {
     int mapping_index = 0;
     int sequence_index = 0;
 
-    while (event.type != YAML_STREAM_END_EVENT) {
-        yaml_parser_parse(&parser, &event);
+    do {
+        if (!yaml_parser_parse(&parser, &event)) {
+            printf("Error while trying to parse configuration file: %s\n", parser.problem);
+            return false;
+        }
 
         switch(event.type) { 
             case YAML_MAPPING_START_EVENT: mapping_index += 1; break;
@@ -131,7 +135,7 @@ bool kimera_parse_config_file(State* state, char* path) {
         if (event.type != YAML_STREAM_END_EVENT) {
             yaml_event_delete(&event);
         } 
-    }
+    } while (event.type != YAML_STREAM_END_EVENT);
 
     yaml_event_delete(&event);
     yaml_parser_delete(&parser);

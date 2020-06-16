@@ -21,7 +21,7 @@ bool open_udp_client(SocketState* sock_state, State* state) {
         return false;
     }
 
-    sock_state->interface = UDP;
+    sock_state->interf = UDP;
     return true;
 }
 
@@ -39,12 +39,12 @@ bool open_udp_server(SocketState* sock_state, State* state) {
     sock_state->server_in->sin_port = htons(state->port);
     sock_state->server_in->sin_addr.s_addr = inet_addr(state->address); 
 
-    sock_state->interface = UDP;
+    sock_state->interf = UDP;
     return true;
 }
 
 void close_udp(SocketState* sock_state) {
     close(sock_state->client_fd);
     close(sock_state->server_fd);
-    sock_state->interface = NONE;
+    sock_state->interf = NONE;
 }

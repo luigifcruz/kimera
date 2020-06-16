@@ -28,6 +28,10 @@ configure_file(
     "${PROJECT_SOURCE_DIR}/include/kimera/state.h"
 )
 
+if(WINDOWS)
+    set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
+endif()
+
 include(cmake/listdirs.cmake)
 
 set_property(GLOBAL PROPERTY GLOBAL_CMAKE_C_FLAGS "")
