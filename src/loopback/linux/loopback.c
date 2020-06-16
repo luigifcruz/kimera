@@ -1,14 +1,14 @@
 #include "kimera/loopback/linux.h"
 
-inline bool open_loopback_sink(LoopbackState* loopback, State* state) {
+bool open_loopback_sink(LoopbackState* loopback, State* state) {
     return init_v4l2_sink(loopback, state);
 }
 
-inline bool loopback_push_frame(LoopbackState* loopback, AVFrame* frame) {
+bool loopback_push_frame(LoopbackState* loopback, AVFrame* frame) {
     return push_v4l2_frame(loopback, frame);
 }
 
-inline bool open_loopback_source(LoopbackState* loopback, State* state) {
+bool open_loopback_source(LoopbackState* loopback, State* state) {
     if (state->source & DISPLAY)
         return init_xcb_source(loopback, state);
     if (state->source & LOOPBACK)
@@ -16,7 +16,7 @@ inline bool open_loopback_source(LoopbackState* loopback, State* state) {
     return false;
 }
 
-inline bool loopback_pull_frame(LoopbackState* loopback, State* state) {
+bool loopback_pull_frame(LoopbackState* loopback, State* state) {
     if (state->source & DISPLAY)
         return pull_xcb_frame(loopback, state);
     if (state->source & LOOPBACK)

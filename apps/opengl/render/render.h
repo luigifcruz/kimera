@@ -82,7 +82,7 @@ bool start_render(RenderState* render, State* state) {
             return false;
         }
 
-        EGLNativeWindowType surface;
+        EGLNativeWindowType surface = 0;
     
         #ifdef KIMERA_MACOS
             surface = glfwGetCocoaWindow(render->adapter);

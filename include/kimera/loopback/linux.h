@@ -1,6 +1,18 @@
 #ifndef LOOPBACK_LINUX_H
 #define LOOPBACK_LINUX_H
 
+#include <xcb/xcb.h>
+#include <linux/videodev2.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <libavutil/time.h>
+#include <libavcodec/avcodec.h>
+#include <libavutil/imgutils.h>
+#include <unistd.h>
+
 #include "kimera/state.h"
 
 typedef struct {

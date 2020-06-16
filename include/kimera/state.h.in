@@ -3,6 +3,7 @@
 
 #include <libavcodec/avcodec.h>
 #include <signal.h>
+#include <stdbool.h>
 
 //
 // CMake Defined Settings
