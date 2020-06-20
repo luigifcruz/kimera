@@ -84,11 +84,11 @@ bool start_render(RenderState* render, State* state) {
 
         EGLNativeWindowType surface = 0;
     
-        #ifdef KIMERA_MACOS
+        #if   defined(KIMERA_MACOS)
             surface = glfwGetCocoaWindow(render->adapter);
-        #elif defined KIMERA_UNIX
+        #elif defined(KIMERA_LINUX)
             surface = glfwGetX11Window(render->adapter);
-        #elif defined KIMERA_WIN32
+        #elif defined(KIMERA_WINDOWS)
             surface = glfwGetWin32Window(render->adapter);
         #endif
 
@@ -128,12 +128,6 @@ bool start_render(RenderState* render, State* state) {
     if (get_gl_error(__LINE__) || get_egl_error(__LINE__)) return false;
 
     return true;
-}
-
-void render_push_frame(RenderState* render) {
-}
-
-void render_pull_frame(RenderState* render) {
 }
 
 bool render_commit_frame(RenderState* render) {

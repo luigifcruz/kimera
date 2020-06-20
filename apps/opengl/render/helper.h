@@ -7,6 +7,9 @@
 #include "glad/glad.h"
 #include "glad/glad_egl.h"
 
+#define MAX_PROC 2
+#define MAX_PLANES 3
+
 size_t get_file_size(FILE* fp) {
     fseek(fp, 0L, SEEK_END);
     size_t size = ftell(fp);
@@ -107,6 +110,37 @@ unsigned int load_shader(char* vs_path, char* fs_path) {
     glDeleteShader(fragment_shader);
 
     return program;
+}
+
+void bind_framebuffer_tex(unsigned int atch_id, unsigned int tex_id) {
+    glFramebufferTexture2D(GL_FRAMEBUFFER, atch_id, GL_TEXTURE_2D, tex_id, 0);
+}
+
+bool get_planes_count(AVFrame* frame, float* ratio, unsigned int* planes) {
+    for (unsigned int i = 0; i < 8; i++) {
+        if (frame->linesize[i] == 0) break;
+        if ((*planes) < MAX_PLANES) {
+            ratio[i] = (float)frame->width / (float)frame->linesize[i];
+        }
+        (*planes)++;
+    }
+    
+    if ((*planes) > MAX_PLANES) {
+        printf("[RENDER] Too many planes (%d), format unsupported.\n", (*planes));
+        return false;
+    }
+
+    return true;
+}
+
+void create_texture(unsigned int id, unsigned int format, int width, int height) {
+    glBindTexture(GL_TEXTURE_2D, id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void set_uniform4f(int program, char* name, float v0, float v1, float v2, float v3) {

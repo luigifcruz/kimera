@@ -1,25 +1,17 @@
-/*
- * Original shader from: https://www.shadertoy.com/view/3td3DB
- */
-
 #version 330 core
 
 #ifdef GL_ES
 precision mediump float;
 #endif
 
+in vec2 TexCoord;
 out vec4 FragColor;
 
-in vec3 ourColor;
-in vec2 TexCoord;
-
-// glslsandbox uniforms
+uniform float count;
 uniform float time;
 uniform vec2 resolution;
-uniform sampler2D texture1;
 
-layout(location = 0) out vec3 color;
-
+uniform sampler2D renderedTexture;
 
 float makePoint(float x,float y,float fx,float fy,float sx,float sy,float t){
    float xx=x+sin(t*fx)*sx;
@@ -27,9 +19,8 @@ float makePoint(float x,float y,float fx,float fy,float sx,float sy,float t){
    return 1.0/sqrt(xx*xx+yy*yy);
 }
 
-void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
-
-   vec2 p=(fragCoord.xy/resolution.x)*2.0-vec2(1.0,resolution.y/resolution.x);
+void main( ) {
+   vec2 p=(gl_FragCoord.xy/resolution.x)*2.0-vec2(1.0,resolution.y/resolution.x);
 
    p=p*2.0;
    
@@ -69,12 +60,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
    c=c+makePoint(x,y,0.2,0.6,0.6,0.3,time);
    c=c+makePoint(x,y,1.3,0.5,0.5,0.4,time);
    
-   vec3 d=vec3(a,b,c)/32.0;
+   vec3 d=vec3(a,b,c)/32.0+count/1000;
    
    float ap = (d.x+d.y+d.z)/3.0;
-   fragColor = (texture(texture1, TexCoord) + vec4(d.x,d.y,d.z,ap)) * 0.5;
-}
-
-void main( void ) {
-    mainImage(color, vec2(gl_FragCoord.x, gl_FragCoord.y));
+   FragColor = (texture2D(renderedTexture, TexCoord) + vec4(d.x,d.y,d.z,ap)) * 0.5;
 }

@@ -14,7 +14,7 @@ endif()
 
 if(WINDOWS)
     file(GLOB AVCODEC_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/deps/ffmpeg*/include")
-    file(GLOB AVCODEC_LDFLAGS "${CMAKE_SOURCE_DIR}/deps/ffmpeg*/lib/*.lib" "${CMAKE_SOURCE_DIR}/deps/ffmpeg*/lib/*.dll")
+    file(GLOB AVCODEC_LDFLAGS "${CMAKE_SOURCE_DIR}/deps/ffmpeg*/lib/*.lib")
 endif()
 
 target_include_directories(ffmpeg INTERFACE
