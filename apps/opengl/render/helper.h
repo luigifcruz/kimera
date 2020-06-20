@@ -77,7 +77,7 @@ unsigned int compile_shader(unsigned int type, char* path) {
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(shader, 512, NULL, info_log);
-        printf("[RENDER] Shader compilation error:\n%s", info_log);
+        printf("[RENDER] Shader (%s) compilation error:\n%s", path, info_log);
         return 0;
     }
 
@@ -102,7 +102,7 @@ unsigned int load_shader(char* vs_path, char* fs_path) {
     glGetProgramiv(program, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(program, 512, NULL, info_log);
-        printf("[RENDER] Shader compilation error:\n%s", info_log);
+        printf("[RENDER] Shader (%s) compilation error:\n%s", vs_path, info_log);
         return 0;
     }
 

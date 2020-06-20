@@ -1,4 +1,4 @@
-#version 330 core
+#version 300 es
 
 #ifdef GL_ES
 precision mediump float;
@@ -60,8 +60,8 @@ void main( ) {
    c=c+makePoint(x,y,0.2,0.6,0.6,0.3,time);
    c=c+makePoint(x,y,1.3,0.5,0.5,0.4,time);
    
-   vec3 d=vec3(a,b,c)/32.0+count/1000;
+   vec3 d=vec3(a,b,c)/32.0+count/1000.0;
    
    float ap = (d.x+d.y+d.z)/3.0;
-   FragColor = (texture2D(renderedTexture, TexCoord) + vec4(d.x,d.y,d.z,ap)) * 0.5;
+   FragColor = (texture(renderedTexture, TexCoord) + vec4(d.x,d.y,d.z,ap)) * 0.5;
 }

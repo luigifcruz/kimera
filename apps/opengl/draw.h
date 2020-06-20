@@ -269,7 +269,7 @@ bool render_draw_frame(CanvasState* render) {
 
         set_uniform1i(render->disp_shader, "renderedTexture", 0);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, render->out_tex[1]);
+        glBindTexture(GL_TEXTURE_2D, get_last_framebuffer(render));
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     }

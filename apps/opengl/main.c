@@ -46,7 +46,7 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
 
     RenderState* render = alloc_render();
 
-    render->mode = HEADLESS;
+    render->mode = WINDOWED;
     render->api  = EGL_OPENGL_ES_API;
 
     if (!start_render(render, state)) goto cleanup;
@@ -71,7 +71,7 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
 
         if (!render_push_frame(&canvas, frame)) break;
         if (!render_proc_frame(&canvas, NULL, NULL)) break;
-       // if (!render_draw_frame(&canvas)) break;
+        if (!render_draw_frame(&canvas)) break;
         if (!render_pull_frame(&canvas)) break;
         
         if (!render_commit_frame(render)) break;
