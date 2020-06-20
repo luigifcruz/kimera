@@ -1,6 +1,11 @@
 #include "kimera/transport.h"
 
 bool open_socket_client(SocketState* socket, State* state) {
+#ifdef KIMERA_WINDOWS
+    WSADATA wsd;
+    WSAStartup(WINSOCK_VERSION, &wsd);
+#endif
+
     if (state->source & TCP)
         open_tcp_client(socket, state);
 
@@ -23,6 +28,11 @@ bool open_socket_client(SocketState* socket, State* state) {
 }
 
 bool open_socket_server(SocketState* socket, State* state) {
+#ifdef KIMERA_WINDOWS
+    WSADATA wsd;
+    WSAStartup(WINSOCK_VERSION, &wsd);
+#endif
+
     if (state->sink & TCP)
         open_tcp_server(socket, state);
 
@@ -61,6 +71,10 @@ void close_socket(SocketState* socket) {
         default:
             break;
     }
+
+#ifdef KIMERA_WINDOWS
+    WSACleanup();
+#endif
 }
 
 void socket_send_packet(SocketState* socket, AVPacket* packet) {
