@@ -53,7 +53,7 @@ bool encoder_push(EncoderState*, AVFrame*);
 // Resampler Methods
 //
 
-void open_resampler(ResamplerState*, enum AVPixelFormat);
+bool open_resampler(ResamplerState*, enum AVPixelFormat);
 void close_resampler(ResamplerState*);
 bool resampler_push_frame(ResamplerState*, State*, AVFrame*);
 

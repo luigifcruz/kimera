@@ -67,7 +67,7 @@ bool open_socket_server(SocketState* socket, State* state) {
 
 void close_socket(SocketState* socket) {
     if (socket->interf != NONE)
-        close_router(&socket->router);
+        close_router(socket->router);
 
     switch (socket->interf) {
         case UDP:
@@ -89,8 +89,8 @@ void close_socket(SocketState* socket) {
 }
 
 void socket_send_packet(SocketState* socket, AVPacket* packet) {
-    while (router_make_packet(&socket->router, packet))
-        socket_send_buffer(socket, socket->router.buffer, socket->router.packet_size);
+    while (router_make_packet(socket->router, packet))
+        socket_send_buffer(socket, socket->router->buffer, socket->router->packet_size);
 }
 
 int socket_recv_packet(SocketState* socket) {

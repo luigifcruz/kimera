@@ -84,8 +84,8 @@ bool parse_packet(DecoderState* decoder, AVPacket* packet) {
                                 &out_data, &out_len, packet->data, packet->size,
                                 AV_NOPTS_VALUE, AV_NOPTS_VALUE, -1);
 
-        assert(r == packet->size);
-        assert(out_len == packet->size);
+        if (r != packet->size || out_len != packet->size)
+            return false;
 
         if (decoder->parser_ctx->key_frame == 1) {
             packet->flags |= AV_PKT_FLAG_KEY;

@@ -43,7 +43,7 @@ typedef struct {
     Interfaces interf;
 
     // Router
-    RouterState router;
+    RouterState* router;
     Packet* packet;
 
     // UDP & TCP Sockets
@@ -73,6 +73,9 @@ int socket_recv_buffer(SocketState*, void*, size_t);
 //
 // Router Methods
 //
+
+RouterState* alloc_router();
+void free_router(RouterState*);
 
 bool start_router(RouterState*, State*);
 void close_router(RouterState*);
