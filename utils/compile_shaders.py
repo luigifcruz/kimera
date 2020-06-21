@@ -1,7 +1,9 @@
 import os
 import sys
 from glob import glob
-from pathlib import Path
+
+def Path(filename):
+    return os.path.basename(filename).split(".")[0]
 
 def convert_file(filename):
     hexes = [ "{:02x}".format(ord(c)) for c in open(filename, 'r').read() ]
@@ -19,7 +21,7 @@ shaders = []
 
 for ext in exts:
     file_list = glob(os.path.join(input_directory, "*." + ext))
-    shaders.append([ Path(shader).stem for shader in file_list ])
+    shaders.append([ Path(shader) for shader in file_list ])
 
 shader_pairs = []
 for shader in shaders[0]:

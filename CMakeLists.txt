@@ -35,6 +35,7 @@ endif()
 include(cmake/listdirs.cmake)
 
 set_property(GLOBAL PROPERTY GLOBAL_CMAKE_C_FLAGS "")
+set_property(GLOBAL PROPERTY GLOBAL_DEPENDENCIES "")
 set_property(GLOBAL PROPERTY GLOBAL_SOURCE_LIST "")
 set_property(GLOBAL PROPERTY GLOBAL_LIB_LIST "")
 
@@ -42,6 +43,7 @@ add_subdirectory(src)
 
 get_property(LIB_LIST GLOBAL PROPERTY GLOBAL_LIB_LIST)
 get_property(SOURCE_LIST GLOBAL PROPERTY GLOBAL_SOURCE_LIST)
+get_property(DEPENDENCIES GLOBAL PROPERTY GLOBAL_DEPENDENCIES)
 get_property(CMAKE_C_FLAGS GLOBAL PROPERTY GLOBAL_CMAKE_C_FLAGS)
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
@@ -55,5 +57,6 @@ endif()
 add_library(kimera ${SOURCE_LIST})
 target_link_libraries(kimera ${LIB_LIST})
 target_include_directories(kimera PUBLIC include)
+add_dependencies(kimera ${DEPENDENCIES})
 
 add_subdirectory(apps)
