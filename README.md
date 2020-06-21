@@ -16,9 +16,9 @@
 ### Interfacing
 |    OS    |  Display  |   Screen-Capture   | Native Video Source | Native Video Sink |
 |----------|-----------|--------------------|---------------------|-------------------|
-| Linux    | ✅ (SDL)  | ✅ (XCB)           | ✅ (V4L2)           | ✅ (V4L2)         |
-| macOS    | ✅ (SDL)  | ✅ (AVFoundation)  | ✅ (AVFoundation)   | ❌                |
-| Windows  | ❌        | ❌                 | ❌                  | ❌                |
+| Linux    | ✅ (GLFW) | ✅ (XCB)          | ✅ (V4L2)          | ✅ (V4L2)         |
+| macOS    | ✅ (GLFW) | ✅ (AVFoundation) | ✅ (AVFoundation)  | ❌                |
+| Windows  | ✅ (GLFW) | ❌                | ❌                 | ❌                |
 
 ### Hardware Acceleration
 |  Technology  | Encode | Decode |         Description         |
@@ -26,14 +26,14 @@
 | VideoToolBox | ✅     | ✅     | Apple Devices (macOS & iOS) |
 | NVENC/CUVID  | ✅     | ✅     | Modern Nvidia GPUs          |
 | OMX          | ✅     | ✅     | Broadcom SoC (Raspberry Pi) |
-| VAAPI        | ❌     | ❌     | Intel Modern CPUs           |
+| VAAPI        | ❌     | ❌     | Modern Intel CPUs           |
 
 ## Installation 
 Pre-compiled binary packages will be available once this app reaches beta. For now, if you want to try the pre-release version of the app, you should compile it yourself by following the instructions below.
 
 ### Dependencies
-- SDL2
-- SDL TTF
+- GLFW
+- OpenGL ES >2.0 or OpenGL >3.3
 - LibAV >12.3
 - CMake >3.13
 - XCB (For Linux)

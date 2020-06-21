@@ -1,12 +1,14 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <string.h>
 
-#include "kimera/socket.h"
-#include "kimera/encoder.h"
-#include "kimera/decoder.h"
-#include "kimera/resampler.h"
+#include "kimera/transport.h"
+#include "kimera/codec.h"
 #include "kimera/loopback.h"
 #include "kimera/display.h"
+#include "kimera/state.h"
 #include "kimera/client.h"
 
 void receiver(State* state, volatile sig_atomic_t* stop) {

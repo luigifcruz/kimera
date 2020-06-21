@@ -1,14 +1,22 @@
 project(ffmpeg)
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(AVCODEC     REQUIRED IMPORTED_TARGET libavcodec)
-pkg_check_modules(AVFORMAT    REQUIRED IMPORTED_TARGET libavformat)
-pkg_check_modules(AVFILTER    REQUIRED IMPORTED_TARGET libavfilter)
-pkg_check_modules(AVUTIL      REQUIRED IMPORTED_TARGET libavutil)
-pkg_check_modules(SWRESAMPLE  REQUIRED IMPORTED_TARGET libswresample)
-pkg_check_modules(SWSCALE     REQUIRED IMPORTED_TARGET libswscale)
-
 add_library(ffmpeg INTERFACE IMPORTED GLOBAL)
+
+if(LINUX OR MACOS)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(AVCODEC     REQUIRED IMPORTED_TARGET libavcodec)
+    pkg_check_modules(AVFORMAT    REQUIRED IMPORTED_TARGET libavformat)
+    pkg_check_modules(AVFILTER    REQUIRED IMPORTED_TARGET libavfilter)
+    pkg_check_modules(AVUTIL      REQUIRED IMPORTED_TARGET libavutil)
+    pkg_check_modules(SWRESAMPLE  REQUIRED IMPORTED_TARGET libswresample)
+    pkg_check_modules(SWSCALE     REQUIRED IMPORTED_TARGET libswscale)
+endif()
+
+if(WINDOWS)
+    file(GLOB AVCODEC_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/deps/ffmpeg*/include")
+    file(GLOB AVCODEC_LDFLAGS "${CMAKE_SOURCE_DIR}/deps/ffmpeg*/lib/*.lib")
+endif()
+
 target_include_directories(ffmpeg INTERFACE
     ${AVCODEC_INCLUDE_DIRS}
     ${AVFORMAT_INCLUDE_DIRS}
@@ -26,3 +34,5 @@ target_link_libraries(ffmpeg INTERFACE
     ${SWRESAMPLE_LDFLAGS}
     ${SWSCALE_LDFLAGS}
 )
+
+set_property(GLOBAL APPEND PROPERTY GLOBAL_LIB_LIST ffmpeg)

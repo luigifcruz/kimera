@@ -1,43 +1,15 @@
-set(LIBS ffmpeg sdl yaml)
+include(${CMAKE_SOURCE_DIR}/cmake/ffmpeg.cmake)
 
-configure_file(
-  "${kimera_SOURCE_DIR}/include/kimera/state.h.in"
-  "${kimera_SOURCE_DIR}/include/kimera/state.h"
-)
+add_subdirectory(loopback)
+add_subdirectory(transport)
+add_subdirectory(display)
+add_subdirectory(codec)
+add_subdirectory(client)
 
-file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${kimera_SOURCE_DIR}/include/kimera/*.h")
-file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${kimera_SOURCE_DIR}/src/*.c")
-
-if(UNIX AND NOT APPLE)
-  list(APPEND LIBS xcb)
-
-  file(GLOB APPLE_HEADER_LIST CONFIGURE_DEPENDS "${kimera_SOURCE_DIR}/include/kimera/loopback/linux/*.h")
-  list(APPEND HEADER_LIST ${APPLE_HEADER_LIST})
-
-  file(GLOB APPLE_SOURCE_LIST CONFIGURE_DEPENDS "${kimera_SOURCE_DIR}/src/loopback/linux/*.c")
-  list(APPEND SOURCE_LIST ${APPLE_SOURCE_LIST})
+if(LINUX OR MACOS OR WINDOWS)
+    file(GLOB TMP_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
+    list(APPEND SOURCE_LIST ${TMP_LIST})
 endif()
 
-if(APPLE)
-  list(APPEND LIBS 
-    "-framework Foundation"
-    "-framework AVFoundation"
-    "-framework CoreMedia"
-    "-framework CoreVideo"
-    "-framework CoreGraphics"
-  )
-
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-declarations")
-
-  file(GLOB APPLE_HEADER_LIST CONFIGURE_DEPENDS "${kimera_SOURCE_DIR}/include/kimera/loopback/macos/*.h")
-  list(APPEND HEADER_LIST ${APPLE_HEADER_LIST})
-
-  file(GLOB APPLE_SOURCE_LIST CONFIGURE_DEPENDS "${kimera_SOURCE_DIR}/src/loopback/macos/*.m")
-  list(APPEND SOURCE_LIST ${APPLE_SOURCE_LIST})
-endif()
-
-add_library(kimera ${SOURCE_LIST} ${HEADER_LIST})
-
-target_link_libraries(kimera ${LIBS})
-
-target_include_directories(kimera PUBLIC ../include)
+set_property(GLOBAL APPEND PROPERTY GLOBAL_SOURCE_LIST ${SOURCE_LIST})
+set_property(GLOBAL APPEND PROPERTY GLOBAL_LIB_LIST ${LIB_LIST})

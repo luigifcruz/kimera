@@ -6,10 +6,8 @@ packet_size: 8192
 
 transmitter:
   source:
-    - display
   sink:
     - udp
-    - display
   device: :1
   address: 192.168.0.14
   port: 8080
@@ -19,8 +17,7 @@ receiver:
   source: 
     - udp
   sink:
-    - display
-  address: 127.0.0.1
+   address: 127.0.0.1
   port: 8080
   codec: hevc
 

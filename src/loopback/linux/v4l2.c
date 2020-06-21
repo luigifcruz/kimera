@@ -1,4 +1,4 @@
-#include "kimera/loopback/linux/v4l2.h"
+#include "kimera/loopback/linux.h"
 
 void alloc_v4l2(LoopbackState* loopback) {
     loopback->v4l2 = (V4L2State*)malloc(sizeof(V4L2State));
