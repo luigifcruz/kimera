@@ -1,14 +1,4 @@
-#ifndef RENDER_HELPER_H
-#define RENDER_HELPER_H
-
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "glad/glad.h"
-#include "glad/glad_egl.h"
-
-#define MAX_PROC 2
-#define MAX_PLANES 3
+#include "render.h"
 
 size_t get_file_size(FILE* fp) {
     fseek(fp, 0L, SEEK_END);
@@ -182,4 +172,14 @@ void set_draw_buffer(GLenum attachment) {
     glDrawBuffers(1, targets);
 }
 
-#endif
+double mticks() {
+    struct timeval tv;
+    gettimeofday(&tv, 0);
+    return (double) tv.tv_usec / 1000 + tv.tv_sec * 1000;
+}
+
+bool is_format_supported(enum AVPixelFormat format, const enum AVPixelFormat formats[]) {
+    for (int i = 0; i < sizeof(format); i++)
+        if (format == formats[i]) return true;
+    return false;
+}

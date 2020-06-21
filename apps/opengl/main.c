@@ -11,68 +11,38 @@
 #include "kimera/transport.h"
 #include "kimera/codec.h"
 #include "kimera/loopback.h"
-#include "kimera/display.h"
 #include "kimera/client.h"
 #include "render/render.h"
-#include "render/meta.h"
-#include "draw.h"
-
-void custom_shader(CanvasState* render, void* object) {
-    set_uniform1f(render->proc_shader, "count", *((float*)object));
-}
 
 void transmitter(State* state, volatile sig_atomic_t* stop) {
-    kimera_print_state(state);
+    bool ok = true;
     
-    // Start Socket Server. 
-    SocketState socket;
-    if (!open_socket_server(&socket, state))
-        goto cleanup;
-
-    // Start Loopback Input.
-    LoopbackState loopback;
-    if (!open_loopback_source(&loopback, state))
-        goto cleanup;
-
-    // Start Encoder.
-    EncoderState encoder;
-    if (!start_encoder(&encoder, state))
-        goto cleanup;
-
-    // Add resampler.
-    ResamplerState resampler;
-    open_resampler(&resampler, state->out_format);
-    
-
+    DecoderState* decoder = alloc_decoder();
+    LoopbackState* loopback = alloc_loopback();
+    ResamplerState* resampler = alloc_resampler();
+    SocketState* socket = alloc_socket();
     RenderState* render = alloc_render();
 
-    render->mode = WINDOWED;
-    render->api  = EGL_OPENGL_ES_API;
+    if (state->sink & LOOPBACK)
+        ok &= open_loopback_sink(loopback, state);
 
-    if (!start_render(render, state)) goto cleanup;
+    ok &= open_decoder(decoder,state);
+    ok &= open_socket_client(socket, state);
+    ok &= open_resampler(resampler, state->out_format);
+    ok &= open_render(render, state);
+
+    if (!ok) goto cleanup;
+       
+    kimera_print_state(state);
     render_print_meta(render);
-
-    CanvasState canvas;
-    start_render2(&canvas, state);
-
-    float i = 1.0;
 
     // Start Decoder Loop.
     while (loopback_pull_frame(&loopback, state) && !(*stop)) {
         if (!resampler_push_frame(&resampler, state, loopback.frame))
             continue;
 
-        AVFrame* frame = resampler.frame;
-
-        canvas.d_height = render->height;
-        canvas.d_width = render->width;
-        
-        i++;
-
-        if (!render_push_frame(&canvas, frame)) break;
-        if (!render_proc_frame(&canvas, NULL, NULL)) break;
-        if (!render_draw_frame(&canvas)) break;
-        if (!render_pull_frame(&canvas)) break;
+        if (!render_push_frame(&render, resampler.frame))
+            break;
         
         if (!render_commit_frame(render)) break;
 
@@ -85,7 +55,7 @@ cleanup:
     close_resampler(&resampler);
     close_loopback(&loopback, state);
     close_encoder(&encoder);
-    free_render(render);
+    close_render(render);
 }
 
 void receiver(State* state, volatile sig_atomic_t* stop) {}

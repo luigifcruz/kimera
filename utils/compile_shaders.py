@@ -1,6 +1,6 @@
-from glob import glob
-import sys
 import os
+import sys
+from glob import glob
 from pathlib import Path
 
 def convert_file(filename):
