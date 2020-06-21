@@ -1,5 +1,16 @@
 #include "kimera/transport.h"
 
+SocketState* alloc_socket() {
+    SocketState* state = malloc(sizeof(SocketState));
+    state->router    = alloc_router();
+    state->packet    = NULL;
+    state->client_in = NULL;
+    state->server_in = NULL;
+    state->client_un = NULL;
+    state->server_un = NULL;
+    return state;
+}
+
 bool open_socket_client(SocketState* socket, State* state) {
 #ifdef KIMERA_WINDOWS
     WSADATA wsd;
@@ -20,10 +31,10 @@ bool open_socket_client(SocketState* socket, State* state) {
         return false;
     }
 
-    if (!start_router(&socket->router, state))
+    if (!start_router(socket->router, state))
         return false;
 
-    socket->packet = socket->router.packet;
+    socket->packet = socket->router->packet;
     return true;
 }
 
@@ -47,10 +58,10 @@ bool open_socket_server(SocketState* socket, State* state) {
         return false;
     }
 
-    if (!start_router(&socket->router, state))
+    if (!start_router(socket->router, state))
         return false;
 
-    socket->packet = socket->router.packet;
+    socket->packet = socket->router->packet;
     return true;
 }
 
@@ -84,9 +95,9 @@ void socket_send_packet(SocketState* socket, AVPacket* packet) {
 
 int socket_recv_packet(SocketState* socket) {
     while (1) {
-        size_t out = socket_recv_buffer(socket, socket->router.buffer, socket->router.packet_size);
-        if (out < (size_t)socket->router.header_size) return false;
-        if (router_parse_packet(&socket->router)) return true;
+        size_t out = socket_recv_buffer(socket, socket->router->buffer, socket->router->packet_size);
+        if (out < (size_t)socket->router->header_size) return false;
+        if (router_parse_packet(socket->router)) return true;
     }   
 }
 

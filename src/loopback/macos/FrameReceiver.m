@@ -24,8 +24,6 @@
 
     pthread_cond_signal(&_context->frame_wait_cond);
     pthread_mutex_unlock(&_context->frame_lock);
-    
-    ++_context->frames_captured;
 }
 
 @end

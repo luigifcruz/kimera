@@ -7,8 +7,6 @@
 typedef struct
 {
   id receiver;
-  int frames_captured;
-
   int width;
   int height;
 

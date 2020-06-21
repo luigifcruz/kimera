@@ -14,103 +14,86 @@
 void receiver(State* state, volatile sig_atomic_t* stop) {
     kimera_print_state(state);
 
-    // Start Decoder.
-    DecoderState decoder;
-    if (!start_decoder(&decoder,state))
-        goto cleanup;
+    bool ok = true;
+    DecoderState* decoder = alloc_decoder();
+    LoopbackState* loopback = alloc_loopback();
+    ResamplerState* resampler = alloc_resampler();
+    SocketState* socket = alloc_socket();
+    DisplayState* display = alloc_display();
 
-    // Start Loopback Ouput.
-    LoopbackState loopback;
-    if (state->sink & LOOPBACK) {
-        if (!open_loopback_sink(&loopback, state))
-            goto cleanup;
-    }
+    if (state->sink & DISPLAY)
+        ok &= open_display(display, state);
 
-    // Add resampler.
-    ResamplerState resampler;
-    open_resampler(&resampler, state->out_format);
+    if (state->sink & LOOPBACK)
+        ok &= open_loopback_sink(loopback, state);
 
-    // Start Display Screen.
-    DisplayState display;
-    if (state->sink & DISPLAY) {
-        if (!start_display(&display, state))
-            goto cleanup;
-    }
+    ok &= open_decoder(decoder,state);
+    ok &= open_socket_client(socket, state);
+    ok &= open_resampler(resampler, state->out_format);
 
-    // Start Socket Server. 
-    SocketState socket;
-    if (!open_socket_client(&socket, state))
-        goto cleanup;
- 
+    if (!ok) goto cleanup;
+
     // Start Decoder Loop.
-    while (socket_recv_packet(&socket) && !(*stop)) {
-        if (decoder_push(&decoder, socket.packet->payload, socket.packet->len, socket.packet->pts)) {
-            if (!resampler_push_frame(&resampler, state, decoder.frame))
+    while (socket_recv_packet(socket) && !(*stop)) {
+        if (decoder_push(decoder, socket->packet->payload, socket->packet->len, socket->packet->pts)) {
+            if (!resampler_push_frame(resampler, state, decoder->frame))
                 continue;
             
             if (state->sink & DISPLAY)
-                display_draw(&display, state, resampler.frame);
+                display_draw(display, state, resampler->frame);
 
             if (state->sink & LOOPBACK)
-                loopback_push_frame(&loopback, resampler.frame);
+                loopback_push_frame(loopback, resampler->frame);
         }
     }
 
 cleanup:
-    close_loopback(&loopback, state);
-    close_display(&display);
-    close_resampler(&resampler);
-    close_decoder(&decoder);
-    close_socket(&socket);
+    free_loopback(loopback, state);
+    free_display(display);
+    free_resampler(resampler);
+    free_decoder(decoder);
+    free_socket(socket);
 }
 
 void transmitter(State* state, volatile sig_atomic_t* stop) {
     kimera_print_state(state);
 
-    // Start Socket Server. 
-    SocketState socket;
-    if (!open_socket_server(&socket, state))
-        goto cleanup;
+    bool ok = true;
+    EncoderState* encoder = alloc_encoder();
+    SocketState* socket = alloc_socket();
+    LoopbackState* loopback = alloc_loopback();
+    DisplayState* display = alloc_display();
+    ResamplerState* resampler = alloc_resampler();
 
-    // Start Loopback Input.
-    LoopbackState loopback;
-    if (!open_loopback_source(&loopback, state))
-        goto cleanup;
+    ok &= open_socket_server(socket, state);
+    ok &= open_loopback_source(loopback, state);
 
-    // Start Display Screen.
-    DisplayState display;
-    if (state->sink & DISPLAY) {
-        if (!start_display(&display, state))
-            goto cleanup;
-    }
+    if (state->sink & DISPLAY)
+        ok &= open_display(display, state);
+    
+    ok &= open_encoder(encoder, state);
+    ok &= open_resampler(resampler, state->out_format);
 
-    // Start Encoder.
-    EncoderState encoder;
-    if (!start_encoder(&encoder, state))
-        goto cleanup;
-
-    // Add resampler.
-    ResamplerState resampler;
-    open_resampler(&resampler, state->out_format);
+    if (!ok) goto cleanup;
 
     // Start Decoder Loop.
-    while (loopback_pull_frame(&loopback, state) && !(*stop)) {
-        if (!resampler_push_frame(&resampler, state, loopback.frame))
+    while (loopback_pull_frame(loopback, state) && !(*stop)) {
+        if (!resampler_push_frame(resampler, state, loopback->frame))
             continue;
 
         if (state->sink & DISPLAY)
-            display_draw(&display, state, resampler.frame);
+            display_draw(display, state, resampler->frame);
         
-        if (encoder_push(&encoder, resampler.frame))
-            socket_send_packet(&socket, encoder.packet);
+        if (encoder_push(encoder, resampler->frame))
+            socket_send_packet(socket, encoder->packet);
     }
 
 cleanup:
-    close_display(&display);
-    close_socket(&socket);
-    close_resampler(&resampler);
-    close_loopback(&loopback, state);
-    close_encoder(&encoder);
+    free_display(display);
+    free_socket(socket);
+    free_resampler(resampler);
+    free_loopback(loopback, state);
+    free_encoder(encoder);
 }
 
 int main(int argc, char *argv[]) {

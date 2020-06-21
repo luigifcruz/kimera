@@ -11,7 +11,28 @@ bool needs_parser(enum AVCodecID codec_id) {
     }
 }
 
-bool start_decoder(DecoderState* decoder, State* state) {
+DecoderState* alloc_decoder() {
+    DecoderState* state = malloc(sizeof(DecoderState));
+    state->codec_ctx  = NULL;
+    state->parser_ctx = NULL;
+    state->retard     = NULL;
+    state->frame      = NULL;
+    return state;
+}
+
+void free_decoder(DecoderState* decoder) {
+    if (decoder->frame)
+        av_frame_free(&decoder->frame);
+    if (decoder->parser_ctx)
+        av_parser_close(decoder->parser_ctx);
+    if (decoder->codec_ctx)
+        avcodec_free_context(&decoder->codec_ctx);
+    if (decoder->retard)
+        av_packet_free(&decoder->retard);
+    free(decoder);
+}
+
+bool open_decoder(DecoderState* decoder, State* state) {
     AVCodec *codec = avcodec_find_decoder_by_name(state->codec);
     if (!codec) {
         printf("[DECODER] Selected decoder (%s) not found.\n", state->codec);
@@ -21,7 +42,6 @@ bool start_decoder(DecoderState* decoder, State* state) {
     decoder->codec_ctx = avcodec_alloc_context3(codec);
     if (!decoder->codec_ctx) {
         printf("[DECODER] Couldn't allocate codec context.\n");
-        close_decoder(decoder);
         return false;
     }
 
@@ -37,18 +57,15 @@ bool start_decoder(DecoderState* decoder, State* state) {
 
     if (avcodec_open2(decoder->codec_ctx, codec, NULL) < 0) {
         printf("[DECODER] Couldn't open codec.\n");
-        close_decoder(decoder);
         return false;
     }
 
-    decoder->retard = NULL;
     decoder->frame = av_frame_alloc();
     decoder->has_parser = needs_parser(codec->id);
 
     if (decoder->has_parser) {
         if (!(decoder->parser_ctx = av_parser_init(codec->id))) {
             printf("[DECODER] Couldn't initialize parser.\n");
-            close_decoder(decoder);
             return false;
         }
         decoder->parser_ctx->flags |= PARSER_FLAG_COMPLETE_FRAMES;
@@ -56,19 +73,6 @@ bool start_decoder(DecoderState* decoder, State* state) {
     }
 
     return true;
-}
-
-void close_decoder(DecoderState* decoder) {
-    if (decoder)
-        return;
-    if (decoder->frame)
-        av_frame_free(&decoder->frame);
-    if (decoder->has_parser)
-        av_parser_close(decoder->parser_ctx);
-    if (decoder->codec_ctx)
-        avcodec_free_context(&decoder->codec_ctx);
-    if (decoder->retard)
-        av_packet_free(&decoder->retard);
 }
 
 bool parse_packet(DecoderState* decoder, AVPacket* packet) {

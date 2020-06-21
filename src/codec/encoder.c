@@ -1,6 +1,21 @@
 #include "kimera/codec.h"
 
-bool start_encoder(EncoderState* encoder, State* state) {
+EncoderState* alloc_encoder() {
+    EncoderState* state = malloc(sizeof(EncoderState));
+    state->codec_ctx = NULL;
+    state->packet    = NULL;
+    return state;
+}
+
+void free_encoder(EncoderState* encoder) {
+    if (encoder->packet)
+        av_packet_free(&encoder->packet);
+    if (encoder->codec_ctx)
+        avcodec_free_context(&encoder->codec_ctx);
+    free(encoder);
+}
+
+bool open_encoder(EncoderState* encoder, State* state) {
     AVCodec *codec = avcodec_find_encoder_by_name(state->codec);
     if (!codec) {
         printf("[ENCODER] Selected encoder (%s) not found.\n", state->codec);
@@ -10,7 +25,6 @@ bool start_encoder(EncoderState* encoder, State* state) {
     encoder->codec_ctx = avcodec_alloc_context3(codec);
     if (!encoder->codec_ctx) {
         printf("[ENCODER] Couldn't allocate codec context.\n");
-        close_encoder(encoder);
         return false;
     }
 
@@ -25,27 +39,16 @@ bool start_encoder(EncoderState* encoder, State* state) {
     encoder->codec_ctx->flags |= AV_CODEC_FLAG_LOW_DELAY;
     if (avcodec_open2(encoder->codec_ctx, codec, NULL) < 0) {
         printf("[ENCODER] Couldn't open codec.\n");
-        close_encoder(encoder);
         return false;
     }
 
     encoder->packet = av_packet_alloc();
     if (!encoder->packet) {
         printf("[ENCODER] Couldn't allocate packet.\n");
-        close_encoder(encoder);
         return false;
     }
 
     return true;
-}
-
-void close_encoder(EncoderState* encoder) {
-    if (encoder)
-        return;
-    if (encoder->packet)
-        av_packet_free(&encoder->packet);
-    if (encoder->codec_ctx)
-        avcodec_free_context(&encoder->codec_ctx);
 }
 
 bool encoder_push(EncoderState* encoder, AVFrame* frame) {
