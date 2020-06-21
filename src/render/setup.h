@@ -1,4 +1,4 @@
-#include "render.h"
+#include "kimera/render.h"
 
 RenderState* alloc_render() {
     RenderState* state = (RenderState*)malloc(sizeof(RenderState));

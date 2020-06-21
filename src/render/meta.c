@@ -1,4 +1,4 @@
-#include "render.h"
+#include "kimera/render.h"
 
 // name: EGL_CLIENT_APIS, EGL_VENDOR, EGL_VERSION, EGL_EXTENSIONS
 const char* egl_query(RenderState* render, int name) {

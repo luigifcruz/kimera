@@ -171,7 +171,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "glad_egl.h"
+#include "glad/glad_egl.h"
 
 int gladLoadEGL(void) {
     return gladLoadEGLLoader((GLADloadproc)eglGetProcAddress);

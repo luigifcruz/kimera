@@ -2,7 +2,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/ffmpeg.cmake)
 
 add_subdirectory(loopback)
 add_subdirectory(transport)
-add_subdirectory(display)
+add_subdirectory(render)
 add_subdirectory(codec)
 add_subdirectory(client)
 

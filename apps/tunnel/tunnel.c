@@ -7,7 +7,7 @@
 #include "kimera/transport.h"
 #include "kimera/codec.h"
 #include "kimera/loopback.h"
-#include "kimera/display.h"
+#include "kimera/render.h"
 #include "kimera/state.h"
 #include "kimera/client.h"
 

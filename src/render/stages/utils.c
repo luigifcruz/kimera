@@ -1,4 +1,4 @@
-#include "render.h"
+#include "kimera/render.h"
 
 unsigned int punch_framebuffer(RenderState* render) {
     unsigned int index = render->proc_tex[render->proc_index];

@@ -1,4 +1,4 @@
-#include "render.h"
+#include "kimera/render.h"
 
 size_t get_file_size(FILE* fp) {
     fseek(fp, 0L, SEEK_END);

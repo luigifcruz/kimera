@@ -1,4 +1,4 @@
-#include "render.h"
+#include "kimera/render.h"
 
 bool render_draw_frame(RenderState* render) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

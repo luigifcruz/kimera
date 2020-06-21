@@ -34,14 +34,14 @@
 // Includes
 //
 
+#include "glad/glad.h"
+#include "glad/glad_egl.h"
+
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
-
-#include "glad/glad.h"
-#include "glad/glad_egl.h"
 
 #include "kimera/state.h"
 
