@@ -63,31 +63,39 @@ bool get_egl_error(int line) {
     return false;
 }
 
-unsigned int compile_shader(unsigned int type, char* path) {
-    char* code_str = open_shader(path);
-    if (!code_str) return 0;
-
+unsigned int compile_shader(unsigned int type, char* code_str) {
     unsigned int shader = glCreateShader(type);
     glShaderSource(shader, 1, (const GLchar* const*)&code_str, NULL);
     glCompileShader(shader);
-    free(code_str);
     
     int success;
-    char info_log[512];
+    char info_log[1024];
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(shader, 512, NULL, info_log);
-        printf("[RENDER] Shader (%s) compilation error:\n%s", path, info_log);
+        printf("[RENDER] Shader compilation error:\n%s", info_log);
         return 0;
     }
 
     return shader;
 }
 
-unsigned int load_shader(char* vs_path, char* fs_path) {
+unsigned int load_shader(int type, char* vs_str, char* fs_str) {
     unsigned int program = glCreateProgram();
-    unsigned int vertex_shader = compile_shader(GL_VERTEX_SHADER, vs_path);
-    unsigned int fragment_shader = compile_shader(GL_FRAGMENT_SHADER, fs_path);
+
+    if (type == 0) {
+        vs_str = open_shader(vs_str);
+        fs_str = open_shader(fs_str);
+        if (!vs_str || !fs_str) return 0;
+    }
+
+    unsigned int vertex_shader = compile_shader(GL_VERTEX_SHADER, vs_str);
+    unsigned int fragment_shader = compile_shader(GL_FRAGMENT_SHADER, fs_str);
+
+    if (type == 0) {
+        free(vs_str);
+        free(fs_str);
+    }
 
     if (vertex_shader == 0 || fragment_shader == 0)
         return 0;
@@ -102,7 +110,7 @@ unsigned int load_shader(char* vs_path, char* fs_path) {
     glGetProgramiv(program, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(program, 512, NULL, info_log);
-        printf("[RENDER] Shader (%s) compilation error:\n%s", vs_path, info_log);
+        printf("[RENDER] Shader compilation error:\n%s", info_log);
         return 0;
     }
 

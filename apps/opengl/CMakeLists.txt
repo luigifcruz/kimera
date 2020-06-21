@@ -16,3 +16,18 @@ include(${CMAKE_SOURCE_DIR}/cmake/egl.cmake)
 add_executable(opengl ${SOURCE_LIST})
 
 target_link_libraries(opengl PRIVATE ${LIBS})
+
+find_package(PythonInterp REQUIRED)
+
+set(SHADER_COMPILER_BIN ${CMAKE_SOURCE_DIR}/utils/compile_shaders.py)
+set(SHADER_COMPILER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/render/shaders)
+set(SHADER_COMPILER_DST ${CMAKE_CURRENT_SOURCE_DIR}/render)
+
+add_custom_target(
+    shader_compiler ALL
+    COMMAND ${PYTHON_EXECUTABLE} ${SHADER_COMPILER_BIN} ${SHADER_COMPILER_SRC} ${SHADER_COMPILER_DST}
+    BYPRODUCTS enums.h
+    COMMENT "Generating Shader Header"
+)
+
+add_dependencies(opengl shader_compiler)

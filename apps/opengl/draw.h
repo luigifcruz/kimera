@@ -1,5 +1,6 @@
 #include "render/helper.h"
 #include "kimera/state.h"
+#include "render/shaders.h"
 
 /*
 //  -> INPUT (RGB, RGBA, YUV420, NV12, YUV422) [in]
@@ -125,7 +126,7 @@ bool load_input(CanvasState* render, AVFrame* frame) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     
-    render->in_shader = load_shader("./shaders/in_yuv420.vs", "./shaders/in_yuv420.fs");
+    render->in_shader = load_shader(1, (char*)in_yuv420_vs, (char*)in_yuv420_fs);
     if (!render->in_shader) return false;
     
     render->use_input = true;
@@ -148,7 +149,7 @@ bool load_output(CanvasState* render, AVFrame* frame) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
    
-    render->out_shader = load_shader("./shaders/out_yuv420.vs", "./shaders/out_yuv420.fs");
+    render->out_shader = load_shader(1, (char*)out_yuv420_vs,  (char*)out_yuv420_fs);
     if (!render->out_shader) return false;
     
     render->use_output = true;
@@ -157,7 +158,7 @@ bool load_output(CanvasState* render, AVFrame* frame) {
 }
 
 bool load_display(CanvasState* render) {
-    render->disp_shader = load_shader("./shaders/display.vs", "./shaders/display.fs");
+    render->disp_shader = load_shader(1, (char*)display_vs, (char*)display_fs);
     if (!render->disp_shader) return false;
     
     render->use_display = true;
@@ -166,7 +167,7 @@ bool load_display(CanvasState* render) {
 }
 
 bool load_process(CanvasState* render) {
-    render->proc_shader = load_shader("./shaders/filter.vs", "./shaders/filter.fs");
+    render->proc_shader = load_shader(1, (char*)filter_vs, (char*)filter_fs);
     if (!render->proc_shader) return false;
 
     render->use_process = true;

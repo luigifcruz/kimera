@@ -20,3 +20,4 @@ out
 examples
 deps
 CMakeSettings.json
+shaders.h
