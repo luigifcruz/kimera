@@ -61,6 +61,9 @@ typedef struct {
     Mode mode;
     Interfaces sink;
     Interfaces source;
+    char* vert_shader;
+    char* frag_shader;
+    bool use_gpu;
     enum AVPixelFormat in_format;
     enum AVPixelFormat out_format;
 } State;

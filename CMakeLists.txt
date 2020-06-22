@@ -6,7 +6,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 if(UNIX AND NOT APPLE)
-    message(STATUS "Assuming UNIX system...")
+    message(STATUS "Assuming Linux system...")
     set(LINUX TRUE)
     set(KIMERA_LINUX TRUE)
 endif()

@@ -9,8 +9,8 @@ typedef struct {
 	AVFrame* frame;
 } LoopbackState;
 
-LoopbackState* alloc_loopback();
-void free_loopback(LoopbackState*, State*);
+LoopbackState* init_loopback();
+void close_loopback(LoopbackState*, State*);
 
 bool open_loopback_sink(LoopbackState*, State*);
 bool open_loopback_source(LoopbackState*, State*);

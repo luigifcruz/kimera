@@ -1,6 +1,18 @@
 #include "kimera/render.h"
+#include "kimera/shaders.h"
+
+bool load_display(RenderState* render) {
+    render->disp_shader = load_shader(1, (char*)display_vs, (char*)display_fs);
+    if (!render->disp_shader) return false;
+
+    render->display_ready = true;
+    return true;
+}
 
 bool render_draw_frame(RenderState* render) {
+    if (!render->display_ready)
+        if (!load_display(render)) return false;
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     {
@@ -30,5 +42,7 @@ bool render_draw_frame(RenderState* render) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    return !get_gl_error(__LINE__);
+    if (get_gl_error(__LINE__)) return false;
+    
+    return device_render(render);
 }

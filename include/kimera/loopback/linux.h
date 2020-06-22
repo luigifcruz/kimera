@@ -42,13 +42,14 @@ typedef struct {
 // Loopback Methods
 //
 
+LoopbackState* init_loopback();
+void close_loopback(LoopbackState*, State*);
+
 bool open_loopback_sink(LoopbackState*, State*);
 bool open_loopback_source(LoopbackState*, State*);
 
 bool loopback_push_frame(LoopbackState*, AVFrame*);
 bool loopback_pull_frame(LoopbackState*, State*);
-
-void close_loopback(LoopbackState*, State*);
 
 //
 // XCB Methods

@@ -59,10 +59,11 @@ typedef struct {
 // General Methods
 //
 
+SocketState* init_socket();
+void close_socket(SocketState*);
+
 bool open_socket_server(SocketState*, State*);
 bool open_socket_client(SocketState*, State*);
-
-void close_socket(SocketState*);
 
 int socket_recv_packet(SocketState*);
 void socket_send_packet(SocketState*, AVPacket*);
@@ -74,11 +75,10 @@ int socket_recv_buffer(SocketState*, void*, size_t);
 // Router Methods
 //
 
-RouterState* alloc_router();
-void free_router(RouterState*);
+RouterState* init_router();
+void close_router(RouterState*);
 
 bool start_router(RouterState*, State*);
-void close_router(RouterState*);
 
 bool router_make_packet(RouterState*, AVPacket*);
 bool router_parse_packet(RouterState*);

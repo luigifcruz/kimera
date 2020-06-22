@@ -1,16 +1,19 @@
+include(${CMAKE_SOURCE_DIR}/cmake/egl.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/glfw.cmake)
+
 if(LINUX)
     list(APPEND LIB_LIST dl)
 endif()
 
 list(APPEND LIB_LIST glfw egl)
-file(GLOB TMP_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/**/*.c")
+file(GLOB TMP_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
 list(APPEND SOURCE_LIST ${TMP_LIST})
 
 # Compile Shaders
 find_package(PythonInterp REQUIRED)
 
 set(SHADER_COMPILER_BIN ${CMAKE_SOURCE_DIR}/utils/compile_shaders.py)
-set(SHADER_COMPILER_SRC ${PROJECT_SOURCE_DIR}/render/shaders)
+set(SHADER_COMPILER_SRC ${PROJECT_SOURCE_DIR}/shaders)
 set(SHADER_COMPILER_DST ${CMAKE_SOURCE_DIR}/include/kimera)
 
 add_custom_target(

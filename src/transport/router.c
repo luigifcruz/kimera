@@ -1,13 +1,13 @@
 #include "kimera/transport.h"
 
-RouterState* alloc_router() {
+RouterState* init_router() {
     RouterState* state = malloc(sizeof(RouterState));
     state->packet = NULL;
     state->buffer = NULL;
     return state;
 }
 
-void free_router(RouterState* router) {
+void close_router(RouterState* router) {
     if (router->packet->payload)
         free(router->packet->payload);
     if (router->buffer)
@@ -71,7 +71,7 @@ bool router_parse_packet(RouterState* router) {
     router->packet->len = len;
     router->packet->i   = i;
     router->packet->n   = n;
-    router->checksum    += 1;
+    router->checksum   += 1;
     
     size_t offset = router->packet->i * router->payload_size;
     size_t size = get_packet_size(router, router->packet, offset);

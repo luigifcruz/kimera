@@ -36,7 +36,8 @@ typedef struct {
 // Decoder Methods
 //
 
-bool start_decoder(DecoderState*, State*);
+DecoderState* init_decoder();
+bool open_decoder(DecoderState*, State*);
 void close_decoder(DecoderState*);
 bool decoder_push(DecoderState*, char*, uint32_t, uint64_t);
 bool needs_parser(enum AVCodecID);
@@ -45,7 +46,8 @@ bool needs_parser(enum AVCodecID);
 // Encoder Methods
 //
 
-bool start_encoder(EncoderState*, State*);
+EncoderState* init_encoder();
+bool open_encoder(EncoderState*, State*);
 void close_encoder(EncoderState*);
 bool encoder_push(EncoderState*, AVFrame*);
 
@@ -53,6 +55,7 @@ bool encoder_push(EncoderState*, AVFrame*);
 // Resampler Methods
 //
 
+ResamplerState* init_resampler();
 bool open_resampler(ResamplerState*, enum AVPixelFormat);
 void close_resampler(ResamplerState*);
 bool resampler_push_frame(ResamplerState*, State*, AVFrame*);

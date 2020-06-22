@@ -13,6 +13,9 @@ State* kimera_state() {
     state->packet_size  = DEFAULT_PACKET_SIZE;
     state->sink         = 0;
     state->source       = 0;
+    state->use_gpu      = false;
+    state->vert_shader  = NULL;
+    state->frag_shader  = NULL;
 
     state->loopback = malloc(64);
     state->address = malloc(64);

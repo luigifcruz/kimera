@@ -2,7 +2,7 @@
 
 // name: EGL_CLIENT_APIS, EGL_VENDOR, EGL_VERSION, EGL_EXTENSIONS
 const char* egl_query(RenderState* render, int name) {
-    return eglQueryString(render->view->display, name);
+    return eglQueryString(render->device->display, name);
 }
 
 // name: GL_VENDOR, GL_RENDERER, GL_VERSION, GL_SHADING_LANGUAGE_VERSION, GL_EXTENSIONS
@@ -22,7 +22,7 @@ void render_print_meta(RenderState* render) {
     printf(".   [Render Meta]\n");
     printf("├── Window Mode:   %s\n", render_mode_query(render));
     printf("├── Frame Size:    %dx%d\n", render->f_width, render->f_height);
-    printf("├── Viewport Size: %dx%d\n", render->d_width, render->d_height);
+    printf("├── Device Size:   %dx%d\n", render->d_width, render->d_height);
     printf("├── Texture Count: %d\n", render->in_planes + render->out_planes + MAX_PROC);
     printf("└──.   [EGL Meta]\n");
     printf("│  ├── APIs:       %s\n", egl_query(render, EGL_CLIENT_APIS));

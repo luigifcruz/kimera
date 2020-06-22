@@ -1,11 +1,11 @@
 #include "kimera/loopback/linux.h"
 
-void alloc_v4l2(LoopbackState* loopback) {
+void init_v4l2(LoopbackState* loopback) {
     loopback->v4l2 = (V4L2State*)malloc(sizeof(V4L2State));
     loopback->v4l2->buffer = NULL;
 }
 
-void free_v4l2(LoopbackState* loopback, State* state) {
+void close_v4l2(LoopbackState* loopback, State* state) {
     if (state->mode & TRANSMITTER) {
         ioctl(loopback->v4l2->dev_fd, VIDIOC_STREAMOFF, &loopback->v4l2->info.type);
     }
@@ -19,7 +19,7 @@ void free_v4l2(LoopbackState* loopback, State* state) {
 }
 
 bool init_v4l2_source(LoopbackState* loopback, State* state) {
-    alloc_v4l2(loopback);
+    init_v4l2(loopback);
 
 	if ((loopback->v4l2->dev_fd = open(state->loopback, O_RDWR)) < 0) {
         printf("[LOOPBACK] Couldn't open loopback interface.\n");
@@ -119,7 +119,7 @@ bool pull_v4l2_frame(LoopbackState* loopback) {
 }
 
 bool init_v4l2_sink(LoopbackState* loopback, State* state) {
-    alloc_v4l2(loopback);
+    init_v4l2(loopback);
     
 	if ((loopback->v4l2->dev_fd = open(state->loopback, O_RDWR)) < 0) {
         printf("[LOOPBACK] Couldn't open interface.\n");

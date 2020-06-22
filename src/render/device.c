@@ -1,40 +1,55 @@
 #include "kimera/render.h"
 
-bool open_viewport(RenderState* render) {
-    ViewportState* view = render->view;
+DeviceState* init_device() {
+    DeviceState* state = (DeviceState*)malloc(sizeof(DeviceState));
+    return state;
+}
 
-    view->api = EGL_OPENGL_API;
+void close_device(DeviceState* device) {
+    if (device->surface)
+        eglDestroySurface(device->display, device->surface);
+    if (device->context)
+        eglDestroyContext(device->display, device->context);
+    if (device->display)
+        eglTerminate(device->display);
+    glfwTerminate();
+}
+
+bool open_device(RenderState* render) {
+    DeviceState* device = render->device;
+
+    device->api = EGL_OPENGL_API;
     if (render->use_opengles)
-        view->api = EGL_OPENGL_ES_API;
+        device->api = EGL_OPENGL_ES_API;
 
     if (!gladLoadEGL()) {
         printf("[RENDER] Failed to initialize EGL.\n");
         return false;
     }
 
-    view->display = eglGetDisplay(EGL_NO_DISPLAY);
+    device->display = eglGetDisplay(EGL_NO_DISPLAY);
     
-    if (!eglInitialize(view->display, NULL, NULL)) {
+    if (!eglInitialize(device->display, NULL, NULL)) {
         printf("[RENDER] Failed to initialize EGL.\n");
         get_egl_error(__LINE__);
         return false;
     }
 
     int num_config;
-    if (!eglChooseConfig(view->display, egl_attr, &view->config, 1, &num_config)) {
+    if (!eglChooseConfig(device->display, egl_attr, &device->config, 1, &num_config)) {
         printf("[RENDER] Failed to config EGL.\n");
         get_egl_error(__LINE__);
         return false;
     }
 
-    if (!eglBindAPI(view->api)) {
+    if (!eglBindAPI(device->api)) {
         printf("[RENDER] Failed to bind API (%s) to EGL.\n", render_api_query(render));
         get_egl_error(__LINE__);
         return false;
     }
 
     if (!render->use_display) {
-        if (!(view->surface = eglCreatePbufferSurface(view->display, view->config, egl_pbuf_attr))) {
+        if (!(device->surface = eglCreatePbufferSurface(device->display, device->config, egl_pbuf_attr))) {
             printf("[RENDER] Error creating pbuffer surface.\n");
             get_egl_error(__LINE__);
             return false;
@@ -48,7 +63,7 @@ bool open_viewport(RenderState* render) {
         glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-        if (!(view->adapter = glfwCreateWindow(
+        if (!(device->adapter = glfwCreateWindow(
             render->d_width, render->d_height, "RENDER", NULL, NULL))) {
             printf("[RENDER] Can't create GLFW window.\n");
             glfwTerminate();
@@ -58,29 +73,29 @@ bool open_viewport(RenderState* render) {
         EGLNativeWindowType surface = 0;
     
         #if   defined(KIMERA_MACOS)
-            surface = glfwGetCocoaWindow(view->adapter);
+            surface = glfwGetCocoaWindow(device->adapter);
         #elif defined(KIMERA_LINUX)
-            surface = glfwGetX11Window(view->adapter);
+            surface = glfwGetX11Window(device->adapter);
         #elif defined(KIMERA_WINDOWS)
-            surface = glfwGetWin32Window(view->adapter);
+            surface = glfwGetWin32Window(device->adapter);
         #endif
 
-        view->surface = eglCreateWindowSurface(view->display, view->config, surface, 0);
-        if (!view->surface) {
+        device->surface = eglCreateWindowSurface(device->display, device->config, surface, 0);
+        if (!device->surface) {
             printf("[RENDER] Failed to create window surface.\n");
             get_egl_error(__LINE__);
             return false;
         };
     }
 
-    view->context = eglCreateContext(view->display, view->config, EGL_NO_CONTEXT, egl_ctx_attr);
-    if (!view->context) {
+    device->context = eglCreateContext(device->display, device->config, EGL_NO_CONTEXT, egl_ctx_attr);
+    if (!device->context) {
         printf("[RENDER] Failed to create context.\n");
         get_egl_error(__LINE__);
         return false;
     };
 
-    if (!eglMakeCurrent(view->display, view->surface, view->surface, view->context)) {
+    if (!eglMakeCurrent(device->display, device->surface, device->surface, device->context)) {
         printf("[RENDER] Failed to make current surface.\n");
         get_egl_error(__LINE__);
         return false;
@@ -88,9 +103,9 @@ bool open_viewport(RenderState* render) {
 
     int response = 0;
 
-    if (view->api == EGL_OPENGL_API)
+    if (device->api == EGL_OPENGL_API)
         response = gladLoadGLLoader((GLADloadproc)eglGetProcAddress);
-    if (view->api == EGL_OPENGL_ES_API)
+    if (device->api == EGL_OPENGL_ES_API)
         response = gladLoadGLES2Loader((GLADloadproc)eglGetProcAddress);
 
     if (!response) {
@@ -103,14 +118,14 @@ bool open_viewport(RenderState* render) {
     return true;
 }
 
-bool viewport_render(RenderState* render) {
+bool device_render(RenderState* render) {
     if (!render->use_display)
         return true;
 
-    eglSwapBuffers(render->view->display, render->view->surface);
+    eglSwapBuffers(render->device->display, render->device->surface);
     if (get_egl_error(__LINE__)) return false;
     
     glfwPollEvents();
-    glfwGetWindowSize(render->view->adapter, &render->d_width, &render->d_height);
-    return !glfwWindowShouldClose(render->view->adapter);
+    glfwGetWindowSize(render->device->adapter, &render->d_width, &render->d_height);
+    return !glfwWindowShouldClose(render->device->adapter);
 }

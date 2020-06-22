@@ -11,7 +11,7 @@ bool needs_parser(enum AVCodecID codec_id) {
     }
 }
 
-DecoderState* alloc_decoder() {
+DecoderState* init_decoder() {
     DecoderState* state = malloc(sizeof(DecoderState));
     state->codec_ctx  = NULL;
     state->parser_ctx = NULL;
@@ -20,7 +20,7 @@ DecoderState* alloc_decoder() {
     return state;
 }
 
-void free_decoder(DecoderState* decoder) {
+void close_decoder(DecoderState* decoder) {
     if (decoder->frame)
         av_frame_free(&decoder->frame);
     if (decoder->parser_ctx)

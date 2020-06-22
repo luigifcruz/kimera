@@ -1,6 +1,6 @@
 #include "kimera/loopback/linux.h"
 
-LoopbackState* alloc_loopback() {
+LoopbackState* init_loopback() {
     LoopbackState* state = malloc(sizeof(LoopbackState));
     state->frame = NULL;
     state->v4l2  = NULL;
@@ -8,11 +8,11 @@ LoopbackState* alloc_loopback() {
     return state;
 }
 
-void free_loopback(LoopbackState* loopback, State* state) {
+void close_loopback(LoopbackState* loopback, State* state) {
     if (state->source & DISPLAY)
-        return free_xcb(loopback);
+        return close_xcb(loopback);
     if (state->source & LOOPBACK)
-        return free_v4l2(loopback, state);
+        return close_v4l2(loopback, state);
 
     if (loopback->frame)
         av_frame_free(&loopback->frame);

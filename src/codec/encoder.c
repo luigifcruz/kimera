@@ -1,13 +1,13 @@
 #include "kimera/codec.h"
 
-EncoderState* alloc_encoder() {
+EncoderState* init_encoder() {
     EncoderState* state = malloc(sizeof(EncoderState));
     state->codec_ctx = NULL;
     state->packet    = NULL;
     return state;
 }
 
-void free_encoder(EncoderState* encoder) {
+void close_encoder(EncoderState* encoder) {
     if (encoder->packet)
         av_packet_free(&encoder->packet);
     if (encoder->codec_ctx)

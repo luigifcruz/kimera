@@ -1,16 +1,16 @@
 #include "kimera/loopback/linux.h"
 
-void alloc_xcb(LoopbackState* loopback) {
+void init_xcb(LoopbackState* loopback) {
     loopback->xcb = (XCBState*)malloc(sizeof(XCBState));
 }
 
-void free_xcb(LoopbackState* loopback) {
+void close_xcb(LoopbackState* loopback) {
     xcb_disconnect(loopback->xcb->connection);
     free(loopback->xcb);
 }
 
 bool init_xcb_source(LoopbackState* loopback, State* state) {
-    alloc_xcb(loopback);
+    init_xcb(loopback);
 
     int error;
     loopback->xcb->connection = xcb_connect(state->loopback, NULL);

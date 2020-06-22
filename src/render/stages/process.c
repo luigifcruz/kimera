@@ -1,6 +1,18 @@
 #include "kimera/render.h"
+#include "kimera/shaders.h"
+
+bool load_process(RenderState* render) {
+    render->proc_shader = load_shader(1, (char*)filter_vs, (char*)filter_fs);
+    if (!render->proc_shader) return false;
+
+    render->process_ready = true;
+    return true;
+}
 
 bool render_proc_frame(RenderState* render) {
+    if (!render->process_ready)
+        if (!load_process(render)) return false;
+
     glBindFramebuffer(GL_FRAMEBUFFER, render->frame_buffer);
     
     bind_framebuffer_tex(GL_COLOR_ATTACHMENT0, get_framebuffer(render));
@@ -9,7 +21,7 @@ bool render_proc_frame(RenderState* render) {
     {
         glUseProgram(render->proc_shader);
 
-        set_uniform1f(render->proc_shader, "time", render_get_time(render));
+        set_uniform1f(render->proc_shader, "time", render_time(render));
         set_uniform2f(render->proc_shader, "resolution", render->f_width, render->f_height);
         set_uniform2f(render->proc_shader, "display", render->d_width, render->d_height);
 

@@ -1,13 +1,13 @@
 #include "kimera/codec.h"
 
-ResamplerState* alloc_resampler() {
+ResamplerState* init_resampler() {
     ResamplerState* state = malloc(sizeof(ResamplerState));
     state->ctx   = NULL;
     state->frame = NULL;
     return state;
 }
 
-void free_resampler(ResamplerState* resampler) {
+void close_resampler(ResamplerState* resampler) {
     if (resampler->frame)
         av_frame_free(&resampler->frame);
     if (resampler->ctx)
@@ -49,16 +49,16 @@ bool configure_resampler(ResamplerState* resampler, State* state, AVFrame* in) {
                                     SWS_BICUBIC, 0, 0, 0);
 
     // Performance Degradation Check
-    if (state->in_format != state->out_format) {
+    if (in->format != state->out_format) {
         printf("[RESAMPLER] Performance Degradation:\n");
         printf("              Output pixel format is different than the input.\n");
         printf("                - Input: %s -> Output: %s\n",
-               av_get_pix_fmt_name(state->in_format),
+               av_get_pix_fmt_name(in->format),
                av_get_pix_fmt_name(state->out_format));
     }
 
     if (
-        in->width != resampler->frame->width ||
+        in->width != resampler->frame->width   ||
         in->height != resampler->frame->height
     ) {
         printf("[RESAMPLER] Performance Degradation:\n");
@@ -68,6 +68,7 @@ bool configure_resampler(ResamplerState* resampler, State* state, AVFrame* in) {
                resampler->frame->width, resampler->frame->height);
     }
 
+    
     resampler->configured = true;
     return true;
 }

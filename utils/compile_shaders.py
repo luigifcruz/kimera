@@ -37,7 +37,7 @@ for pair in shader_pairs:
         filename = pair + "." + ext
         binary, size = convert_file(os.path.join(input_directory, filename))
         var_name = "{}_{}".format(pair, ext)
-        file.write("const char {}[] = {};\n".format(var_name, binary))
-        file.write("const int {}_size = {};\n\n".format(var_name, size))
+        file.write("static const char {}[] = {};\n".format(var_name, binary))
+        file.write("static const int {}_size = {};\n\n".format(var_name, size))
 
 file.write("#endif")

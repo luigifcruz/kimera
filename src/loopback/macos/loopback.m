@@ -2,14 +2,14 @@
 
 #import "kimera/loopback/macos/CameraAdapter.h"
 
-LoopbackState* alloc_loopback() {
+LoopbackState* init_loopback() {
     LoopbackState* state = malloc(sizeof(LoopbackState));
     state->frame = NULL;
     state->state = NULL;
     return state;
 }
 
-void free_loopback(LoopbackState* loopback, State* state) {
+void close_loopback(LoopbackState* loopback, State* state) {
     [(id)loopback->state stopCapture];
     if (loopback->frame)
         av_frame_free(&loopback->frame);

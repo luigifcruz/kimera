@@ -8,8 +8,8 @@
             "name": "Debug",
             "type": "gdb",
             "request": "launch",
-            "target": "kimera",
-            "arguments": "tx",
+            "target": "apps/tunnel/tunnel",
+            "arguments": " rx ../examples/linux_screen.yml",
             "cwd": "${workspaceRoot}/build",
             "valuesFormatting": "parseText"
         }

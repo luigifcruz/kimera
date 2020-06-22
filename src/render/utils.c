@@ -115,6 +115,8 @@ void bind_framebuffer_tex(unsigned int atch_id, unsigned int tex_id) {
 }
 
 bool get_planes_count(AVFrame* frame, float* ratio, unsigned int* planes) {
+    *planes = 0;
+    
     for (unsigned int i = 0; i < 8; i++) {
         if (frame->linesize[i] == 0) break;
         if ((*planes) < MAX_PLANES) {
@@ -179,7 +181,7 @@ double mticks() {
 }
 
 bool is_format_supported(enum AVPixelFormat format, const enum AVPixelFormat formats[]) {
-    for (int i = 0; i < sizeof(format); i++)
+    for (unsigned int i = 0; i < sizeof(format); i++)
         if (format == formats[i]) return true;
     return false;
 }
