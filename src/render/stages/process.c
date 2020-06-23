@@ -21,9 +21,10 @@ bool render_proc_frame(RenderState* render) {
     {
         glUseProgram(render->proc_shader);
 
+        set_uniform1i(render->proc_shader, "pts", render->pts);
         set_uniform1f(render->proc_shader, "time", render_time(render));
-        set_uniform2f(render->proc_shader, "resolution", render->f_width, render->f_height);
-        set_uniform2f(render->proc_shader, "display", render->d_width, render->d_height);
+        set_uniform2f(render->proc_shader, "resolution", render->f_size.w, render->f_size.h);
+        set_uniform2f(render->proc_shader, "display", render->d_size.w, render->d_size.h);
 
         //if (cb != NULL) (void)(*cb)(render, obj);
 

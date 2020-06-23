@@ -24,10 +24,10 @@ void close_render(RenderState* render) {
 }
 
 bool open_render(RenderState* render, State* state) {
-    render->f_height = state->height;
-    render->f_width = state->width;
-    render->d_height = state->height / 2;
-    render->d_width = state->width / 2;
+    render->f_size.w = state->width;
+    render->f_size.h = state->height;
+    render->d_size.w = state->width / 2;
+    render->d_size.h = state->height / 2;
 
     render->in_format = state->in_format; 
     if (!is_format_supported(render->in_format, input_formats))
@@ -41,11 +41,11 @@ bool open_render(RenderState* render, State* state) {
     if (state->sink & DISPLAY)
         render->use_display = true;
 
-    if (!open_device(render)) return false;
-    if (!load_default(render)) return false;
-
     render->time = mticks();
     render->state = state;
+
+    if (!open_device(render)) return false;
+    if (!load_default(render)) return false;
 
     return true;
 }
@@ -85,7 +85,7 @@ bool load_default(RenderState* render) {
 
     glGenTextures(MAX_PROC, &render->proc_tex[0]);
     for (unsigned int i = 0; i < MAX_PROC; i++)
-        create_texture(render->proc_tex[i], GL_RGBA, render->f_width, render->f_height);
+        create_texture(render->proc_tex[i], GL_RGBA, render->f_size.w, render->f_size.h);
     set_draw_buffer(GL_COLOR_ATTACHMENT0);
     render->proc_index = 0;
 

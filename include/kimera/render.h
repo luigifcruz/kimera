@@ -37,6 +37,7 @@
 
 #if   defined(KIMERA_MACOS)
     #define GLFW_EXPOSE_NATIVE_COCOA
+    #include <sys/time.h>
 #elif defined(KIMERA_LINUX)
     #define GLFW_EXPOSE_NATIVE_X11
     #define GLFW_EXPOSE_NATIVE_WAYLAND
@@ -103,6 +104,11 @@ static const unsigned int indices[] = {
 //
 
 typedef struct {
+    int w;
+    int h;
+} Resolution;
+
+typedef struct {
     GLFWwindow*  adapter;
     GLenum       api;
     EGLConfig    config;
@@ -130,15 +136,14 @@ typedef struct {
     bool process_ready;
 
     int pts;
-
-    int f_width;
-    int f_height;
-
-    int d_width;
-    int d_height;
-
     double time;
-    
+
+    Resolution f_size;
+    Resolution d_size;
+
+    Resolution in_size[MAX_PLANES];
+    Resolution out_size[MAX_PLANES];
+
     // add process callback pointer
 
     unsigned int vertex_buffer;
@@ -149,11 +154,6 @@ typedef struct {
     unsigned int out_shader;
     unsigned int proc_shader;
     unsigned int disp_shader;
-
-    // Replace With Actual Sizes
-    float in_ratio[MAX_PLANES];
-    float out_ratio[MAX_PLANES];
-    // -----
 
     unsigned int in_planes;
     unsigned int out_planes;
@@ -225,7 +225,7 @@ unsigned int load_shader(int type, char* vs_str, char* fs_str);
 
 void bind_framebuffer_tex(unsigned int atch_id, unsigned int tex_id);
 
-bool get_planes_count(AVFrame* frame, float* ratio, unsigned int* planes);
+bool get_planes_count(AVFrame* frame, Resolution* size, unsigned int* planes);
 
 void create_texture(unsigned int id, unsigned int format, int width, int height);
 

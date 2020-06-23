@@ -15,6 +15,19 @@ void close_device(DeviceState* device) {
     glfwTerminate();
 }
 
+char* device_window_name(RenderState* render) {
+    char* name[32];
+    switch (render->state->mode) {
+        case TRANSMITTER:
+            sprintf((char*)name, "Kimera - Transmitter Display");
+            break;
+        case RECEIVER:
+            sprintf((char*)name, "Kimera - Receiver Display");
+            break;
+    }
+    return name;
+}
+
 bool open_device(RenderState* render) {
     DeviceState* device = render->device;
 
@@ -63,8 +76,9 @@ bool open_device(RenderState* render) {
         glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
+        char* win_name = device_window_name(render);
         if (!(device->adapter = glfwCreateWindow(
-            render->d_width, render->d_height, "RENDER", NULL, NULL))) {
+            render->d_size.w, render->d_size.h, win_name, NULL, NULL))) {
             printf("[RENDER] Can't create GLFW window.\n");
             glfwTerminate();
             return false;
@@ -126,6 +140,6 @@ bool device_render(RenderState* render) {
     if (get_egl_error(__LINE__)) return false;
     
     glfwPollEvents();
-    glfwGetWindowSize(render->device->adapter, &render->d_width, &render->d_height);
+    glfwGetWindowSize(render->device->adapter, &render->d_size.w, &render->d_size.h);
     return !glfwWindowShouldClose(render->device->adapter);
 }
