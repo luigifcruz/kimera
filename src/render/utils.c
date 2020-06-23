@@ -206,8 +206,8 @@ double mticks() {
     return (double) tv.tv_usec / 1000 + tv.tv_sec * 1000;
 }
 
-bool is_format_supported(enum AVPixelFormat format, const enum AVPixelFormat formats[]) {
-    for (unsigned int i = 0; i < sizeof(format); i++)
+bool is_format_supported(enum AVPixelFormat format, const enum AVPixelFormat formats[], int size) {
+    for (int i = 0; i < size; i++)
         if (format == formats[i]) return true;
     return false;
 }
