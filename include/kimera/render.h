@@ -25,7 +25,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/time.h>
+#include <stdint.h>
+
 
 //
 // Global Definitions
@@ -40,6 +41,7 @@
     #define GLFW_EXPOSE_NATIVE_X11
     #define GLFW_EXPOSE_NATIVE_WAYLAND
     #include <unistd.h>
+    #include <sys/time.h>
 #elif defined(KIMERA_WINDOWS)
     #define GLFW_EXPOSE_NATIVE_WIN32
     #include <Windows.h>
