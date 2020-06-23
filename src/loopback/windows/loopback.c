@@ -1,7 +1,7 @@
 #include "kimera/loopback/windows.h"
 
 LoopbackState* init_loopback() {
-	return;
+	return NULL;
 }
 
 void close_loopback(LoopbackState* loopback, State* state) {
@@ -24,8 +24,4 @@ bool open_loopback_source(LoopbackState* loopback, State* state) {
 
 bool loopback_pull_frame(LoopbackState* loopback, State* state) {
 	return false;
-}
-
-void close_loopback(LoopbackState* loopback, State* state) {
-	return;
 }
