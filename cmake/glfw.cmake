@@ -5,7 +5,7 @@ add_library(glfw INTERFACE IMPORTED GLOBAL)
 if(LINUX OR MACOS)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(glfw REQUIRED IMPORTED_TARGET glfw3)
-    list(APPEND glfw_LDFLAGS "-lm")
+    list(APPEND glfw_LDFLAGS "-lm -lpthread")
 endif()
 
 if(WINDOWS)
