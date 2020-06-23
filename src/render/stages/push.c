@@ -13,7 +13,15 @@ bool load_input(RenderState* render, AVFrame* frame) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     
-    render->in_shader = load_shader(1, (char*)in_yuv420_vs, (char*)in_yuv420_fs);
+    switch (render->in_format) {
+        case AV_PIX_FMT_YUV420P:
+            render->in_shader = load_shader(1, (char*)in_yuv420_vs, (char*)in_yuv420_fs);
+            break;
+        default:
+            printf("[RENDER] Unsupported GPU based color convertion.\n");
+            break;
+    }
+    
     if (!render->in_shader) return false;
 
     render->input_ready = true;
