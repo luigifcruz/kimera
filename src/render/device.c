@@ -64,7 +64,7 @@ bool open_device(RenderState* render) {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
         if (!(device->adapter = glfwCreateWindow(
-            render->d_width, render->d_height, "RENDER", NULL, NULL))) {
+            render->d_size.w, render->d_size.h, "RENDER", NULL, NULL))) {
             printf("[RENDER] Can't create GLFW window.\n");
             glfwTerminate();
             return false;
@@ -126,6 +126,6 @@ bool device_render(RenderState* render) {
     if (get_egl_error(__LINE__)) return false;
     
     glfwPollEvents();
-    glfwGetWindowSize(render->device->adapter, &render->d_width, &render->d_height);
+    glfwGetWindowSize(render->device->adapter, &render->d_size.w, &render->d_size.h);
     return !glfwWindowShouldClose(render->device->adapter);
 }

@@ -138,13 +138,15 @@ void bind_framebuffer_tex(unsigned int atch_id, unsigned int tex_id) {
     glFramebufferTexture2D(GL_FRAMEBUFFER, atch_id, GL_TEXTURE_2D, tex_id, 0);
 }
 
-bool get_planes_count(AVFrame* frame, float* ratio, unsigned int* planes) {
+bool get_planes_count(AVFrame* frame, Size* size, unsigned int* planes) {
     *planes = 0;
     
     for (unsigned int i = 0; i < 8; i++) {
         if (frame->linesize[i] == 0) break;
         if ((*planes) < MAX_PLANES) {
-            ratio[i] = (float)frame->width / (float)frame->linesize[i];
+            float ratio = (float)frame->width / (float)frame->linesize[i];
+            (size+i)->w = (int)((float)frame->width / ratio);
+            (size+i)->h = (int)((float)frame->height / ratio);
         }
         (*planes)++;
     }
