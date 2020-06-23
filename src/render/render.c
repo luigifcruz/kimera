@@ -41,11 +41,11 @@ bool open_render(RenderState* render, State* state) {
     if (state->sink & DISPLAY)
         render->use_display = true;
 
-    if (!open_device(render)) return false;
-    if (!load_default(render)) return false;
-
     render->time = mticks();
     render->state = state;
+
+    if (!open_device(render)) return false;
+    if (!load_default(render)) return false;
 
     return true;
 }

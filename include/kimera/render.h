@@ -37,6 +37,7 @@
 
 #if   defined(KIMERA_MACOS)
     #define GLFW_EXPOSE_NATIVE_COCOA
+    #include <sys/time.h>
 #elif defined(KIMERA_LINUX)
     #define GLFW_EXPOSE_NATIVE_X11
     #define GLFW_EXPOSE_NATIVE_WAYLAND
@@ -105,7 +106,7 @@ static const unsigned int indices[] = {
 typedef struct {
     int w;
     int h;
-} Size;
+} Resolution;
 
 typedef struct {
     GLFWwindow*  adapter;
@@ -137,11 +138,11 @@ typedef struct {
     int pts;
     double time;
 
-    Size f_size;
-    Size d_size;
+    Resolution f_size;
+    Resolution d_size;
 
-    Size in_size[MAX_PLANES];
-    Size out_size[MAX_PLANES];
+    Resolution in_size[MAX_PLANES];
+    Resolution out_size[MAX_PLANES];
 
     // add process callback pointer
 
@@ -224,7 +225,7 @@ unsigned int load_shader(int type, char* vs_str, char* fs_str);
 
 void bind_framebuffer_tex(unsigned int atch_id, unsigned int tex_id);
 
-bool get_planes_count(AVFrame* frame, Size* size, unsigned int* planes);
+bool get_planes_count(AVFrame* frame, Resolution* size, unsigned int* planes);
 
 void create_texture(unsigned int id, unsigned int format, int width, int height);
 
