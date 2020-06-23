@@ -57,12 +57,11 @@
 
 static const enum AVPixelFormat input_formats[] = {
     AV_PIX_FMT_YUV420P,
-    AV_PIX_FMT_RGB0
+    AV_PIX_FMT_BGRA
 };
 
 static const enum AVPixelFormat output_formats[] = {
-    AV_PIX_FMT_YUV420P,
-    AV_PIX_FMT_RGB0
+    AV_PIX_FMT_YUV420P
 };
 
 static const int egl_attr[] = {
@@ -243,7 +242,7 @@ void set_draw_buffer(GLenum attachment);
 
 double mticks();
 
-bool is_format_supported(enum AVPixelFormat format, const enum AVPixelFormat formats[]);
+bool is_format_supported(enum AVPixelFormat format, const enum AVPixelFormat formats[], int size);
 
 DeviceState* init_device();
 

@@ -16,7 +16,7 @@ void close_device(DeviceState* device) {
 }
 
 char* device_window_name(RenderState* render) {
-    char* name[32];
+    static char* name[32];
     switch (render->state->mode) {
         case TRANSMITTER:
             sprintf((char*)name, "Kimera - Transmitter Display");
@@ -25,7 +25,7 @@ char* device_window_name(RenderState* render) {
             sprintf((char*)name, "Kimera - Receiver Display");
             break;
     }
-    return name;
+    return (char*)name;
 }
 
 bool open_device(RenderState* render) {

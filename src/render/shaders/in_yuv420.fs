@@ -5,9 +5,9 @@ precision highp float;
 in vec2 TexCoord;
 out vec4 FragColor;
 
-uniform sampler2D PlaneTex0;
-uniform sampler2D PlaneTex1;
-uniform sampler2D PlaneTex2;
+uniform sampler2D PlaneTex0; // Y
+uniform sampler2D PlaneTex1; // U
+uniform sampler2D PlaneTex2; // V
 
 const vec3 Rcoeff = vec3( 1.1640,  0.000,  1.596);
 const vec3 Gcoeff = vec3( 1.1640, -0.391, -0.813);

@@ -26,7 +26,7 @@ bool init_xcb_source(LoopbackState* loopback, State* state) {
     AVRational time_base = (AVRational){ 1, state->framerate };
     loopback->frame_duration = av_rescale_q(1, time_base, AV_TIME_BASE_Q);
 
-    state->in_format = 	AV_PIX_FMT_RGB32;
+    state->in_format = 	AV_PIX_FMT_BGRA;
 
     loopback->frame = av_frame_alloc();
     loopback->frame->width = loopback->xcb->screen->width_in_pixels;

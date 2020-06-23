@@ -5,7 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug",
+            "name": "Tunnel TX",
+            "type": "gdb",
+            "request": "launch",
+            "target": "apps/tunnel/tunnel",
+            "arguments": " tx ../examples/linux_screen.yml",
+            "cwd": "${workspaceRoot}/build",
+            "valuesFormatting": "parseText"
+        }, {
+            "name": "Tunnel RX",
             "type": "gdb",
             "request": "launch",
             "target": "apps/tunnel/tunnel",
