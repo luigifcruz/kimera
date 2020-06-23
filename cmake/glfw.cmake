@@ -8,12 +8,16 @@ if(LINUX OR MACOS)
     list(APPEND glfw_LDFLAGS "-lm -lpthread")
 endif()
 
+if(LINUX)
+    pkg_check_modules(x11 REQUIRED IMPORTED_TARGET x11)
+endif()
+
 if(WINDOWS)
-     file(GLOB glfw_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/deps/glfw*/include/")
-     file(GLOB glfw_LDFLAGS "${CMAKE_SOURCE_DIR}/deps/glfw*/lib-vc2019/glfw3dll.lib")
+    file(GLOB glfw_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/deps/glfw*/include/")
+    file(GLOB glfw_LDFLAGS "${CMAKE_SOURCE_DIR}/deps/glfw*/lib-vc2019/glfw3dll.lib")
 endif()
 
 target_include_directories(glfw INTERFACE ${glfw_INCLUDE_DIRS})
-target_link_libraries(glfw INTERFACE ${glfw_LDFLAGS})
+target_link_libraries(glfw INTERFACE ${glfw_LDFLAGS} ${x11_LDFLAGS})
 
 set_property(GLOBAL APPEND PROPERTY GLOBAL_LIB_LIST glfw)
