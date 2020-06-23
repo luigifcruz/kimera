@@ -41,12 +41,12 @@ Pre-compiled binary packages will be available once this app reaches beta. For n
 
 #### Linux (Debian Based)
 ```shell
-$ sudo apt install libavcodec-dev libavfilter-dev libavutil-dev libavformat-dev libsdl2-dev libsdl2-ttf-dev libyaml-dev
+$ sudo apt install libavcodec-dev libavfilter-dev libavutil-dev libavformat-dev libglfw3-dev libyaml-dev
 ```
 
 #### macOS
 ```shell
-$ brew install libyaml sdl2 sdl2_ttf libav cmake
+$ brew install libyaml glfw3 libav cmake
 ```
 
 ### Compilation
@@ -62,12 +62,12 @@ $ sudo make install
 ## Usage
 Create a server with the `/dev/video0` as input and localhost TCP as output.
 ```shell
-$ ./kimera tx ../examples/linux.yml
+$ ./tunnel tx ../examples/linux.yml
 ```
 
 Receive the video from the TCP server and display it on the screen.
 ```shell
-$ ./kimera rx ../examples/linux.yml
+$ ./tunnel rx ../examples/linux.yml
 ```
 
 ## License
