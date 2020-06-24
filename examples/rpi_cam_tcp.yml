@@ -19,6 +19,6 @@ receiver:
     - tcp 
   sink:
     - display
-  address: 192.168.0.2 # Destination Address
-  port: 8080 # Destination Port
+  address: 192.168.0.2 # Source Address
+  port: 8080 # Source Port
   codec: h264
