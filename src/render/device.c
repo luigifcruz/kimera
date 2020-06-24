@@ -1,8 +1,12 @@
 #include "kimera/render.h"
 
 DeviceState* init_device() {
-    DeviceState* state = (DeviceState*)malloc(sizeof(DeviceState));
-    return state;
+    DeviceState* device = (DeviceState*)malloc(sizeof(DeviceState));
+    device->display = NULL;
+    device->surface = NULL;
+    device->context = NULL;
+    device->adapter = NULL;
+    return device;
 }
 
 void close_device(DeviceState* device) {
@@ -12,6 +16,8 @@ void close_device(DeviceState* device) {
         eglDestroyContext(device->display, device->context);
     if (device->display)
         eglTerminate(device->display);
+    if (device->adapter)
+        glfwDestroyWindow(device->adapter);
     glfwTerminate();
 }
 
@@ -26,6 +32,14 @@ char* device_window_name(RenderState* render) {
             break;
     }
     return (char*)name;
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (key == GLFW_KEY_Q && action == GLFW_RELEASE)
+        raise(SIGINT);
+
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE)
+        raise(SIGINT);
 }
 
 bool open_device(RenderState* render) {
@@ -93,6 +107,8 @@ bool open_device(RenderState* render) {
         #elif defined(KIMERA_WINDOWS)
             surface = glfwGetWin32Window(device->adapter);
         #endif
+
+        glfwSetKeyCallback(device->adapter, key_callback);
 
         device->surface = eglCreateWindowSurface(device->display, device->config, surface, 0);
         if (!device->surface) {

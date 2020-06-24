@@ -155,7 +155,8 @@ bool get_planes_size(AVFrame* frame, Resolution* size, unsigned int* planes) {
                 (size+i)->h = frame->height;
                 (size+i)->pix = GL_RGBA;
                 break;
-            default: return false;
+            default:
+                return false;
         }
     }
     

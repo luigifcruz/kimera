@@ -4,16 +4,12 @@ RenderState* init_render() {
     RenderState* state     = (RenderState*)malloc(sizeof(RenderState));
     state->device          = init_device();
     state->resampler       = init_resampler();
-    state->device->display = NULL;
-    state->device->surface = NULL;
-    state->device->context = NULL;
-    state->device->adapter = NULL;
-    state->use_opengles   = true;
-    state->use_display    = false;
-    state->display_ready  = false;
-    state->input_ready    = false;
-    state->output_ready   = false;
-    state->process_ready  = false;
+    state->use_opengles    = true;
+    state->use_display     = false;
+    state->display_ready   = false;
+    state->input_ready     = false;
+    state->output_ready    = false;
+    state->process_ready   = false;
     return state;
 }
 
