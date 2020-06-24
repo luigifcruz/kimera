@@ -10,7 +10,7 @@ transmitter:
   sink:
     - tcp
   device: /dev/video0
-  address: 192.168.0.2 # Local Address
+  address: 0.0.0.0 # Local Address
   port: 8080 # Local Port
   codec: h264_omx
 
@@ -19,6 +19,6 @@ receiver:
     - tcp 
   sink:
     - display
-  address: 0.0.0.0 # Destination Address
+  address: 192.168.0.2 # Destination Address
   port: 8080 # Destination Port
   codec: h264
