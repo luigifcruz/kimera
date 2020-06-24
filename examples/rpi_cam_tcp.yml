@@ -1,0 +1,24 @@
+width: 1280
+height: 720
+framerate: 30
+bitrate: 8000000
+packet_size: 32000
+
+transmitter:
+  source:
+    - loopback
+  sink:
+    - tcp
+  device: /dev/video0
+  address: 192.168.0.2 # Local Address
+  port: 8080 # Local Port
+  codec: h264_omx
+
+receiver:
+  source: 
+    - tcp 
+  sink:
+    - display
+  address: 0.0.0.0 # Destination Address
+  port: 8080 # Destination Port
+  codec: h264
