@@ -105,6 +105,7 @@ static const unsigned int indices[] = {
 typedef struct {
     int w;
     int h;
+    GLenum pix;
 } Resolution;
 
 typedef struct {
@@ -142,8 +143,6 @@ typedef struct {
 
     Resolution in_size[MAX_PLANES];
     Resolution out_size[MAX_PLANES];
-
-    // add process callback pointer
 
     unsigned int vertex_buffer;
     unsigned int index_buffer;
@@ -224,9 +223,13 @@ unsigned int load_shader(int type, char* vs_str, char* fs_str);
 
 void bind_framebuffer_tex(unsigned int atch_id, unsigned int tex_id);
 
-bool get_planes_count(AVFrame* frame, Resolution* size, unsigned int* planes);
+bool get_planes_size(AVFrame* frame, Resolution* size, unsigned int* planes);
 
-void create_texture(unsigned int id, unsigned int format, int width, int height);
+void fill_texture(Resolution size, uint8_t* data);
+
+void read_texture(Resolution size, uint8_t* data);
+
+void create_texture(unsigned int id, Resolution size);
 
 void set_uniform4f(int program, char* name, float v0, float v1, float v2, float v3);
 

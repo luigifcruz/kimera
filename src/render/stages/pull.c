@@ -12,14 +12,14 @@ bool load_output(RenderState* render) {
         return false;
     }
 
-    if (!get_planes_count(render->frame, &render->out_size[0], &render->out_planes))
+    if (!get_planes_size(render->frame, &render->out_size[0], &render->out_planes))
         return false;
     
     glBindFramebuffer(GL_FRAMEBUFFER, render->frame_buffer);
 
     glGenTextures(render->out_planes, &render->out_tex[0]);
     for (unsigned int i = 0; i < render->out_planes; i++)
-        create_texture(render->out_tex[i], GL_RED, render->out_size[i].w, render->out_size[i].h);
+        create_texture(render->out_tex[i], render->out_size[i]);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
    
@@ -50,9 +50,7 @@ bool render_pull_frame(RenderState* render) {
         
         glViewport(0, 0, render->out_size[i].w, render->out_size[i].h);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glReadPixels(0, 0, render->out_size[i].w, render->out_size[i].h,
-                     GL_RED, GL_UNSIGNED_BYTE, render->frame->data[i]);
-
+        read_texture(render->out_size[i], render->frame->data[i]);
         bind_framebuffer_tex(GL_COLOR_ATTACHMENT0, 0);
     }
 

@@ -2,20 +2,23 @@
 #include "kimera/shaders.h"
 
 bool load_input(RenderState* render, AVFrame* frame) {
-    if (!get_planes_count(frame, &render->in_size[0], &render->in_planes))
+    if (!get_planes_size(frame, &render->in_size[0], &render->in_planes))
         return false;
 
     glBindFramebuffer(GL_FRAMEBUFFER, render->frame_buffer);
 
     glGenTextures(render->in_planes, &render->in_tex[0]);
     for (unsigned int i = 0; i < render->in_planes; i++)
-        create_texture(render->in_tex[i], GL_RED, render->in_size[i].w, render->in_size[i].h);
+        create_texture(render->in_tex[i], render->in_size[i]);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     
     switch (render->in_format) {
         case AV_PIX_FMT_YUV420P:
             render->in_shader = load_shader(1, (char*)in_yuv420_vs, (char*)in_yuv420_fs);
+            break;
+        case AV_PIX_FMT_BGRA:
+            render->in_shader = load_shader(1, (char*)in_bgra_vs, (char*)in_bgra_fs);
             break;
         default:
             printf("[RENDER] Unsupported GPU based color convertion.\n");
@@ -54,8 +57,7 @@ bool render_push_frame(RenderState* render, AVFrame* frame) {
 
             glActiveTexture(GL_TEXTURE0 + i);
             glBindTexture(GL_TEXTURE_2D, render->in_tex[i]);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, render->in_size[i].w, render->in_size[i].h, 
-                         0, GL_RED, GL_UNSIGNED_BYTE, render->resampler->frame->data[i]);
+            fill_texture(render->in_size[i], render->resampler->frame->data[i]);
         }
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

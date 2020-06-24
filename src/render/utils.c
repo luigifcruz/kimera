@@ -138,17 +138,25 @@ void bind_framebuffer_tex(unsigned int atch_id, unsigned int tex_id) {
     glFramebufferTexture2D(GL_FRAMEBUFFER, atch_id, GL_TEXTURE_2D, tex_id, 0);
 }
 
-bool get_planes_count(AVFrame* frame, Resolution* size, unsigned int* planes) {
-    *planes = 0;
-    
-    for (unsigned int i = 0; i < 8; i++) {
-        if (frame->linesize[i] == 0) break;
-        if ((*planes) < MAX_PLANES) {
-            float ratio = (float)frame->width / (float)frame->linesize[i];
-            (size+i)->w = (int)((float)frame->width / ratio);
-            (size+i)->h = (int)((float)frame->height / ratio);
+bool get_planes_size(AVFrame* frame, Resolution* size, unsigned int* planes) {
+    *planes = av_pix_fmt_count_planes(frame->format);
+
+    for (unsigned int i = 0; i < *planes; i++) {
+        float ratio = (float)frame->width / (float)frame->linesize[i];
+
+        switch (frame->format) {
+            case AV_PIX_FMT_YUV420P:
+                (size+i)->w = (int)((float)frame->width / ratio);
+                (size+i)->h = (int)((float)frame->height / ratio);
+                (size+i)->pix = GL_RED;
+                break;
+            case AV_PIX_FMT_BGRA:
+                (size+i)->w = frame->width;
+                (size+i)->h = frame->height;
+                (size+i)->pix = GL_RGBA;
+                break;
+            default: return false;
         }
-        (*planes)++;
     }
     
     if ((*planes) > MAX_PLANES) {
@@ -159,13 +167,21 @@ bool get_planes_count(AVFrame* frame, Resolution* size, unsigned int* planes) {
     return true;
 }
 
-void create_texture(unsigned int id, unsigned int format, int width, int height) {
+void read_texture(Resolution size, uint8_t* data) {
+    glReadPixels(0, 0, size.w, size.h, size.pix, GL_UNSIGNED_BYTE, data);
+}
+
+void fill_texture(Resolution size, uint8_t* data) {
+    glTexImage2D(GL_TEXTURE_2D, 0, size.pix, size.w, size.h, 0, size.pix, GL_UNSIGNED_BYTE, data);
+}
+
+void create_texture(unsigned int id, Resolution size) {
     glBindTexture(GL_TEXTURE_2D, id);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, 0);
+    fill_texture(size, NULL);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 

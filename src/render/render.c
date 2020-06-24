@@ -26,6 +26,8 @@ void close_render(RenderState* render) {
 bool open_render(RenderState* render, State* state) {
     render->f_size.w = state->width;
     render->f_size.h = state->height;
+    render->f_size.pix = GL_RGBA;
+    
     render->d_size.w = state->width / 2;
     render->d_size.h = state->height / 2;
 
@@ -33,12 +35,12 @@ bool open_render(RenderState* render, State* state) {
     int output_formats_size = sizeof(output_formats)/sizeof(enum AVPixelFormat);
 
     render->in_format = state->in_format; 
-    if (!is_format_supported(render->in_format, &input_formats, input_formats_size))
+    if (!is_format_supported(render->in_format, input_formats, input_formats_size))
         render->in_format = input_formats[0];
     if (!open_resampler(render->resampler, render->in_format)) return false;
 
     render->out_format = state->out_format; 
-    if (!is_format_supported(render->out_format, &output_formats, output_formats_size))
+    if (!is_format_supported(render->out_format, output_formats, output_formats_size))
         render->out_format = output_formats[0];
 
     if (state->sink & DISPLAY)
@@ -88,7 +90,7 @@ bool load_default(RenderState* render) {
 
     glGenTextures(MAX_PROC, &render->proc_tex[0]);
     for (unsigned int i = 0; i < MAX_PROC; i++)
-        create_texture(render->proc_tex[i], GL_RGBA, render->f_size.w, render->f_size.h);
+        create_texture(render->proc_tex[i], render->f_size);
     set_draw_buffer(GL_COLOR_ATTACHMENT0);
     render->proc_index = 0;
 
