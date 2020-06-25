@@ -70,5 +70,6 @@ bool encoder_push(EncoderState* encoder, AVFrame* frame) {
         return false;
     }
 
+    encoder->packet->pts = frame->pts;
     return true;
 }
