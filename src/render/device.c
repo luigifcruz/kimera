@@ -54,7 +54,12 @@ bool open_device(RenderState* render) {
         return false;
     }
 
-    device->display = eglGetDisplay(EGL_NO_DISPLAY);
+    device->display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    if (device->display == EGL_NO_DISPLAY) {
+        printf("[RENDER] Failed to get device display.\n");
+        get_egl_error(__LINE__);
+        return false;
+    }
     
     if (!eglInitialize(device->display, NULL, NULL)) {
         printf("[RENDER] Failed to initialize EGL.\n");

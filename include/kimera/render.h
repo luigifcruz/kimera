@@ -75,8 +75,8 @@ static const int egl_attr[] = {
 };
 
 static const int egl_ctx_attr[] = {
-    EGL_CONTEXT_MAJOR_VERSION, 3,
-    EGL_CONTEXT_CLIENT_VERSION, 3,
+    EGL_CONTEXT_MAJOR_VERSION, 2,
+    EGL_CONTEXT_CLIENT_VERSION, 2,
     EGL_NONE
 };
 
