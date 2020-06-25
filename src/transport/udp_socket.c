@@ -16,6 +16,11 @@ bool open_udp_client(SocketState* sock_state, State* state) {
     sock_state->server_in->sin_addr.s_addr = INADDR_ANY; 
     sock_state->server_in->sin_port = htons(state->port); 
 
+    int n = 1024 * 1024;
+    if (setsockopt(sock_state->server_fd, SOL_SOCKET, SO_RCVBUF, &n, sizeof(n)) == -1) {
+        printf("[UDP_SOCKET] Couldn't allocate bigger UDP buffer. This might result in problems.\n");
+    }
+
     if (bind(sock_state->server_fd, (socket_t*)sock_state->server_in, sizeof(socket_in)) < 0) {
         printf("[UDP_SOCKET] Couldn't bind with server port.\n");
         return false;
