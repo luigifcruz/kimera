@@ -90,10 +90,16 @@ bool kimera_parse_config_file(State* state, char* path) {
                         int_ptr = &state->bitrate;
 
                     if (!strcmp((char*)event.data.scalar.value, "vert_shader"))
-                        char_ptr = &state->vert_shader;
+                        char_ptr = state->vert_shader;
 
                     if (!strcmp((char*)event.data.scalar.value, "frag_shader"))
-                        char_ptr = &state->frag_shader;
+                        char_ptr = state->frag_shader;
+
+                    if (!strcmp((char*)event.data.scalar.value, "ssl_cert"))
+                        char_ptr = state->ssl_cert;
+
+                    if (!strcmp((char*)event.data.scalar.value, "ssl_key"))
+                        char_ptr = state->ssl_key;
                 }
 
                 // Register Secondary Parameters
@@ -127,6 +133,12 @@ bool kimera_parse_config_file(State* state, char* path) {
 
                         if (!strcmp((char*)event.data.scalar.value, "display"))
                             counter += DISPLAY;
+
+                        if (!strcmp((char*)event.data.scalar.value, "filter"))
+                            counter += FILTER;
+
+                        if (!strcmp((char*)event.data.scalar.value, "tcp_ssl"))
+                            counter += TCP_SSL;
                         
                         if (direction == 1)
                             state->source += counter;

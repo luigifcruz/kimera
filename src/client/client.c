@@ -26,6 +26,10 @@ void print_io_list(Interfaces interfaces) {
         printf(" DISPLAY");
     if (interfaces & LOOPBACK)
         printf(" LOOPBACK");
+    if (interfaces & FILTER)
+        printf(" FILTER");
+    if (interfaces & TCP_SSL)
+        printf(" TCP_SSL");
     printf("\n");
 }
 

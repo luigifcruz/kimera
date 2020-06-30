@@ -16,8 +16,10 @@ State* kimera_state() {
 
     state->software_only = false;
 
-    state->vert_shader = malloc(128);
-    state->frag_shader = malloc(128);
+    state->ssl_key     = malloc(256);
+    state->ssl_cert    = malloc(256);
+    state->vert_shader = malloc(256);
+    state->frag_shader = malloc(256);
     state->loopback    = malloc(64);
     state->address     = malloc(64);
     state->codec       = malloc(64);

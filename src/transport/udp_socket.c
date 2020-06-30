@@ -53,3 +53,13 @@ void close_udp(SocketState* sock_state) {
     close(sock_state->server_fd);
     sock_state->interf = NONE;
 }
+
+int send_udp(SocketState* socket, const void* buf, size_t len) {
+    socklen_t slen = sizeof(*socket->server_in);
+    return sendto(socket->server_fd, buf, len, 0, (socket_t*)socket->server_in, slen);
+}
+
+int recv_udp(SocketState* socket, void* buf, size_t len) {
+    socklen_t slen = sizeof(*socket->client_in);
+    return recvfrom(socket->server_fd, buf, len, MSG_WAITALL, (socket_t*)socket->client_in, &slen);
+}

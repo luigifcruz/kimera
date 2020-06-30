@@ -42,7 +42,7 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
     while (!(*stop)) {
         clock_t beginFrame = clock();
         if (!render_push_frame(render, frame)) break;
-        if (state->vert_shader && state->frag_shader)
+        if (state->sink & FILTER)
             if (!render_proc_frame(render)) break;
         if (state->sink & DISPLAY)
             if (!render_draw_frame(render)) break;

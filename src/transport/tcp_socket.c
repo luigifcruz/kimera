@@ -52,7 +52,7 @@ bool open_tcp_server(SocketState* sock_state, State* state) {
         return false;
     }
 
-    if ((listen(sock_state->server_fd, 5)) != 0) { 
+    if ((listen(sock_state->server_fd, 1)) != 0) { 
         printf("[TCP_SOCKET] Failed to listen.\n");
         return false;
     }
@@ -75,4 +75,12 @@ void close_tcp(SocketState* sock_state) {
     close(sock_state->client_fd);
     close(sock_state->server_fd);
     sock_state->interf = NONE;
+}
+
+int send_tcp(SocketState* socket, const void* buf, size_t len) {
+    return write(socket->client_fd, buf, len);
+}
+
+int recv_tcp(SocketState* socket, void* buf, size_t len) {
+    return recv(socket->server_fd, buf, len, MSG_WAITALL);
 }
