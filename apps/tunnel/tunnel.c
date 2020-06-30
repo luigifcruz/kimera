@@ -11,8 +11,6 @@
 #include "kimera/client.h"
 
 void receiver(State* state, volatile sig_atomic_t* stop) {
-    state->use_gpu = true;
-
     bool ok = true;
     DecoderState* decoder = init_decoder();
     LoopbackState* loopback = init_loopback();
@@ -37,9 +35,9 @@ void receiver(State* state, volatile sig_atomic_t* stop) {
         if (decoder_push(decoder, socket->packet->payload, socket->packet->len, socket->packet->pts)) {
             AVFrame* frame = decoder->frame;
 
-            if (state->use_gpu) {
+            if (!state->software_only) {
                 if (!render_push_frame(render, frame)) break;
-                if (state->vert_shader && state->frag_shader)
+                if (state->sink & FILTER)
                     if (!render_proc_frame(render)) break;
                 if (state->sink & DISPLAY)
                     if (!render_draw_frame(render)) break;
@@ -65,8 +63,6 @@ cleanup:
 }
 
 void transmitter(State* state, volatile sig_atomic_t* stop) {
-    state->use_gpu = true;
-
     bool ok = true;
     EncoderState* encoder = init_encoder();
     SocketState* socket = init_socket();
@@ -88,9 +84,9 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
     while (loopback_pull_frame(loopback, state) && !(*stop)) {
         AVFrame* frame = loopback->frame;
 
-        if (state->use_gpu) {
+        if (!state->software_only) {
             if (!render_push_frame(render, frame)) break;
-            if (state->vert_shader && state->frag_shader)
+            if (state->sink & FILTER)
                 if (!render_proc_frame(render)) break;
             if (state->sink & DISPLAY)
                 if (!render_draw_frame(render)) break;

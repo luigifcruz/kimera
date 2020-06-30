@@ -2,13 +2,13 @@ width: 1280
 height: 800
 framerate: 30
 bitrate: 5000000
-packet_size: 8192
+packet_size: 65000
 
 transmitter:
   source:
     - display
   sink:
-    - udp
+    - tcp
   device: 0
   address: 127.0.0.1
   port: 8080
@@ -16,7 +16,7 @@ transmitter:
 
 receiver:
   source: 
-    - udp
+    - tcp
   sink:
     - display
   address: 127.0.0.1

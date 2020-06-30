@@ -15,3 +15,4 @@ examples
 deps
 CMakeSettings.json
 shaders.h
+.vscode/settings.json

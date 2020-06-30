@@ -88,6 +88,12 @@ bool kimera_parse_config_file(State* state, char* path) {
 
                     if (!strcmp((char*)event.data.scalar.value, "bitrate"))
                         int_ptr = &state->bitrate;
+
+                    if (!strcmp((char*)event.data.scalar.value, "vert_shader"))
+                        char_ptr = &state->vert_shader;
+
+                    if (!strcmp((char*)event.data.scalar.value, "frag_shader"))
+                        char_ptr = &state->frag_shader;
                 }
 
                 // Register Secondary Parameters
