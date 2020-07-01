@@ -129,7 +129,7 @@ int recv_unix(SocketState*, void*, size_t);
 // TCP SSL Methods
 //
 
-bool open_crypto(State*, CryptoState*, bool);
+bool open_crypto(State*, SocketState*);
 void close_cryto(CryptoState*);
 
 bool open_tcp_ssl_client(SocketState*, State*);

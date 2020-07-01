@@ -1,17 +1,36 @@
 #include "kimera/transport.h"
 
-bool open_crypto(State* state, CryptoState* crypto, bool is_server) {
-    crypto = (CryptoState*)malloc(sizeof(CryptoState));
+CryptoState* init_crypto() {
+    CryptoState* crypto = (CryptoState*)malloc(sizeof(CryptoState));
+    crypto->ctx = NULL;
+    crypto->ssl = NULL;
+    crypto->method = NULL;
+    return crypto;
+}
+
+void close_cryto(CryptoState* crypto) {
+    if (crypto->ssl) {
+        SSL_shutdown(crypto->ssl);
+        SSL_free(crypto->ssl);
+    }
+    if (crypto->ctx)
+        SSL_CTX_free(crypto->ctx);
+    EVP_cleanup();
+}
+
+bool open_crypto(State* state, SocketState* socket) {
+    CryptoState* crypto = (CryptoState*)malloc(sizeof(CryptoState));
 
     SSL_library_init();
     SSL_load_error_strings();	
     OpenSSL_add_ssl_algorithms();
 
-    if (is_server)
-        crypto->method = SSLv23_server_method();
-    else
-        crypto->method = SSLv23_client_method();
-    
+    if (state->packet_size >= 31000) {
+        printf("[TCP_SSL_SOCKET] Invalid settings, packet_size must be smaller than 31 KB.\n");
+        return false;
+    }
+
+    crypto->method = TLS_method();
     crypto->ctx = SSL_CTX_new(crypto->method);
     if (!crypto->ctx) {
         printf("[TCP_SSL_SOCKET] Unable to create SSL context.\n");
@@ -39,19 +58,13 @@ bool open_crypto(State* state, CryptoState* crypto, bool is_server) {
     }
 
     crypto->ssl = SSL_new(crypto->ctx);
+    socket->crypto = crypto;
 
     return true;
 }
 
-void close_cryto(CryptoState* crypto) {
-    SSL_shutdown(crypto->ssl);
-    SSL_free(crypto->ssl);
-    SSL_CTX_free(crypto->ctx);
-    EVP_cleanup();
-}
-
 bool open_tcp_ssl_client(SocketState* sock_state, State* state) {
-    if (!open_crypto(state, sock_state->crypto, false))
+    if (!open_crypto(state, sock_state))
         return false;
 
     sock_state->server_in = (socket_in*)malloc(sizeof(socket_in));
@@ -76,22 +89,22 @@ bool open_tcp_ssl_client(SocketState* sock_state, State* state) {
         return false;
     }
 
-    printf("SSL_connect 1\n");
     SSL_set_fd(sock_state->crypto->ssl, sock_state->server_fd);
-    printf("SSL_connect 1.5\n");
     if (SSL_connect(sock_state->crypto->ssl) <= 0) {
         printf("[TCP_SSL_SOCKET] Couldn't accept secure connection.\n");
         ERR_print_errors_fp(stderr);
         return false;
     }
-    printf("SSL_connect 2\n");
+
+    const char* enc_name = SSL_get_cipher(sock_state->crypto->ssl);
+    printf("[TCP_SSL_SOCKET] Client connected with %s encryption.\n", enc_name);
 
     sock_state->interf = TCP_SSL;
     return true;
 }
 
 bool open_tcp_ssl_server(SocketState* sock_state, State* state) {
-    if (!open_crypto(state, sock_state->crypto, true))
+    if (!open_crypto(state, sock_state))
         return false;
 
     sock_state->server_in = (socket_in*)malloc(sizeof(socket_in));
@@ -131,18 +144,15 @@ bool open_tcp_ssl_server(SocketState* sock_state, State* state) {
         return false;
     }
     
-    printf("SSL_accept 1\n");
     SSL_set_fd(sock_state->crypto->ssl, sock_state->client_fd);
-    printf("SSL_accept 1.5\n");
-
     if (SSL_accept(sock_state->crypto->ssl) <= 0) {
         printf("[TCP_SSL_SOCKET] Couldn't accept secure connection.\n");
         ERR_print_errors_fp(stderr);
         return false;
     }
-    printf("SSL_accept 2\n");
 
-    printf("[TCP_SSL_SOCKET] Client connected.\n");
+    const char* enc_name = SSL_get_cipher(sock_state->crypto->ssl);
+    printf("[TCP_SSL_SOCKET] Client connected with %s encryption.\n", enc_name);
 
     sock_state->interf = TCP_SSL;
     return true;
@@ -159,11 +169,9 @@ void close_tcp_ssl(SocketState* sock_state) {
 }
 
 int send_tcp_ssl(SocketState* socket, const void* buf, size_t len) {
-    //return SSL_write(socket->crypto->ssl, (void*)buf, len);
-    return len;
+    return SSL_write(socket->crypto->ssl, (void*)buf, len);
 }
 
 int recv_tcp_ssl(SocketState* socket, void* buf, size_t len) {
-    //return SSL_read(socket->crypto->ssl, buf, len);
-    return len;
+    return SSL_read(socket->crypto->ssl, buf, len);
 }

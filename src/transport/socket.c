@@ -112,7 +112,6 @@ int socket_recv_packet(SocketState* socket) {
 }
 
 int socket_send_buffer(SocketState* socket, const void* buf, size_t len) {
-    printf("AAAAAAA\n");
     switch (socket->interf) {
         case UDP:
             return send_udp(socket, buf, len);
@@ -129,7 +128,6 @@ int socket_send_buffer(SocketState* socket, const void* buf, size_t len) {
 }
 
 int socket_recv_buffer(SocketState* socket, void* buf, size_t len) {
-    printf("BBBBBBB\n");
     switch (socket->interf) {
         case UDP:
             return recv_udp(socket, buf, len);
