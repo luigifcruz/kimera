@@ -28,9 +28,9 @@ configure_file(
     "${PROJECT_SOURCE_DIR}/include/kimera/state.h"
 )
 
-if(WINDOWS)
-    set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
-endif()
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 include(cmake/listdirs.cmake)
 
