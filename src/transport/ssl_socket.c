@@ -8,7 +8,7 @@ CryptoState* init_crypto() {
     return crypto;
 }
 
-void close_cryto(CryptoState* crypto) {
+void close_crypto(CryptoState* crypto) {
     if (crypto->ssl) {
         SSL_shutdown(crypto->ssl);
         SSL_free(crypto->ssl);
@@ -18,22 +18,20 @@ void close_cryto(CryptoState* crypto) {
     EVP_cleanup();
 }
 
-bool open_crypto(State* state, SocketState* socket) {
-    CryptoState* crypto = (CryptoState*)malloc(sizeof(CryptoState));
-
+bool start_crypto(CryptoState* crypto, State* state) {
     SSL_library_init();
     SSL_load_error_strings();	
     OpenSSL_add_ssl_algorithms();
 
     if (state->packet_size >= 31000) {
-        printf("[TCP_SSL_SOCKET] Invalid settings, packet_size must be smaller than 31 KB.\n");
+        printf("[CRYPTO] Invalid settings, packet_size must be smaller than 31 KB.\n");
         return false;
     }
 
     crypto->method = TLS_method();
     crypto->ctx = SSL_CTX_new(crypto->method);
     if (!crypto->ctx) {
-        printf("[TCP_SSL_SOCKET] Unable to create SSL context.\n");
+        printf("[CRYPTO] Unable to create SSL context.\n");
         ERR_print_errors_fp(stderr);
         return false;
     }
@@ -42,33 +40,49 @@ bool open_crypto(State* state, SocketState* socket) {
 
     if (state->mode & TRANSMITTER) {
         if (SSL_CTX_use_certificate_file(crypto->ctx, state->ssl_cert, SSL_FILETYPE_PEM) <= 0) {
-            printf("[TCP_SSL_SOCKET] Couldn't open SSL certificate.\n");
+            printf("[CRYPTO] Couldn't open SSL certificate.\n");
             ERR_print_errors_fp(stderr);
             return false;
         }
 
         if (SSL_CTX_use_PrivateKey_file(crypto->ctx, state->ssl_key, SSL_FILETYPE_PEM) <= 0) {
-            printf("[TCP_SSL_SOCKET] Couldn't open SSL key.");
+            printf("[CRYPTO] Couldn't open SSL key.");
             ERR_print_errors_fp(stderr);
             return false;
         }
 
         if (!SSL_CTX_check_private_key(crypto->ctx)) {
-            printf("[TCP_SSL_SOCKET] Couldn't validate public certificate.\n");
+            printf("[CRYPTO] Couldn't validate public certificate.\n");
             return false;
         }
     }
 
-    crypto->ssl = SSL_new(crypto->ctx);
-    socket->crypto = crypto;
+    return true;
+}
 
+bool crypto_accept(CryptoState* crypto, unsigned int fd) {
+    crypto->ssl = SSL_new(crypto->ctx);
+    SSL_set_fd(crypto->ssl, fd);
+    if (SSL_accept(crypto->ssl) <= 0) {
+        printf("[CRYPTO] Couldn't accept secure connection.\n");
+        ERR_print_errors_fp(stderr);
+        return false;
+    }
+    return true;
+}
+
+bool crypto_connect(CryptoState* crypto, unsigned int fd) {
+    crypto->ssl = SSL_new(crypto->ctx);
+    SSL_set_fd(crypto->ssl, fd);
+    if (SSL_connect(crypto->ssl) <= 0) {
+        printf("[CRYPTO] Couldn't accept secure connection.\n");
+        ERR_print_errors_fp(stderr);
+        return false;
+    }
     return true;
 }
 
 bool open_tcp_ssl_client(SocketState* sock_state, State* state) {
-    if (!open_crypto(state, sock_state))
-        return false;
-
     sock_state->server_in = (socket_in*)malloc(sizeof(socket_in));
 
     if ((sock_state->server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
@@ -91,12 +105,12 @@ bool open_tcp_ssl_client(SocketState* sock_state, State* state) {
         return false;
     }
 
-    SSL_set_fd(sock_state->crypto->ssl, sock_state->server_fd);
-    if (SSL_connect(sock_state->crypto->ssl) <= 0) {
-        printf("[TCP_SSL_SOCKET] Couldn't accept secure connection.\n");
-        ERR_print_errors_fp(stderr);
+    sock_state->crypto = init_crypto();
+    if (!start_crypto(sock_state->crypto, state))
         return false;
-    }
+
+    if (!crypto_connect(sock_state->crypto, sock_state->server_fd))
+        return false;
 
     const char* enc_name = SSL_get_cipher(sock_state->crypto->ssl);
     printf("[TCP_SSL_SOCKET] Client connected with %s encryption.\n", enc_name);
@@ -106,9 +120,6 @@ bool open_tcp_ssl_client(SocketState* sock_state, State* state) {
 }
 
 bool open_tcp_ssl_server(SocketState* sock_state, State* state) {
-    if (!open_crypto(state, sock_state))
-        return false;
-
     sock_state->server_in = (socket_in*)malloc(sizeof(socket_in));
     sock_state->client_in = (socket_in*)malloc(sizeof(socket_in));
 
@@ -145,13 +156,13 @@ bool open_tcp_ssl_server(SocketState* sock_state, State* state) {
         printf("[TCP_SSL_SOCKET] Couldn't accept the client.\n");
         return false;
     }
-    
-    SSL_set_fd(sock_state->crypto->ssl, sock_state->client_fd);
-    if (SSL_accept(sock_state->crypto->ssl) <= 0) {
-        printf("[TCP_SSL_SOCKET] Couldn't accept secure connection.\n");
-        ERR_print_errors_fp(stderr);
+
+    sock_state->crypto = init_crypto();
+    if (!start_crypto(sock_state->crypto, state))
         return false;
-    }
+
+    if (!crypto_accept(sock_state->crypto, sock_state->client_fd))
+        return false;
 
     const char* enc_name = SSL_get_cipher(sock_state->crypto->ssl);
     printf("[TCP_SSL_SOCKET] Client connected with %s encryption.\n", enc_name);
@@ -161,7 +172,8 @@ bool open_tcp_ssl_server(SocketState* sock_state, State* state) {
 }
 
 void close_tcp_ssl(SocketState* sock_state) {
-    close_cryto(sock_state->crypto);
+    if (sock_state->crypto)
+        close_crypto(sock_state->crypto);
 
     close(sock_state->client_fd);
     close(sock_state->server_fd);
