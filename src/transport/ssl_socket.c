@@ -40,21 +40,23 @@ bool open_crypto(State* state, SocketState* socket) {
 
     SSL_CTX_set_ecdh_auto(crypto->ctx, 1);
 
-    if (SSL_CTX_use_certificate_file(crypto->ctx, state->ssl_cert, SSL_FILETYPE_PEM) <= 0) {
-        printf("[TCP_SSL_SOCKET] Couldn't open SSL certificate.\n");
-        ERR_print_errors_fp(stderr);
-	    return false;
-    }
+    if (state->mode & TRANSMITTER) {
+        if (SSL_CTX_use_certificate_file(crypto->ctx, state->ssl_cert, SSL_FILETYPE_PEM) <= 0) {
+            printf("[TCP_SSL_SOCKET] Couldn't open SSL certificate.\n");
+            ERR_print_errors_fp(stderr);
+            return false;
+        }
 
-    if (SSL_CTX_use_PrivateKey_file(crypto->ctx, state->ssl_key, SSL_FILETYPE_PEM) <= 0) {
-        printf("[TCP_SSL_SOCKET] Couldn't open SSL key.");
-        ERR_print_errors_fp(stderr);
-	    return false;
-    }
+        if (SSL_CTX_use_PrivateKey_file(crypto->ctx, state->ssl_key, SSL_FILETYPE_PEM) <= 0) {
+            printf("[TCP_SSL_SOCKET] Couldn't open SSL key.");
+            ERR_print_errors_fp(stderr);
+            return false;
+        }
 
-    if (!SSL_CTX_check_private_key(crypto->ctx)) {
-        printf("[TCP_SSL_SOCKET] Couldn't validate public certificate.\n");
-        return false;
+        if (!SSL_CTX_check_private_key(crypto->ctx)) {
+            printf("[TCP_SSL_SOCKET] Couldn't validate public certificate.\n");
+            return false;
+        }
     }
 
     crypto->ssl = SSL_new(crypto->ctx);
