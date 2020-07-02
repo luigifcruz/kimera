@@ -1,5 +1,11 @@
 #include "kimera/state.h"
 
+char* empty_string(size_t len) {
+    char* string = (char*)malloc(len);
+    string[0] = '\0';
+    return string;
+}
+
 State* kimera_state() {
     State *state = malloc(sizeof(State));
 
@@ -11,18 +17,18 @@ State* kimera_state() {
     state->out_format    = DEFAULT_FORMAT;
     state->framerate     = DEFAULT_FRAMERATE;
     state->packet_size   = DEFAULT_PACKET_SIZE;
+    state->psk_identity  = DEFAULT_PSK_IDENTITY;
     state->sink          = 0;
     state->source        = 0;
 
     state->software_only = false;
 
-    state->ssl_key     = malloc(256);
-    state->ssl_cert    = malloc(256);
-    state->vert_shader = malloc(256);
-    state->frag_shader = malloc(256);
-    state->loopback    = malloc(64);
-    state->address     = malloc(64);
-    state->codec       = malloc(64);
+    state->psk_key       = empty_string(256);
+    state->vert_shader   = empty_string(256);
+    state->frag_shader   = empty_string(256);
+    state->loopback      = empty_string(64);
+    state->address       = empty_string(64);
+    state->codec         = empty_string(64);
 
     strcpy(state->loopback, DEFAULT_LOOPBACK);
     strcpy(state->address, DEFAULT_ADDRESS);

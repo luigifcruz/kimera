@@ -3,6 +3,9 @@
 
 #include "kimera/state.h"
 
+#define MAX_KEY_LEN     256
+#define DEFAULT_KEY_LEN 64
+
 #ifdef KIMERA_WINDOWS
 #include <ws2tcpip.h>
 #include <afunix.h>
@@ -18,6 +21,7 @@
 
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <openssl/rand.h>
 
 typedef struct sockaddr_in socket_in;
 typedef struct sockaddr_un socket_un;
@@ -128,6 +132,11 @@ int recv_unix(SocketState*, void*, size_t);
 //
 // TCP SSL Methods
 //
+
+char* crypto_new_key(size_t);
+char* crypto_bytes_to_b64(char*, size_t);
+char* crypto_b64_to_bytes(char*);
+const char* crypto_get_cipher(CryptoState*);
 
 bool open_tcp_ssl_client(SocketState*, State*);
 bool open_tcp_ssl_server(SocketState*, State*);

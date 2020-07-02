@@ -20,19 +20,20 @@
 // Default Settings
 //
 
-#define HEADER_SIZE         20
-#define DEFAULT_PACKET_SIZE 1020
+#define HEADER_SIZE          20
+#define DEFAULT_PACKET_SIZE  1020
 
-#define DEFAULT_PORT        8080
-#define DEFAULT_ADDRESS     "0.0.0.0"
-#define DEFAULT_LOOPBACK    "/dev/video0"
+#define DEFAULT_PORT         8080
+#define DEFAULT_ADDRESS      "0.0.0.0"
+#define DEFAULT_LOOPBACK     "/dev/video0"
 
-#define DEFAULT_FRAMERATE   25
-#define DEFAULT_WIDTH       1280
-#define DEFAULT_HEIGHT      720
-#define DEFAULT_BITRATE     3000000
-#define DEFAULT_CODEC       "libx265"
-#define DEFAULT_FORMAT      AV_PIX_FMT_YUV420P
+#define DEFAULT_FRAMERATE    25
+#define DEFAULT_WIDTH        1280
+#define DEFAULT_HEIGHT       720
+#define DEFAULT_BITRATE      3000000
+#define DEFAULT_CODEC        "libx265"
+#define DEFAULT_FORMAT       AV_PIX_FMT_YUV420P
+#define DEFAULT_PSK_IDENTITY "KIMERA_PSK_IDENTITY"
 
 typedef enum {
     NONE     = 0 << 0,
@@ -65,8 +66,8 @@ typedef struct {
     Interfaces source;
     char* vert_shader;
     char* frag_shader;
-    char* ssl_cert;
-    char* ssl_key;
+    char* psk_key;
+    char* psk_identity;
     bool software_only;
     enum AVPixelFormat in_format;
     enum AVPixelFormat out_format;

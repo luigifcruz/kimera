@@ -65,6 +65,15 @@ void inthand(int signum) {
     stop = 1;
 }
 
+void kimera_print_random_key() {
+    size_t len = 64;
+    char* bin_key = crypto_new_key(len);
+    char* b64_key = crypto_bytes_to_b64(bin_key, len);
+    printf("%s\n", b64_key);
+    free(b64_key);
+    free(bin_key);
+}
+
 int kimera_client(
     int argc, char *argv[],
     void(*tx)(State*, volatile sig_atomic_t*),
@@ -91,6 +100,11 @@ int kimera_client(
 
     if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version")) {
         kimera_print_version();
+        return 0;
+    }
+
+    if (!strcmp(argv[1], "-k") || !strcmp(argv[1], "--key")) {
+        kimera_print_random_key();
         return 0;
     }
 

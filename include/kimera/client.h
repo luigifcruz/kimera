@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <yaml.h>
 
+#include "kimera/transport.h"
 #include "kimera/state.h"
 
 volatile sig_atomic_t stop;

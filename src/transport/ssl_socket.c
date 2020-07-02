@@ -1,10 +1,13 @@
 #include "kimera/transport.h"
 
+const State* crypto_state;
+
 CryptoState* init_crypto() {
     CryptoState* crypto = (CryptoState*)malloc(sizeof(CryptoState));
-    crypto->ctx = NULL;
-    crypto->ssl = NULL;
+    crypto->ctx    = NULL;
+    crypto->ssl    = NULL;
     crypto->method = NULL;
+    crypto_state   = NULL;
     return crypto;
 }
 
@@ -18,14 +21,68 @@ void close_crypto(CryptoState* crypto) {
     EVP_cleanup();
 }
 
+char* crypto_new_key(size_t len) {
+    char* buffer = (char*)malloc(len);
+    if (RAND_bytes((unsigned char*)buffer, len) != 1) {
+        printf("[CRYPTO] Can't generate random key.\n");
+        return NULL;
+    }
+    return buffer;
+}
+
+char* crypto_bytes_to_b64(char* key, size_t len) {
+    if (!key) return NULL;
+    char* b64 = (char*)malloc(MAX_KEY_LEN);
+    EVP_EncodeBlock((unsigned char*)b64, (const unsigned char*)key, len);
+    return b64;
+}
+
+char* crypto_b64_to_bytes(char* b64) {
+    if (!b64) return NULL;
+    size_t b64_len = strlen(b64);
+    char* key = (char*)malloc(MAX_KEY_LEN);
+    EVP_DecodeBlock((unsigned char*)key, (const unsigned char*)b64, b64_len);
+    return key;
+}
+
+const char* crypto_get_cipher(CryptoState* crypto) {
+    return SSL_CIPHER_get_name(SSL_get_current_cipher(crypto->ssl));
+}
+
 bool start_crypto(CryptoState* crypto, State* state) {
-    SSL_library_init();
     SSL_load_error_strings();	
-    OpenSSL_add_ssl_algorithms();
+    OpenSSL_add_all_algorithms();
 
     if (state->packet_size >= 31000) {
         printf("[CRYPTO] Invalid settings, packet_size must be smaller than 31 KB.\n");
         return false;
+    }
+
+    if (state->mode & TRANSMITTER && strlen(state->psk_key) < 8) {
+        printf("\nNo pre-shared key found, generating one...\n");
+        printf("TIP: This can be pre-defined in the configuration file as `psk_key`.\n\n");
+        
+        state->psk_key = crypto_new_key(DEFAULT_KEY_LEN);
+        char* b64_key = crypto_bytes_to_b64(state->psk_key, DEFAULT_KEY_LEN);
+        printf("%s\n\n", b64_key);
+        free(b64_key);
+    }
+
+    if (state->mode & RECEIVER && strlen(state->psk_key) < 8) {
+        printf("\nNo pre-shared key found! Type the Transmitter Pre-shared Key:\n");
+        printf("TIP: This can be pre-defined in the configuration file as `psk_key`.\n\n");
+        
+        char* b64_key = (char*)malloc(MAX_KEY_LEN);
+        printf("KEY> ");
+        int values = scanf("%s", b64_key);
+        printf("\n");
+
+        if (values == 1 && !(state->psk_key = crypto_b64_to_bytes(b64_key))) {
+            printf("[CRYPTO] User entered an invalid pre-shared key. Exiting...\n");
+            return false;
+        }
+
+        free(b64_key);
     }
 
     crypto->method = TLS_method();
@@ -36,49 +93,87 @@ bool start_crypto(CryptoState* crypto, State* state) {
         return false;
     }
 
-    SSL_CTX_set_ecdh_auto(crypto->ctx, 1);
+    crypto_state = state;
+    return true;
+}
 
-    if (state->mode & TRANSMITTER) {
-        if (SSL_CTX_use_certificate_file(crypto->ctx, state->ssl_cert, SSL_FILETYPE_PEM) <= 0) {
-            printf("[CRYPTO] Couldn't open SSL certificate.\n");
-            ERR_print_errors_fp(stderr);
-            return false;
-        }
+static unsigned int psk_client_cb(SSL *ssl, const char *hint, char *id, unsigned int max_id_len, unsigned char *psk, unsigned int max_psk_len) {
+    (void)(ssl);
+    (void)(hint);
 
-        if (SSL_CTX_use_PrivateKey_file(crypto->ctx, state->ssl_key, SSL_FILETYPE_PEM) <= 0) {
-            printf("[CRYPTO] Couldn't open SSL key.");
-            ERR_print_errors_fp(stderr);
-            return false;
-        }
-
-        if (!SSL_CTX_check_private_key(crypto->ctx)) {
-            printf("[CRYPTO] Couldn't validate public certificate.\n");
-            return false;
-        }
+    if (!crypto_state) {
+        printf("[CRYPTO] Global state not loaded.\n");
+        return 0;
     }
 
-    return true;
+    size_t id_len = strlen(crypto_state->psk_identity);
+    if (id_len >= max_id_len) {
+        printf("[CRYPTO] The PSK identity is too long.\n");
+        return 0;
+    }
+
+    size_t psk_len = strlen(crypto_state->psk_key);
+    if (psk_len >= max_psk_len) {
+        printf("[CRYPTO] Pre-shared key is too long. Max length is %d and have %ld.\n", max_psk_len, psk_len);
+        return 0;
+    }
+
+    strcpy(id, crypto_state->psk_identity);
+    memcpy(psk, crypto_state->psk_key, psk_len);
+    return psk_len;
+}
+
+static unsigned int psk_server_cb(SSL* ssl, const char* id, unsigned char* psk, unsigned int max_len) {
+    (void)(ssl);
+
+    if (!id) {
+        printf("[CRYPTO] The PSK identity wasn't found.\n");
+        return 0;
+    }
+
+    if (!crypto_state) {
+        printf("[CRYPTO] Global state not loaded.\n");
+        return 0;
+    }
+
+    if (strcmp(id, crypto_state->psk_identity) != 0) {
+        printf("[CRYPTO] Can't validate PSK identity.\n");
+        return 0;
+    }
+
+    size_t psk_len = strlen(crypto_state->psk_key);
+    if (psk_len >= max_len) {
+        printf("[CRYPTO] Pre-shared key is too long. Max length is %d and have %ld.\n", max_len, psk_len);
+        return 0;
+    }
+
+    memcpy(psk, crypto_state->psk_key, psk_len);
+    return psk_len;
 }
 
 bool crypto_accept(CryptoState* crypto, unsigned int fd) {
     crypto->ssl = SSL_new(crypto->ctx);
     SSL_set_fd(crypto->ssl, fd);
+    SSL_set_psk_server_callback(crypto->ssl, psk_server_cb);
     if (SSL_accept(crypto->ssl) <= 0) {
         printf("[CRYPTO] Couldn't accept secure connection.\n");
         ERR_print_errors_fp(stderr);
         return false;
     }
+    printf("[CRYPTO] Negotiated cipher set: %s\n", crypto_get_cipher(crypto));
     return true;
 }
 
 bool crypto_connect(CryptoState* crypto, unsigned int fd) {
     crypto->ssl = SSL_new(crypto->ctx);
     SSL_set_fd(crypto->ssl, fd);
+    SSL_set_psk_client_callback(crypto->ssl, psk_client_cb);
     if (SSL_connect(crypto->ssl) <= 0) {
         printf("[CRYPTO] Couldn't accept secure connection.\n");
         ERR_print_errors_fp(stderr);
         return false;
     }
+    printf("[CRYPTO] Negotiated cipher set: %s\n", crypto_get_cipher(crypto));
     return true;
 }
 
@@ -112,8 +207,7 @@ bool open_tcp_ssl_client(SocketState* sock_state, State* state) {
     if (!crypto_connect(sock_state->crypto, sock_state->server_fd))
         return false;
 
-    const char* enc_name = SSL_get_cipher(sock_state->crypto->ssl);
-    printf("[TCP_SSL_SOCKET] Client connected with %s encryption.\n", enc_name);
+    printf("[TCP_SSL_SOCKET] Connected to server...\n");
 
     sock_state->interf = TCP_SSL;
     return true;
@@ -164,8 +258,7 @@ bool open_tcp_ssl_server(SocketState* sock_state, State* state) {
     if (!crypto_accept(sock_state->crypto, sock_state->client_fd))
         return false;
 
-    const char* enc_name = SSL_get_cipher(sock_state->crypto->ssl);
-    printf("[TCP_SSL_SOCKET] Client connected with %s encryption.\n", enc_name);
+    printf("[TCP_SSL_SOCKET] Client connected...\n");
 
     sock_state->interf = TCP_SSL;
     return true;

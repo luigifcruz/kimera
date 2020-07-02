@@ -95,11 +95,8 @@ bool kimera_parse_config_file(State* state, char* path) {
                     if (!strcmp((char*)event.data.scalar.value, "frag_shader"))
                         char_ptr = state->frag_shader;
 
-                    if (!strcmp((char*)event.data.scalar.value, "ssl_cert"))
-                        char_ptr = state->ssl_cert;
-
-                    if (!strcmp((char*)event.data.scalar.value, "ssl_key"))
-                        char_ptr = state->ssl_key;
+                    if (!strcmp((char*)event.data.scalar.value, "psk_key"))
+                        char_ptr = state->psk_key;
                 }
 
                 // Register Secondary Parameters
