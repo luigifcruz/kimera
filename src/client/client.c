@@ -10,6 +10,7 @@ void kimera_print_help() {
     printf("    - [profile] (required)  Name of the selected profile from the configuration file.\n");
     printf("    - [mode]    (required)  Operation Mode: Transmitter (tx) or Receiver (rx).\n");
     printf("    - [config]  (optional)  Path of the configuration file containing profiles.\n");
+    printf("Available Flags:\n    -h Print Help\n    -v Print Version\n    -k Print Crypto Key\n");
     printf("Example:\n   kimera tx rpi4_picam_v1 profiles.yml\n");
 }
 
@@ -66,12 +67,11 @@ void inthand(int signum) {
 }
 
 void kimera_print_random_key() {
-    size_t len = 64;
-    char* bin_key = crypto_new_key(len);
-    char* b64_key = crypto_bytes_to_b64(bin_key, len);
+    char b64_key[MAX_KEY_LEN];
+    char bin_key[DEFAULT_KEY_LEN];
+    if (!crypto_new_key(bin_key, DEFAULT_KEY_LEN)) return;
+    crypto_bytes_to_b64(bin_key, DEFAULT_KEY_LEN, (char*)&b64_key);
     printf("%s\n", b64_key);
-    free(b64_key);
-    free(bin_key);
 }
 
 int kimera_client(

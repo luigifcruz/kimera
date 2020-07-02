@@ -21,28 +21,22 @@ void close_crypto(CryptoState* crypto) {
     EVP_cleanup();
 }
 
-char* crypto_new_key(size_t len) {
-    char* buffer = (char*)malloc(len);
-    if (RAND_bytes((unsigned char*)buffer, len) != 1) {
+bool crypto_new_key(char* bin, size_t bin_len) {
+    if (RAND_bytes((unsigned char*)bin, bin_len) != 1) {
         printf("[CRYPTO] Can't generate random key.\n");
-        return NULL;
+        return false;
     }
-    return buffer;
+    return true;
 }
 
-char* crypto_bytes_to_b64(char* key, size_t len) {
-    if (!key) return NULL;
-    char* b64 = (char*)malloc(MAX_KEY_LEN);
-    EVP_EncodeBlock((unsigned char*)b64, (const unsigned char*)key, len);
-    return b64;
+int crypto_bytes_to_b64(char* bin, size_t bin_len, char* b64) {
+    if (!bin || !b64) return -1;
+    return EVP_EncodeBlock((unsigned char*)b64, (const unsigned char*)bin, bin_len);
 }
 
-char* crypto_b64_to_bytes(char* b64) {
-    if (!b64) return NULL;
-    size_t b64_len = strlen(b64);
-    char* key = (char*)malloc(MAX_KEY_LEN);
-    EVP_DecodeBlock((unsigned char*)key, (const unsigned char*)b64, b64_len);
-    return key;
+int crypto_b64_to_bytes(char* b64, size_t b64_len, char* bin) {
+    if (!bin || !b64) return -1;
+    return EVP_DecodeBlock((unsigned char*)bin, (const unsigned char*)b64, b64_len);
 }
 
 const char* crypto_get_cipher(CryptoState* crypto) {
@@ -58,31 +52,29 @@ bool start_crypto(CryptoState* crypto, State* state) {
         return false;
     }
 
-    if (state->mode & TRANSMITTER && strlen(state->psk_key) < 8) {
-        printf("\nNo pre-shared key found, generating one...\n");
-        printf("TIP: This can be pre-defined in the configuration file as `psk_key`.\n\n");
-        
-        state->psk_key = crypto_new_key(DEFAULT_KEY_LEN);
-        char* b64_key = crypto_bytes_to_b64(state->psk_key, DEFAULT_KEY_LEN);
-        printf("%s\n\n", b64_key);
-        free(b64_key);
-    }
+    if (strlen(state->psk_key) < 8) {
+        if (state->mode & TRANSMITTER) {
+            char bin_key[DEFAULT_KEY_LEN];
+            if (!crypto_new_key(bin_key, DEFAULT_KEY_LEN)) return false;
+            crypto_bytes_to_b64((char*)&bin_key, DEFAULT_KEY_LEN, state->psk_key);
 
-    if (state->mode & RECEIVER && strlen(state->psk_key) < 8) {
-        printf("\nNo pre-shared key found! Type the Transmitter Pre-shared Key:\n");
-        printf("TIP: This can be pre-defined in the configuration file as `psk_key`.\n\n");
-        
-        char* b64_key = (char*)malloc(MAX_KEY_LEN);
-        printf("KEY> ");
-        int values = scanf("%s", b64_key);
-        printf("\n");
-
-        if (values == 1 && !(state->psk_key = crypto_b64_to_bytes(b64_key))) {
-            printf("[CRYPTO] User entered an invalid pre-shared key. Exiting...\n");
-            return false;
+            printf("\nNo pre-shared key found, generating one...\n");
+            printf("TIP: This can be pre-defined in the configuration file as `psk_key`.\n\n");
+            printf("%s\n\n", state->psk_key);
         }
 
-        free(b64_key);
+        if (state->mode & RECEIVER) {
+            printf("\nNo pre-shared key found! Type the Transmitter Pre-shared Key:\n");
+            printf("TIP: This can be pre-defined in the configuration file as `psk_key`.\n\n");
+            printf("KEY> ");
+
+            if (scanf("%s",  state->psk_key) != 1) {
+                printf("[CRYPTO] User entered an invalid pre-shared key. Exiting...\n");
+                return false;
+            }
+
+            printf("\n");
+        }
     }
 
     crypto->method = TLS_method();
@@ -112,15 +104,15 @@ static unsigned int psk_client_cb(SSL *ssl, const char *hint, char *id, unsigned
         return 0;
     }
 
-    size_t psk_len = strlen(crypto_state->psk_key);
-    if (psk_len >= max_psk_len) {
-        printf("[CRYPTO] Pre-shared key is too long. Max length is %d and have %ld.\n", max_psk_len, psk_len);
+    size_t b64_len = strlen(crypto_state->psk_key);
+    if ((size_t)(((float)b64_len/0.75)+0.5) >= max_psk_len) {
+        printf("[CRYPTO] Pre-shared key is too long.");
         return 0;
     }
 
     strcpy(id, crypto_state->psk_identity);
-    memcpy(psk, crypto_state->psk_key, psk_len);
-    return psk_len;
+
+    return crypto_b64_to_bytes(crypto_state->psk_key, b64_len, (char*)psk);
 }
 
 static unsigned int psk_server_cb(SSL* ssl, const char* id, unsigned char* psk, unsigned int max_len) {
@@ -141,14 +133,13 @@ static unsigned int psk_server_cb(SSL* ssl, const char* id, unsigned char* psk, 
         return 0;
     }
 
-    size_t psk_len = strlen(crypto_state->psk_key);
-    if (psk_len >= max_len) {
-        printf("[CRYPTO] Pre-shared key is too long. Max length is %d and have %ld.\n", max_len, psk_len);
+    size_t b64_len = strlen(crypto_state->psk_key);
+    if ((size_t)(((float)b64_len*0.75)+0.5) >= max_len) {
+        printf("[CRYPTO] Pre-shared key is too long.");
         return 0;
     }
 
-    memcpy(psk, crypto_state->psk_key, psk_len);
-    return psk_len;
+    return crypto_b64_to_bytes(crypto_state->psk_key, b64_len, (char*)psk);
 }
 
 bool crypto_accept(CryptoState* crypto, unsigned int fd) {

@@ -133,9 +133,9 @@ int recv_unix(SocketState*, void*, size_t);
 // TCP SSL Methods
 //
 
-char* crypto_new_key(size_t);
-char* crypto_bytes_to_b64(char*, size_t);
-char* crypto_b64_to_bytes(char*);
+bool crypto_new_key(char*, size_t);
+int crypto_bytes_to_b64(char*, size_t, char*);
+int crypto_b64_to_bytes(char*, size_t, char*);
 const char* crypto_get_cipher(CryptoState*);
 
 bool open_tcp_ssl_client(SocketState*, State*);
