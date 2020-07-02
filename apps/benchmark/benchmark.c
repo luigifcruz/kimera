@@ -14,7 +14,7 @@ double clockToMilliseconds(clock_t ticks){
     return (ticks/(double)CLOCKS_PER_SEC)*1000.0;
 }
 
-void transmitter(State* state, volatile sig_atomic_t* stop) {
+void benchmark(State* state, volatile sig_atomic_t* stop) {
     bool ok = true;
     RenderState* render = init_render();
     AVFrame* frame = av_frame_alloc();
@@ -67,5 +67,10 @@ cleanup:
 }
 
 int main(int argc, char *argv[]) {
-    return kimera_client(argc, argv, transmitter, NULL);
+    State* state = kimera_state();
+    volatile sig_atomic_t stop = false;
+
+    benchmark(state, &stop);
+
+    return 0;
 }
