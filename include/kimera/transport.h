@@ -3,6 +3,9 @@
 
 #include "kimera/state.h"
 
+#define MAX_KEY_LEN     256
+#define DEFAULT_KEY_LEN 64
+
 #ifdef KIMERA_WINDOWS
 #include <ws2tcpip.h>
 #include <afunix.h>
@@ -15,6 +18,10 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
+
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#include <openssl/rand.h>
 
 typedef struct sockaddr_in socket_in;
 typedef struct sockaddr_un socket_un;
@@ -38,9 +45,18 @@ typedef struct {
 } RouterState;
 
 typedef struct {
+    const SSL_METHOD *method;
+    SSL_CTX *ctx;
+    SSL *ssl;
+} CryptoState;
+
+typedef struct {
     int server_fd;
     int client_fd;
     Interfaces interf;
+
+    // Crypto
+    CryptoState* crypto;
 
     // Router
     RouterState* router;
@@ -90,6 +106,8 @@ bool router_parse_packet(RouterState*);
 bool open_tcp_client(SocketState*, State*);
 bool open_tcp_server(SocketState*, State*);
 void close_tcp(SocketState*);
+int send_tcp(SocketState*, const void*, size_t);
+int recv_tcp(SocketState*, void*, size_t);
 
 //
 // UDP Socket Methods
@@ -98,6 +116,8 @@ void close_tcp(SocketState*);
 bool open_udp_client(SocketState*, State*);
 bool open_udp_server(SocketState*, State*);
 void close_udp(SocketState*);
+int send_udp(SocketState*, const void*, size_t);
+int recv_udp(SocketState*, void*, size_t);
 
 //
 // UNIX Socket Methods
@@ -106,6 +126,23 @@ void close_udp(SocketState*);
 bool open_unix_client(SocketState*, State*);
 bool open_unix_server(SocketState*, State*);
 void close_unix(SocketState*);
+int send_unix(SocketState*, const void*, size_t);
+int recv_unix(SocketState*, void*, size_t);
+
+//
+// TCP SSL Methods
+//
+
+bool crypto_new_key(char*, size_t);
+int crypto_bytes_to_b64(char*, size_t, char*);
+int crypto_b64_to_bytes(char*, size_t, char*);
+const char* crypto_get_cipher(CryptoState*);
+
+bool open_tcp_ssl_client(SocketState*, State*);
+bool open_tcp_ssl_server(SocketState*, State*);
+void close_tcp_ssl(SocketState*);
+int send_tcp_ssl(SocketState*, const void*, size_t);
+int recv_tcp_ssl(SocketState*, void*, size_t);
 
 //
 // Util Methods

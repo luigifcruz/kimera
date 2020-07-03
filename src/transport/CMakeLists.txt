@@ -1,4 +1,7 @@
+include(${CMAKE_SOURCE_DIR}/cmake/openssl.cmake)
+
 if(LINUX OR MACOS OR WINDOWS)
+    list(APPEND LIB_LIST openssl)
     file(GLOB TMP_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
     list(APPEND SOURCE_LIST ${TMP_LIST})
 endif()

@@ -3,6 +3,7 @@
 SocketState* init_socket() {
     SocketState* state = malloc(sizeof(SocketState));
     state->router    = init_router();
+    state->crypto    = NULL;
     state->packet    = NULL;
     state->client_in = NULL;
     state->server_in = NULL;
@@ -21,6 +22,9 @@ void close_socket(SocketState* socket) {
             break;
         case TCP:
             close_tcp(socket);
+            break;
+        case TCP_SSL:
+            close_tcp_ssl(socket);
             break;
         case UNIX:
             close_unix(socket);
@@ -42,6 +46,9 @@ bool open_socket_client(SocketState* socket, State* state) {
 
     if (state->source & TCP)
         open_tcp_client(socket, state);
+
+    if (state->source & TCP_SSL)
+        open_tcp_ssl_client(socket, state);
 
     if (state->source & UDP)
         open_udp_client(socket, state);
@@ -69,6 +76,9 @@ bool open_socket_server(SocketState* socket, State* state) {
 
     if (state->sink & TCP)
         open_tcp_server(socket, state);
+
+    if (state->sink & TCP_SSL)
+        open_tcp_ssl_server(socket, state);
 
     if (state->sink & UDP)
         open_udp_server(socket, state);
@@ -102,25 +112,33 @@ int socket_recv_packet(SocketState* socket) {
 }
 
 int socket_send_buffer(SocketState* socket, const void* buf, size_t len) {
-    if (socket->interf & UNIX || socket->interf & TCP) {
-        return write(socket->client_fd, buf, len);
-    }
-
-    if (socket->interf & UDP) {
-        socklen_t slen = sizeof(*socket->server_in);
-        return sendto(socket->server_fd, buf, len, 0, (socket_t*)socket->server_in, slen);
+    switch (socket->interf) {
+        case UDP:
+            return send_udp(socket, buf, len);
+        case TCP:
+            return send_tcp(socket, buf, len);
+        case TCP_SSL:
+            return send_tcp_ssl(socket, buf, len);
+        case UNIX:
+            return send_unix(socket, buf, len);
+        default:
+            break;
     }
     return 0;
 }
 
 int socket_recv_buffer(SocketState* socket, void* buf, size_t len) {
-    if (socket->interf & UNIX || socket->interf & TCP) {
-        return recv(socket->server_fd, buf, len, MSG_WAITALL);
-    }
-        
-    if (socket->interf & UDP) {
-        socklen_t slen = sizeof(*socket->client_in);
-        return recvfrom(socket->server_fd, buf, len, MSG_WAITALL, (socket_t*)socket->client_in, &slen);
+    switch (socket->interf) {
+        case UDP:
+            return recv_udp(socket, buf, len);
+        case TCP:
+            return recv_tcp(socket, buf, len);
+        case TCP_SSL:
+            return recv_tcp_ssl(socket, buf, len);
+        case UNIX:
+            return recv_unix(socket, buf, len);
+        default:
+            break;
     }
     return 0;
 }

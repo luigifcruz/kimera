@@ -10,6 +10,7 @@ void kimera_print_help() {
     printf("    - [profile] (required)  Name of the selected profile from the configuration file.\n");
     printf("    - [mode]    (required)  Operation Mode: Transmitter (tx) or Receiver (rx).\n");
     printf("    - [config]  (optional)  Path of the configuration file containing profiles.\n");
+    printf("Available Flags:\n    -h Print Help\n    -v Print Version\n    -k Print Crypto Key\n");
     printf("Example:\n   kimera tx rpi4_picam_v1 profiles.yml\n");
 }
 
@@ -26,6 +27,10 @@ void print_io_list(Interfaces interfaces) {
         printf(" DISPLAY");
     if (interfaces & LOOPBACK)
         printf(" LOOPBACK");
+    if (interfaces & FILTER)
+        printf(" FILTER");
+    if (interfaces & TCP_SSL)
+        printf(" TCP_SSL");
     printf("\n");
 }
 
@@ -61,6 +66,14 @@ void inthand(int signum) {
     stop = 1;
 }
 
+void kimera_print_random_key() {
+    char b64_key[MAX_KEY_LEN];
+    char bin_key[DEFAULT_KEY_LEN];
+    if (!crypto_new_key(bin_key, DEFAULT_KEY_LEN)) return;
+    crypto_bytes_to_b64(bin_key, DEFAULT_KEY_LEN, (char*)&b64_key);
+    printf("%s\n", b64_key);
+}
+
 int kimera_client(
     int argc, char *argv[],
     void(*tx)(State*, volatile sig_atomic_t*),
@@ -87,6 +100,11 @@ int kimera_client(
 
     if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version")) {
         kimera_print_version();
+        return 0;
+    }
+
+    if (!strcmp(argv[1], "-k") || !strcmp(argv[1], "--key")) {
+        kimera_print_random_key();
         return 0;
     }
 

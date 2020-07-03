@@ -62,3 +62,11 @@ void close_unix(SocketState* sock_state) {
     close(sock_state->client_fd);
     sock_state->interf = NONE;
 }
+
+int send_unix(SocketState* socket, const void* buf, size_t len) {
+    return write(socket->client_fd, buf, len);
+}
+
+int recv_unix(SocketState* socket, void* buf, size_t len) {
+    return recv(socket->server_fd, buf, len, MSG_WAITALL);
+} 
