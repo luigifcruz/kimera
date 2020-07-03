@@ -130,19 +130,22 @@ int send_unix(SocketState*, const void*, size_t);
 int recv_unix(SocketState*, void*, size_t);
 
 //
-// TCP SSL Methods
+// Crypto Methods
 //
+
+CryptoState* init_crypto();
+void close_crypto();
 
 bool crypto_new_key(char*, size_t);
 int crypto_bytes_to_b64(char*, size_t, char*);
 int crypto_b64_to_bytes(char*, size_t, char*);
-const char* crypto_get_cipher(CryptoState*);
 
-bool open_tcp_ssl_client(SocketState*, State*);
-bool open_tcp_ssl_server(SocketState*, State*);
-void close_tcp_ssl(SocketState*);
-int send_tcp_ssl(SocketState*, const void*, size_t);
-int recv_tcp_ssl(SocketState*, void*, size_t);
+bool start_crypto(CryptoState*, State*);
+bool crypto_connect(CryptoState*, unsigned int);
+bool crypto_accept(CryptoState*, unsigned int);
+
+int crypto_send(SocketState*, const void*, size_t);
+int crypto_recv(SocketState*, void*, size_t);
 
 //
 // Util Methods

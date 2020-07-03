@@ -23,6 +23,15 @@ bool open_tcp_client(SocketState* sock_state, State* state) {
         return false;
     }
 
+    if (state->pipe & CRYPTO) {
+        sock_state->crypto = init_crypto();
+        if (!start_crypto(sock_state->crypto, state))
+            return false;
+
+        if (!crypto_connect(sock_state->crypto, sock_state->server_fd))
+            return false;
+    }
+
     sock_state->interf = TCP;
     return true;
 }
@@ -65,6 +74,15 @@ bool open_tcp_server(SocketState* sock_state, State* state) {
         return false;
     }
 
+    if (state->pipe & CRYPTO) {
+        sock_state->crypto = init_crypto();
+        if (!start_crypto(sock_state->crypto, state))
+            return false;
+
+        if (!crypto_accept(sock_state->crypto, sock_state->client_fd))
+            return false;
+    }
+
     printf("[TCP_SOCKET] Client connected.\n");
 
     sock_state->interf = TCP;
@@ -72,15 +90,22 @@ bool open_tcp_server(SocketState* sock_state, State* state) {
 }
 
 void close_tcp(SocketState* sock_state) {
+    if (sock_state->crypto)
+        close_crypto(sock_state->crypto);
+    
     close(sock_state->client_fd);
     close(sock_state->server_fd);
     sock_state->interf = NONE;
 }
 
 int send_tcp(SocketState* socket, const void* buf, size_t len) {
+    if (socket->crypto)
+        return crypto_send(socket, buf, len);
     return write(socket->client_fd, buf, len);
 }
 
 int recv_tcp(SocketState* socket, void* buf, size_t len) {
+    if (socket->crypto)
+        return crypto_recv(socket, buf, len);
     return recv(socket->server_fd, buf, len, MSG_WAITALL);
 }

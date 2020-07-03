@@ -144,7 +144,7 @@ bool decoder_push(DecoderState* decoder, char* buf, uint32_t len, uint64_t pts) 
 
     if (packet->pts != AV_NOPTS_VALUE) {
         bool ok = parse_packet(decoder, packet);
-
+        
         if (decoder->retard)
             decoder->retard = NULL;
 
