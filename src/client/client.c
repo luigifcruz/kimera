@@ -29,8 +29,12 @@ void print_io_list(Interfaces interfaces) {
         printf(" LOOPBACK");
     if (interfaces & FILTER)
         printf(" FILTER");
-    if (interfaces & TCP_SSL)
-        printf(" TCP_SSL");
+    if (interfaces & RESAMPLE)
+        printf(" RESAMPLE");
+    if (interfaces & GPU_RESAMPLE)
+        printf(" GPU_RESAMPLE");
+    if (interfaces & CRYPTO)
+        printf(" CRYPTO");
     printf("\n");
 }
 
@@ -49,6 +53,8 @@ void kimera_print_state(State* state) {
 
     printf("    ├── Source: ");
     print_io_list(state->source);
+    printf("    ├── Pipe:   ");
+    print_io_list(state->pipe);
     printf("    ├── Sink:   ");
     print_io_list(state->sink);
 

@@ -98,7 +98,7 @@ static unsigned int psk_client_cb(SSL *ssl, const char *hint, char *id, unsigned
         return 0;
     }
 
-    size_t id_len = strlen(crypto_state->psk_identity);
+    size_t id_len = strlen(KIMERA_PSK_IDENTITY);
     if (id_len >= max_id_len) {
         printf("[CRYPTO] The PSK identity is too long.\n");
         return 0;
@@ -110,7 +110,7 @@ static unsigned int psk_client_cb(SSL *ssl, const char *hint, char *id, unsigned
         return 0;
     }
 
-    strcpy(id, crypto_state->psk_identity);
+    strcpy(id, KIMERA_PSK_IDENTITY);
 
     return crypto_b64_to_bytes(crypto_state->psk_key, b64_len, (char*)psk);
 }
@@ -128,7 +128,7 @@ static unsigned int psk_server_cb(SSL* ssl, const char* id, unsigned char* psk, 
         return 0;
     }
 
-    if (strcmp(id, crypto_state->psk_identity) != 0) {
+    if (strcmp(id, KIMERA_PSK_IDENTITY) != 0) {
         printf("[CRYPTO] Can't validate PSK identity.\n");
         return 0;
     }
@@ -200,7 +200,7 @@ bool open_tcp_ssl_client(SocketState* sock_state, State* state) {
 
     printf("[TCP_SSL_SOCKET] Connected to server...\n");
 
-    sock_state->interf = TCP_SSL;
+    sock_state->interf = TCP;//TCP_SSL;
     return true;
 }
 
@@ -251,7 +251,7 @@ bool open_tcp_ssl_server(SocketState* sock_state, State* state) {
 
     printf("[TCP_SSL_SOCKET] Client connected...\n");
 
-    sock_state->interf = TCP_SSL;
+    sock_state->interf = TCP;
     return true;
 }
 

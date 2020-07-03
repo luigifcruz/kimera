@@ -35,16 +35,14 @@ void receiver(State* state, volatile sig_atomic_t* stop) {
         if (decoder_push(decoder, socket->packet->payload, socket->packet->len, socket->packet->pts)) {
             AVFrame* frame = decoder->frame;
 
-            if (!state->software_only) {
-                if (!render_push_frame(render, frame)) break;
-                if (state->sink & FILTER)
-                    if (!render_proc_frame(render)) break;
-                if (state->sink & DISPLAY)
-                    if (!render_draw_frame(render)) break;
-                if (state->sink & LOOPBACK) {
-                    if (!render_pull_frame(render)) break;
-                    frame = render->frame;
-                }
+            if (!render_push_frame(render, frame)) break;
+            if (state->sink & FILTER)
+                if (!render_proc_frame(render)) break;
+            if (state->sink & DISPLAY)
+                if (!render_draw_frame(render)) break;
+            if (state->sink & LOOPBACK) {
+                if (!render_pull_frame(render)) break;
+                frame = render->frame;
             }
 
             if (!resampler_push_frame(resampler, state, frame))
@@ -84,15 +82,13 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
     while (loopback_pull_frame(loopback, state) && !(*stop)) {
         AVFrame* frame = loopback->frame;
 
-        if (!state->software_only) {
-            if (!render_push_frame(render, frame)) break;
-            if (state->sink & FILTER)
-                if (!render_proc_frame(render)) break;
-            if (state->sink & DISPLAY)
-                if (!render_draw_frame(render)) break;
-            if (!render_pull_frame(render)) break;
-            frame = render->frame;
-        }
+        if (!render_push_frame(render, frame)) break;
+        if (state->sink & FILTER)
+            if (!render_proc_frame(render)) break;
+        if (state->sink & DISPLAY)
+            if (!render_draw_frame(render)) break;
+        if (!render_pull_frame(render)) break;
+        frame = render->frame;
 
         if (!resampler_push_frame(resampler, state, frame))
             continue;

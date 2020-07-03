@@ -23,9 +23,6 @@ void close_socket(SocketState* socket) {
         case TCP:
             close_tcp(socket);
             break;
-        case TCP_SSL:
-            close_tcp_ssl(socket);
-            break;
         case UNIX:
             close_unix(socket);
             break;
@@ -46,9 +43,6 @@ bool open_socket_client(SocketState* socket, State* state) {
 
     if (state->source & TCP)
         open_tcp_client(socket, state);
-
-    if (state->source & TCP_SSL)
-        open_tcp_ssl_client(socket, state);
 
     if (state->source & UDP)
         open_udp_client(socket, state);
@@ -76,9 +70,6 @@ bool open_socket_server(SocketState* socket, State* state) {
 
     if (state->sink & TCP)
         open_tcp_server(socket, state);
-
-    if (state->sink & TCP_SSL)
-        open_tcp_ssl_server(socket, state);
 
     if (state->sink & UDP)
         open_udp_server(socket, state);
@@ -117,8 +108,6 @@ int socket_send_buffer(SocketState* socket, const void* buf, size_t len) {
             return send_udp(socket, buf, len);
         case TCP:
             return send_tcp(socket, buf, len);
-        case TCP_SSL:
-            return send_tcp_ssl(socket, buf, len);
         case UNIX:
             return send_unix(socket, buf, len);
         default:
@@ -133,8 +122,6 @@ int socket_recv_buffer(SocketState* socket, void* buf, size_t len) {
             return recv_udp(socket, buf, len);
         case TCP:
             return recv_tcp(socket, buf, len);
-        case TCP_SSL:
-            return recv_tcp_ssl(socket, buf, len);
         case UNIX:
             return recv_unix(socket, buf, len);
         default:
