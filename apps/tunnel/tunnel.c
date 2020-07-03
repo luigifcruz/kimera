@@ -34,24 +34,24 @@ void receiver(State* state, volatile sig_atomic_t* stop) {
     while (socket_recv_packet(socket) && !(*stop)) {
         if (decoder_push(decoder, socket->packet->payload, socket->packet->len, socket->packet->pts)) {
             AVFrame* frame = decoder->frame;
+            Interfaces pipe = state->pipe;
+            Interfaces sink = state->sink;
 
-            if (!state->software_only) {
+            if (pipe & GPU_RESAMPLE || pipe & FILTER || sink & DISPLAY)
                 if (!render_push_frame(render, frame)) break;
-                if (state->sink & FILTER)
-                    if (!render_proc_frame(render)) break;
-                if (state->sink & DISPLAY)
-                    if (!render_draw_frame(render)) break;
-                if (state->sink & LOOPBACK) {
-                    if (!render_pull_frame(render)) break;
-                    frame = render->frame;
-                }
+            if (pipe & FILTER)
+                if (!render_proc_frame(render)) break;
+            if (sink & DISPLAY)
+                if (!render_draw_frame(render)) break;
+            if (pipe & GPU_RESAMPLE || pipe & FILTER) {
+                if (!render_pull_frame(render)) break;
+                frame = render->frame;
             }
 
-            if (!resampler_push_frame(resampler, state, frame))
-                continue;
+            if (!resampler_push_frame(resampler, state, frame)) break;
 
             if (state->sink & LOOPBACK)
-                loopback_push_frame(loopback, resampler->frame);
+                if (!loopback_push_frame(loopback, resampler->frame)) break;
         }
     }
 
@@ -83,19 +83,21 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
 
     while (loopback_pull_frame(loopback, state) && !(*stop)) {
         AVFrame* frame = loopback->frame;
+        Interfaces pipe = state->pipe;
+        Interfaces sink = state->source;
 
-        if (!state->software_only) {
+        if (pipe & GPU_RESAMPLE || pipe & FILTER || sink & DISPLAY)
             if (!render_push_frame(render, frame)) break;
-            if (state->sink & FILTER)
-                if (!render_proc_frame(render)) break;
-            if (state->sink & DISPLAY)
-                if (!render_draw_frame(render)) break;
+        if (pipe & FILTER)
+            if (!render_proc_frame(render)) break;
+        if (sink & DISPLAY)
+            if (!render_draw_frame(render)) break;
+        if (pipe & GPU_RESAMPLE || pipe & FILTER) {
             if (!render_pull_frame(render)) break;
             frame = render->frame;
         }
 
-        if (!resampler_push_frame(resampler, state, frame))
-            continue;
+        if (!resampler_push_frame(resampler, state, frame)) break;
 
         if (encoder_push(encoder, resampler->frame))
             socket_send_packet(socket, encoder->packet);

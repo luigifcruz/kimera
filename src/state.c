@@ -17,11 +17,10 @@ State* kimera_state() {
     state->out_format    = DEFAULT_FORMAT;
     state->framerate     = DEFAULT_FRAMERATE;
     state->packet_size   = DEFAULT_PACKET_SIZE;
-    state->psk_identity  = DEFAULT_PSK_IDENTITY;
+ 
     state->sink          = 0;
+    state->pipe          = 0;
     state->source        = 0;
-
-    state->software_only = false;
 
     state->psk_key       = empty_string(256);
     state->vert_shader   = empty_string(256);

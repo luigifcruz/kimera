@@ -72,6 +72,11 @@ bool kimera_parse_config_file(State* state, char* path) {
                     break;
                 }
 
+                if (!strcmp((char*)event.data.scalar.value, "pipe")) {
+                    direction = 3;
+                    break;
+                }
+
                 // Register Root Parameters
                 if (mapping_index == 1) {
                     if (!strcmp((char*)event.data.scalar.value, "width"))
@@ -134,13 +139,21 @@ bool kimera_parse_config_file(State* state, char* path) {
                         if (!strcmp((char*)event.data.scalar.value, "filter"))
                             counter += FILTER;
 
-                        if (!strcmp((char*)event.data.scalar.value, "tcp_ssl"))
-                            counter += TCP_SSL;
-                        
+                        if (!strcmp((char*)event.data.scalar.value, "resample"))
+                            counter += RESAMPLE;
+
+                        if (!strcmp((char*)event.data.scalar.value, "gpu_resample"))
+                            counter += GPU_RESAMPLE;
+
+                        if (!strcmp((char*)event.data.scalar.value, "crypto"))
+                            counter += CRYPTO;
+
                         if (direction == 1)
                             state->source += counter;
                         if (direction == 2)
                             state->sink += counter;
+                        if (direction == 3)
+                            state->pipe += counter;
                     }
                 }
                 break;
