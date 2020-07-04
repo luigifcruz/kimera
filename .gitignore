@@ -16,3 +16,5 @@ deps
 CMakeSettings.json
 shaders.h
 .vscode/settings.json
+compile_commands.json
+.clangd

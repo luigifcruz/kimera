@@ -22,7 +22,7 @@ void render_print_meta(RenderState* render) {
     printf(".   [Render Meta]\n");
     printf("├── Window Mode:   %s\n", render_mode_query(render));
     printf("├── Frame Size:    %dx%d\n", render->f_size.w, render->f_size.h);
-    printf("├── Device Size:   %dx%d\n", render->d_size.w, render->d_size.w);
+    printf("├── Device Size:   %dx%d\n", render->d_size.w, render->d_size.h);
     printf("└──.   [EGL Meta]\n");
     printf("│  ├── APIs:       %s\n", egl_query(render, EGL_CLIENT_APIS));
     printf("│  ├── Version:    %s\n", egl_query(render, EGL_VERSION));
