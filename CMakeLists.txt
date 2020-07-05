@@ -47,12 +47,14 @@ get_property(DEPENDENCIES GLOBAL PROPERTY GLOBAL_DEPENDENCIES)
 get_property(CMAKE_C_FLAGS GLOBAL PROPERTY GLOBAL_CMAKE_C_FLAGS)
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+    set(CMAKE_CXX_STANDARD 17)
+
     if(NOT WINDOWS)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -Wno-int-to-pointer-cast")
         set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O2 -g")
         set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2")
     endif()
-    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 
 add_library(kimera ${SOURCE_LIST})

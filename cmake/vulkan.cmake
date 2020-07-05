@@ -2,7 +2,7 @@ project(vk)
 
 add_library(vk INTERFACE IMPORTED GLOBAL)
 
-if(LINUX OR MACOS)
+if(LINUX)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(vk REQUIRED IMPORTED_TARGET vulkan)
 endif()
