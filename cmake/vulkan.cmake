@@ -7,6 +7,10 @@ if(LINUX)
     pkg_check_modules(vk REQUIRED IMPORTED_TARGET vulkan)
 endif()
 
+if(MACOS)
+    list(APPEND vk_LDFLAGS "-lvulkan")
+endif()
+
 target_include_directories(vk INTERFACE ${vk_INCLUDE_DIRS})
 target_link_libraries(vk INTERFACE ${vk_LDFLAGS})
 
