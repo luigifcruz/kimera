@@ -1,5 +1,7 @@
 #include "kimera/client.h"
 
+volatile sig_atomic_t stop;
+
 void kimera_print_version() {
     printf("Kimera Version: %d.%d\n", KIMERA_VERSION_MAJOR, KIMERA_VERSION_MINOR);
     printf("Ffmpeg Version: %s\n", av_version_info());
@@ -47,7 +49,7 @@ void kimera_print_state(State* state) {
 
     if (state->mode == TRANSMITTER)
         printf("    .   TRANSMITTER\n");
-    
+
     if (state->mode == RECEIVER)
         printf("    .   RECEIVER\n");
 
@@ -139,12 +141,12 @@ int kimera_client(
             kimera_free(state);
             return -1;
     }
-        
+
     if (!kimera_parse_config_file(state, config_path)) {
         kimera_free(state);
         return -1;
     }
-        
+
     switch (state->mode) {
         case TRANSMITTER:
             (void)(*tx)(state, &stop);

@@ -10,8 +10,6 @@
 #include "kimera/transport.h"
 #include "kimera/state.h"
 
-volatile sig_atomic_t stop;
-
 //
 // Client Methods
 //
