@@ -47,6 +47,7 @@ class VulkanRender {
             if (!pickPhysicalDevice()) return false;
             if (!createLogicalDevice()) return false;
             if (!createSwapChain()) return false;
+            if (!createImageViews()) return false;
             if (!mainLoop()) return false;
 
             close();
@@ -54,6 +55,10 @@ class VulkanRender {
         }
 
         void close() {
+            for (auto imageView : swapChainImageView) {
+                vkDestroyImageView(device, imageView, NULL);
+            }
+
             vkDestroySwapchainKHR(device, swapChain, NULL);
             vkDestroyDevice(device, NULL);
             vkDestroySurfaceKHR(instance, surface, NULL);
@@ -78,6 +83,8 @@ class VulkanRender {
         std::vector<VkImage> swapChainImages;
         VkFormat swapChainImageFormat;
         VkExtent2D swapChainExtent;
+
+        std::vector<VkImageView> swapChainImageView;
 
         bool initWindow() {
             if (!glfwInit()) {
@@ -148,6 +155,36 @@ class VulkanRender {
                 printf("Can't create GLFW window!\n");
                 return false;
             }
+            return true;
+        }
+
+        bool createImageViews() {
+            swapChainImageView.resize(swapChainImages.size());
+
+            for (size_t i = 0; i < swapChainImages.size(); i++) {
+                VkImageViewCreateInfo createInfo{};
+                createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+                createInfo.image = swapChainImages[i];
+                createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+                createInfo.format = swapChainImageFormat;
+
+                createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+                createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+                createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+                createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+                createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                createInfo.subresourceRange.baseMipLevel = 0;
+                createInfo.subresourceRange.levelCount = 1;
+                createInfo.subresourceRange.baseArrayLayer = 0;
+                createInfo.subresourceRange.layerCount = 1;
+
+                if (vkCreateImageView(device, &createInfo, NULL, &swapChainImageView[i]) != VK_SUCCESS) {
+                    printf("Failed to create image views.\n");
+                    return false;
+                }
+            }
+
             return true;
         }
 
