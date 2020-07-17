@@ -54,6 +54,7 @@ $ brew install libyaml glfw3 libav cmake
 $ git clone https://github.com/luigifreitas/kimera.git
 $ cd kimera
 $ mkdir build
+$ cd build
 $ cmake -DCMAKE_BUILD_TYPE=Release ..
 $ make -j
 $ sudo make install
