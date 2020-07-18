@@ -18,7 +18,6 @@
 //
 
 #include "kimera/state.h"
-#include "kimera/codec.h"
 
 #include "glad/glad.h"
 #include "glad/glad_egl.h"
@@ -90,7 +89,7 @@ static const float vertices[] = {
      1.0f,  1.0f, 0.0f,  1.0f, 0.0f,
      1.0f, -1.0f, 0.0f,  1.0f, 1.0f,
     -1.0f, -1.0f, 0.0f,  0.0f, 1.0f,
-    -1.0f,  1.0f, 0.0f,  0.0f, 0.0f 
+    -1.0f,  1.0f, 0.0f,  0.0f, 0.0f
 };
 
 static const unsigned int indices[] = {

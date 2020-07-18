@@ -1,11 +1,18 @@
-#include "kimera/client.h"
+#include "kimera/client.hpp"
 
-void kimera_print_version() {
+Kimera::Kimera(State* state) {
+    this->state = state;
+}
+
+Kimera::~Kimera() {
+}
+
+void Kimera::PrintVersion() {
     printf("Kimera Version: %d.%d\n", KIMERA_VERSION_MAJOR, KIMERA_VERSION_MINOR);
     printf("Ffmpeg Version: %s\n", av_version_info());
 }
 
-void kimera_print_help() {
+void Kimera::PrintHelp() {
     printf("Usage:\n   kimera [mode] [profile] [config]\n");
     printf("    - [profile] (required)  Name of the selected profile from the configuration file.\n");
     printf("    - [mode]    (required)  Operation Mode: Transmitter (tx) or Receiver (rx).\n");
@@ -47,7 +54,7 @@ void kimera_print_state(State* state) {
 
     if (state->mode == TRANSMITTER)
         printf("    .   TRANSMITTER\n");
-    
+
     if (state->mode == RECEIVER)
         printf("    .   RECEIVER\n");
 
@@ -139,12 +146,12 @@ int kimera_client(
             kimera_free(state);
             return -1;
     }
-        
+
     if (!kimera_parse_config_file(state, config_path)) {
         kimera_free(state);
         return -1;
     }
-        
+
     switch (state->mode) {
         case TRANSMITTER:
             (void)(*tx)(state, &stop);

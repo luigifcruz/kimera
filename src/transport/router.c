@@ -56,7 +56,7 @@ bool router_parse_packet(RouterState* router) {
 
     if (pts < router->packet->pts)
         return false;
-    
+
     if (pts > router->packet->pts) {
         free(router->packet->payload);
         router->checksum = (uint32_t)0;
@@ -66,13 +66,13 @@ bool router_parse_packet(RouterState* router) {
             return false;
         }
     }
-    
+
     router->packet->pts = pts;
     router->packet->len = len;
     router->packet->i   = i;
     router->packet->n   = n;
     router->checksum   += 1;
-    
+
     size_t offset = router->packet->i * router->payload_size;
     size_t size = get_packet_size(router, router->packet, offset);
     memcpy(router->packet->payload + offset, (uint8_t*)(router->buffer+router->header_size), size);

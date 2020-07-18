@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(kimera VERSION 1.0 LANGUAGES C)
+project(kimera VERSION 1.0 LANGUAGES C CXX)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
@@ -58,6 +58,8 @@ endif()
 add_library(kimera ${SOURCE_LIST})
 target_link_libraries(kimera ${LIB_LIST})
 target_include_directories(kimera PUBLIC include)
-add_dependencies(kimera ${DEPENDENCIES})
 
+if(DEPENDENCIES)
+add_dependencies(kimera ${DEPENDENCIES})
+endif()
 add_subdirectory(apps)

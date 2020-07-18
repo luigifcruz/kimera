@@ -1,10 +1,10 @@
-#include "kimera/loopback/linux.h"
+#include "kimera/loopback/linux.hpp"
 
 unsigned int ff_to_v4l(enum AVPixelFormat input) {
     switch (input) {
-    case AV_PIX_FMT_RGB24:          return V4L2_PIX_FMT_RGB24; 
-    case AV_PIX_FMT_YUYV422:        return V4L2_PIX_FMT_YUYV; 
-    case AV_PIX_FMT_YUV420P:        return V4L2_PIX_FMT_YUV420; 
+    case AV_PIX_FMT_RGB24:          return V4L2_PIX_FMT_RGB24;
+    case AV_PIX_FMT_YUYV422:        return V4L2_PIX_FMT_YUYV;
+    case AV_PIX_FMT_YUV420P:        return V4L2_PIX_FMT_YUV420;
     case AV_PIX_FMT_YUV422P:        return V4L2_PIX_FMT_YUV422P;
     case AV_PIX_FMT_UYVY422:        return V4L2_PIX_FMT_UYVY;
     case AV_PIX_FMT_YUV411P:        return V4L2_PIX_FMT_YUV411P;
@@ -39,9 +39,9 @@ unsigned int ff_to_v4l(enum AVPixelFormat input) {
 
 enum AVPixelFormat v4l_to_ff(unsigned int input) {
     switch (input) {
-    case V4L2_PIX_FMT_RGB24:        return AV_PIX_FMT_RGB24; 
-    case V4L2_PIX_FMT_YUYV:         return AV_PIX_FMT_YUYV422; 
-    case V4L2_PIX_FMT_YUV420:       return AV_PIX_FMT_YUV420P; 
+    case V4L2_PIX_FMT_RGB24:        return AV_PIX_FMT_RGB24;
+    case V4L2_PIX_FMT_YUYV:         return AV_PIX_FMT_YUYV422;
+    case V4L2_PIX_FMT_YUV420:       return AV_PIX_FMT_YUV420P;
     case V4L2_PIX_FMT_YUV422P:      return AV_PIX_FMT_YUV422P;
     case V4L2_PIX_FMT_UYVY:         return AV_PIX_FMT_UYVY422;
     case V4L2_PIX_FMT_YUV411P:      return AV_PIX_FMT_YUV411P;
@@ -75,7 +75,7 @@ enum AVPixelFormat v4l_to_ff(unsigned int input) {
 #endif
     default:
         printf("[LOOPBACK] Selected pixel format (%d) not supported.\n", input);
-        return -1;
+        return AV_PIX_FMT_NONE;
     }
 }
 
@@ -85,8 +85,8 @@ unsigned int find_v4l_format(int fd, unsigned int preferred) {
     memset(&fmtdesc, 0, sizeof(fmtdesc));
     fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
-    while(ioctl(fd, VIDIOC_ENUM_FMT, &fmtdesc) == 0) {  
-        printf("[LOOPBACK] Device Format: %s\n", fmtdesc.description);  
+    while(ioctl(fd, VIDIOC_ENUM_FMT, &fmtdesc) == 0) {
+        printf("[LOOPBACK] Device Format: %s\n", fmtdesc.description);
         opt = fmtdesc.pixelformat;
         if (fmtdesc.pixelformat == preferred)
             return fmtdesc.pixelformat;

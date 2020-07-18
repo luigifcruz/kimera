@@ -4,39 +4,41 @@
 #include <stdbool.h>
 #include <string.h>
 
+extern "C" {
 #include "kimera/transport.h"
-#include "kimera/codec.h"
-#include "kimera/loopback.h"
-#include "kimera/render.h"
+//#include "kimera/render.h"
 #include "kimera/client.h"
+}
+
+#include "kimera/loopback.hpp"
+#include "kimera/codec.hpp"
 
 void receiver(State* state, volatile sig_atomic_t* stop) {
     bool ok = true;
-    DecoderState* decoder = init_decoder();
-    LoopbackState* loopback = init_loopback();
-    ResamplerState* resampler = init_resampler();
     SocketState* socket = init_socket();
-    RenderState* render = init_render();
+//    RenderState* render = init_render();
+
+    Loopback loopback(state);
+    Decoder decoder(state);
+    Resampler resampler(state, state->out_format);
 
     if (state->sink & LOOPBACK)
-        ok &= open_loopback_sink(loopback, state);
-
-    ok &= open_decoder(decoder,state);
+         ok &= loopback.SetSink();
     ok &= open_socket_client(socket, state);
-    ok &= open_resampler(resampler, state->out_format);
-    ok &= open_render(render, state);
+    //ok &= open_render(render, state);
 
     if (!ok) goto cleanup;
 
     kimera_print_state(state);
-    render_print_meta(render);
+   // render_print_meta(render);
 
     while (socket_recv_packet(socket) && !(*stop)) {
-        if (decoder_push(decoder, socket->packet->payload, socket->packet->len, socket->packet->pts)) {
-            AVFrame* frame = decoder->frame;
+        if (decoder.Push(socket->packet->payload, socket->packet->len, socket->packet->pts)) {
+            AVFrame* frame = decoder.Pull();
             Interfaces pipe = state->pipe;
             Interfaces sink = state->sink;
 
+/*
             if (pipe & GPU_RESAMPLE || pipe & FILTER || sink & DISPLAY)
                 if (!render_push_frame(render, frame)) break;
             if (pipe & FILTER)
@@ -47,45 +49,42 @@ void receiver(State* state, volatile sig_atomic_t* stop) {
                 if (!render_pull_frame(render)) break;
                 frame = render->frame;
             }
-
-            if (!resampler_push_frame(resampler, state, frame)) break;
+*/
+            if (!resampler.Push(frame)) break;
 
             if (state->sink & LOOPBACK)
-                if (!loopback_push_frame(loopback, resampler->frame)) break;
+                if (!loopback.Push(resampler.Pull())) break;
         }
     }
 
 cleanup:
-    close_loopback(loopback, state);
-    close_resampler(resampler);
-    close_decoder(decoder);
     close_socket(socket);
 }
 
 void transmitter(State* state, volatile sig_atomic_t* stop) {
     bool ok = true;
-    EncoderState* encoder = init_encoder();
+    AVFrame* frame = NULL;
+
     SocketState* socket = init_socket();
-    LoopbackState* loopback = init_loopback();
-    RenderState* render = init_render();
-    ResamplerState* resampler = init_resampler();
+//  RenderState* render = init_render();
+
+    Loopback loopback(state);
+    Encoder encoder(state);
+    Resampler resampler(state, state->out_format);
 
     ok &= open_socket_server(socket, state);
-    ok &= open_loopback_source(loopback, state);
-    ok &= open_encoder(encoder, state);
-    ok &= open_resampler(resampler, state->out_format);
-    ok &= open_render(render, state);
+    ok &= loopback.SetSource();
+//  ok &= open_render(render, state);
 
     if (!ok) goto cleanup;
 
     kimera_print_state(state);
-    render_print_meta(render);
+//  render_print_meta(render);
 
-    while (loopback_pull_frame(loopback, state) && !(*stop)) {
-        AVFrame* frame = loopback->frame;
+    while ((frame = loopback.Pull()) != NULL && !(*stop)) {
         Interfaces pipe = state->pipe;
         Interfaces sink = state->source;
-
+/*
         if (pipe & GPU_RESAMPLE || pipe & FILTER || sink & DISPLAY)
             if (!render_push_frame(render, frame)) break;
         if (pipe & FILTER)
@@ -96,19 +95,16 @@ void transmitter(State* state, volatile sig_atomic_t* stop) {
             if (!render_pull_frame(render)) break;
             frame = render->frame;
         }
+*/
+        if (!resampler.Push(frame)) break;
 
-        if (!resampler_push_frame(resampler, state, frame)) break;
-
-        if (encoder_push(encoder, resampler->frame))
-            socket_send_packet(socket, encoder->packet);
+        if (encoder.Push(resampler.Pull()))
+            socket_send_packet(socket, encoder.Pull());
     }
 
 cleanup:
-    close_render(render);
+//  close_render(render);
     close_socket(socket);
-    close_resampler(resampler);
-    close_loopback(loopback, state);
-    close_encoder(encoder);
 }
 
 int main(int argc, char *argv[]) {

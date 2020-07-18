@@ -61,19 +61,19 @@ typedef struct {
     int framerate;
     int port;
     int packet_size;
-    
+
     char* codec;
     char* vert_shader;
     char* frag_shader;
     char* psk_key;
     char* address;
     char* loopback;
-    
+
     enum AVPixelFormat in_format;
     enum AVPixelFormat out_format;
-    
+
     Mode mode;
-    
+
     Interfaces source;
     Interfaces pipe;
     Interfaces sink;

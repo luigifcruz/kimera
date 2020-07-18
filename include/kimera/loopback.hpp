@@ -4,7 +4,7 @@
 #include "kimera/state.h"
 
 #if	  defined(KIMERA_LINUX)
-#include "kimera/loopback/linux.h"
+#include "kimera/loopback/linux.hpp"
 #elif defined(KIMERA_MACOS)
 #include "kimera/loopback/macos/loopback.h"
 #elif defined(KIMERA_WINDOWS)

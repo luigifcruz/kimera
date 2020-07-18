@@ -13,7 +13,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
-#include <arpa/inet.h> 
+#include <arpa/inet.h>
 #endif
 
 #include <sys/types.h>
