@@ -1,7 +1,7 @@
 #include "kimera/codec.hpp"
 #include <libavutil/pixfmt.h>
 
-Resampler::Resampler(State* state, enum AVPixelFormat format) {
+Resampler::Resampler(Kimera* state, enum AVPixelFormat format) {
     this->configured = false;
     this->format = format;
     this->state = state;

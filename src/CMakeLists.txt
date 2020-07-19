@@ -7,7 +7,7 @@ add_subdirectory(codec)
 add_subdirectory(client)
 
 if(LINUX OR MACOS OR WINDOWS)
-    file(GLOB TMP_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
+    file(GLOB TMP_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cc")
     list(APPEND SOURCE_LIST ${TMP_LIST})
 endif()
 

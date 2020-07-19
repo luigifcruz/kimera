@@ -1,11 +1,10 @@
-#include "kimera/client.h"
-#include <assert.h>
+#include "kimera/client.hpp"
 
-bool kimera_parse_config_file(State* state, char* path) {
+bool Client::ParseConfigFile(char* path) {
     FILE* config_file;
     yaml_parser_t parser;
     yaml_event_t event;
-    
+
     if ((config_file = fopen(path, "r")) == NULL) {
         printf("[KIMERA] Configuration file not found.\n");
         return false;
@@ -21,7 +20,7 @@ bool kimera_parse_config_file(State* state, char* path) {
     int* int_ptr = NULL;
     char* char_ptr = NULL;
 
-    Mode mode = 0;
+    Mode mode;
     int direction = 0;
     int mapping_index = 0;
     int sequence_index = 0;
@@ -32,7 +31,7 @@ bool kimera_parse_config_file(State* state, char* path) {
             return false;
         }
 
-        switch(event.type) { 
+        switch(event.type) {
             case YAML_MAPPING_START_EVENT: mapping_index += 1; break;
             case YAML_MAPPING_END_EVENT: mapping_index -= 1; break;
             case YAML_SEQUENCE_START_EVENT: sequence_index += 1; break;
@@ -84,7 +83,7 @@ bool kimera_parse_config_file(State* state, char* path) {
 
                     if (!strcmp((char*)event.data.scalar.value, "packet_size"))
                         int_ptr = &state->packet_size;
-                    
+
                     if (!strcmp((char*)event.data.scalar.value, "height"))
                         int_ptr = &state->height;
 
@@ -114,46 +113,46 @@ bool kimera_parse_config_file(State* state, char* path) {
 
                     if (!strcmp((char*)event.data.scalar.value, "codec"))
                         char_ptr = state->codec;
-                    
+
                     if (!strcmp((char*)event.data.scalar.value, "port"))
                         int_ptr = &state->port;
 
                     if (sequence_index == 1) {
-                        int counter = 0;
+                        Interfaces counter;
 
                         if (!strcmp((char*)event.data.scalar.value, "tcp"))
-                            counter += TCP;
+                            counter = TCP;
 
                         if (!strcmp((char*)event.data.scalar.value, "udp"))
-                            counter += UDP;
+                            counter = UDP;
 
                         if (!strcmp((char*)event.data.scalar.value, "unix"))
-                            counter += UNIX;
-                        
+                            counter = UNIX;
+
                         if (!strcmp((char*)event.data.scalar.value, "loopback"))
-                            counter += LOOPBACK;
+                            counter = LOOPBACK;
 
                         if (!strcmp((char*)event.data.scalar.value, "display"))
-                            counter += DISPLAY;
+                            counter = DISPLAY;
 
                         if (!strcmp((char*)event.data.scalar.value, "filter"))
-                            counter += FILTER;
+                            counter = FILTER;
 
                         if (!strcmp((char*)event.data.scalar.value, "resample"))
-                            counter += RESAMPLE;
+                            counter = RESAMPLE;
 
                         if (!strcmp((char*)event.data.scalar.value, "gpu_resample"))
-                            counter += GPU_RESAMPLE;
+                            counter = GPU_RESAMPLE;
 
                         if (!strcmp((char*)event.data.scalar.value, "crypto"))
-                            counter += CRYPTO;
+                            counter = CRYPTO;
 
                         if (direction == 1)
-                            state->source += counter;
+                            state->source = static_cast<Interfaces>(counter | static_cast<Interfaces>(state->source));
                         if (direction == 2)
-                            state->sink += counter;
+                            state->sink = static_cast<Interfaces>(counter | static_cast<Interfaces>(state->sink));
                         if (direction == 3)
-                            state->pipe += counter;
+                            state->pipe = static_cast<Interfaces>(counter | static_cast<Interfaces>(state->pipe));
                     }
                 }
                 break;
@@ -162,7 +161,7 @@ bool kimera_parse_config_file(State* state, char* path) {
 
         if (event.type != YAML_STREAM_END_EVENT) {
             yaml_event_delete(&event);
-        } 
+        }
     } while (event.type != YAML_STREAM_END_EVENT);
 
     yaml_event_delete(&event);

@@ -8,26 +8,31 @@ extern "C" {
 #include <stdint.h>
 #include <stdlib.h>
 #include <yaml.h>
-#include "kimera/transport.h"
-#include "kimera/state.h"
 }
 
-class Kimera {
-public:
-    Kimera(State*);
-    ~Kimera();
+#include "kimera/transport.hpp"
+#include "kimera/kimera.hpp"
 
-    State* GetState();
+class Client {
+public:
+    Client(Kimera*);
+    ~Client();
+
+    Kimera* GetState();
 
     bool ParseConfigFile(char*);
 
+    void PrintInterface(Interfaces);
     void PrintVersion();
     void PrintState();
+    void PrintHelp();
+    void PrintKey();
 
-    int Attach(int, char*, void(*tx)(State*, volatile sig_atomic_t*),
-                           void(*rx)(State*, volatile sig_atomic_t*));
+    int Attach(int, char* argv[], void(*tx)(Client*), void(*rx)(Client*));
+
+    bool ShouldStop();
 private:
-    State* state = NULL;
+    Kimera* state = NULL;
     volatile sig_atomic_t* stop;
 };
 

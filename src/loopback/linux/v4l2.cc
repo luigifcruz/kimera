@@ -1,6 +1,6 @@
 #include "kimera/loopback/linux.hpp"
 
-V4L2::V4L2(State* state) {
+V4L2::V4L2(Kimera* state) {
     this->state = state;
 }
 

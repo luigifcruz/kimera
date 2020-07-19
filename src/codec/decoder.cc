@@ -11,7 +11,7 @@ Decoder::~Decoder() {
         av_packet_free(&this->retard);
 }
 
-Decoder::Decoder(State* state) {
+Decoder::Decoder(Kimera* state) {
     AVCodec *codec = avcodec_find_decoder_by_name(state->codec);
     if (!codec) {
         printf("[DECODER] Selected decoder (%s) not found.\n", state->codec);
@@ -52,14 +52,8 @@ Decoder::Decoder(State* state) {
     }
 }
 
-bool Decoder::Push(char* buf, uint32_t len, uint64_t pts) {
+bool Decoder::Push(AVPacket* packet) {
     bool status = false;
-
-    AVPacket* packet = av_packet_alloc();
-    av_init_packet(packet);
-    packet->data = (uint8_t*)buf;
-    packet->size = len;
-    packet->pts = pts;
 
     if (this->retard || packet->pts == AV_NOPTS_VALUE) {
         this->retard = av_packet_alloc();

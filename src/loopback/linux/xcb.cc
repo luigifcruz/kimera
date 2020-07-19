@@ -1,6 +1,6 @@
 #include "kimera/loopback/linux.hpp"
 
-XCB::XCB(State* state) {
+XCB::XCB(Kimera* state) {
     this->state = state;
 }
 

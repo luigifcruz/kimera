@@ -24,8 +24,8 @@ if(APPLE)
 endif()
 
 configure_file(
-    "${PROJECT_SOURCE_DIR}/include/kimera/state.h.in"
-    "${PROJECT_SOURCE_DIR}/include/kimera/state.h"
+    "${PROJECT_SOURCE_DIR}/include/kimera/kimera.hpp.in"
+    "${PROJECT_SOURCE_DIR}/include/kimera/kimera.hpp"
 )
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)

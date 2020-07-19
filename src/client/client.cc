@@ -1,18 +1,33 @@
 #include "kimera/client.hpp"
 
-Kimera::Kimera(State* state) {
+volatile sig_atomic_t stop_handler;
+
+void InterruptHandler(int signum) {
+    if (stop_handler == 1) {
+      exit(-1);
+    }
+    printf("Safely exiting, press Crtl-C again to force shutdown.\n");
+    stop_handler = 1;
+}
+
+Client::Client(Kimera* state) {
     this->state = state;
+    this->stop = &stop_handler;
 }
 
-Kimera::~Kimera() {
+Client::~Client() {
 }
 
-void Kimera::PrintVersion() {
+Kimera* Client::GetState() {
+    return this->state;
+}
+
+void Client::PrintVersion() {
     printf("Kimera Version: %d.%d\n", KIMERA_VERSION_MAJOR, KIMERA_VERSION_MINOR);
     printf("Ffmpeg Version: %s\n", av_version_info());
 }
 
-void Kimera::PrintHelp() {
+void Client::PrintHelp() {
     printf("Usage:\n   kimera [mode] [profile] [config]\n");
     printf("    - [profile] (required)  Name of the selected profile from the configuration file.\n");
     printf("    - [mode]    (required)  Operation Mode: Transmitter (tx) or Receiver (rx).\n");
@@ -21,7 +36,7 @@ void Kimera::PrintHelp() {
     printf("Example:\n   kimera tx rpi4_picam_v1 profiles.yml\n");
 }
 
-void print_io_list(Interfaces interfaces) {
+void Client::PrintInterface(Interfaces interfaces) {
     if (interfaces == NONE)
         printf(" NONE");
     if (interfaces & TCP)
@@ -45,7 +60,7 @@ void print_io_list(Interfaces interfaces) {
     printf("\n");
 }
 
-void kimera_print_state(State* state) {
+void Client::PrintState() {
     printf(".   CURRENT STATE\n");
     printf("├── Dimensions: %dx%d\n", state->width, state->height);
     printf("├── Framerate:  %d FPS\n", state->framerate);
@@ -59,11 +74,11 @@ void kimera_print_state(State* state) {
         printf("    .   RECEIVER\n");
 
     printf("    ├── Source: ");
-    print_io_list(state->source);
+    PrintInterface(state->source);
     printf("    ├── Pipe:   ");
-    print_io_list(state->pipe);
+    PrintInterface(state->pipe);
     printf("    ├── Sink:   ");
-    print_io_list(state->sink);
+    PrintInterface(state->sink);
 
     printf("    ├── Device:  %s\n", state->loopback);
     printf("    ├── Address: %s\n", state->address);
@@ -71,64 +86,52 @@ void kimera_print_state(State* state) {
     printf("    └── Codec:   %s\n", state->codec);
 }
 
-void inthand(int signum) {
-    if (stop == 1) {
-      exit(-1);
-    }
-    printf("Safely exiting, press Crtl-C again to force shutdown.\n");
-    stop = 1;
-}
-
-void kimera_print_random_key() {
+void Client::PrintKey() {
     char b64_key[MAX_KEY_LEN];
     char bin_key[DEFAULT_KEY_LEN];
-    if (!crypto_new_key(bin_key, DEFAULT_KEY_LEN)) return;
-    crypto_bytes_to_b64(bin_key, DEFAULT_KEY_LEN, (char*)&b64_key);
+    if (!Crypto::NewKey(bin_key, DEFAULT_KEY_LEN)) return;
+    Crypto::Bytes2Base(bin_key, DEFAULT_KEY_LEN, (char*)&b64_key);
     printf("%s\n", b64_key);
 }
 
-int kimera_client(
-    int argc, char *argv[],
-    void(*tx)(State*, volatile sig_atomic_t*),
-    void(*rx)(State*, volatile sig_atomic_t*)) {
+int Client::Attach(int argc, char *argv[], void(*tx)(Client*), void(*rx)(Client*)) {
     // Set Windows console to UTF-8
 #ifdef KIMERA_WINDOWS
     system("chcp 65001");
 #endif
 
     // Register signal handler.
-    signal(SIGINT, inthand);
+    signal(SIGINT, InterruptHandler);
 
     // Parse Command-Line Arguments
     if (argc < 2) {
         printf("Not enough arguments.\n");
-        kimera_print_help();
+        PrintHelp();
         return -1;
     }
 
     if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help")) {
-        kimera_print_help();
+        PrintHelp();
         return 0;
     }
 
     if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version")) {
-        kimera_print_version();
+        PrintVersion();
         return 0;
     }
 
     if (!strcmp(argv[1], "-k") || !strcmp(argv[1], "--key")) {
-        kimera_print_random_key();
+        PrintKey();
         return 0;
     }
 
     if (argc < 3) {
         printf("Not enough arguments.\n");
-        kimera_print_help();
+        PrintHelp();
         return -1;
     }
 
     // Declare Default Settings
-    State* state = kimera_state();
     char* config_path = argv[2];
 
     switch (argv[1][0]) {
@@ -142,26 +145,50 @@ int kimera_client(
             break;
         default:
             printf("Mode (%s) not valid.\n", argv[1]);
-            kimera_print_help();
-            kimera_free(state);
+            PrintHelp();
             return -1;
     }
 
-    if (!kimera_parse_config_file(state, config_path)) {
-        kimera_free(state);
-        return -1;
+    if (!ParseConfigFile(config_path)) return -1;
+
+    if (state->pipe & CRYPTO && strlen(state->psk_key) < 8) {
+        if (state->mode & TRANSMITTER) {
+            char bin_key[DEFAULT_KEY_LEN];
+            if (!Crypto::NewKey(bin_key, DEFAULT_KEY_LEN)) return -1;
+            Crypto::Bytes2Base((char*)&bin_key, DEFAULT_KEY_LEN, state->psk_key);
+
+            printf("\nNo pre-shared key found, generating one...\n");
+            printf("TIP: This can be pre-defined in the configuration file as `psk_key`.\n\n");
+            printf("%s\n\n", state->psk_key);
+        }
+
+        if (state->mode & RECEIVER) {
+            printf("\nNo pre-shared key found! Type the Transmitter Pre-shared Key:\n");
+            printf("TIP: This can be pre-defined in the configuration file as `psk_key`.\n\n");
+            printf("KEY> ");
+
+            if (scanf("%s",  state->psk_key) != 1) {
+                printf("[CRYPTO] User entered an invalid pre-shared key. Exiting...\n");
+                throw "error";
+            }
+
+            printf("\n");
+        }
     }
 
     switch (state->mode) {
         case TRANSMITTER:
-            (void)(*tx)(state, &stop);
+            (void)(*tx)(this);
             break;
         case RECEIVER:
-            (void)(*rx)(state, &stop);
+            (void)(*rx)(this);
             break;
         default: break;
     }
 
-    kimera_free(state);
     return 0;
+}
+
+bool Client::ShouldStop() {
+    return this->stop;
 }

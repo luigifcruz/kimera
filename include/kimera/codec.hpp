@@ -15,16 +15,16 @@ extern "C" {
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
 #include <libavutil/pixdesc.h>
-
-#include "kimera/state.h"
 }
+
+#include "kimera/kimera.hpp"
 
 class Decoder {
 public:
-    Decoder(State*);
+    Decoder(Kimera*);
     ~Decoder();
 
-    bool Push(char*, uint32_t, uint64_t);
+    bool Push(AVPacket*);
     AVFrame* Pull();
 
 private:
@@ -40,7 +40,7 @@ private:
 
 class Encoder {
 public:
-    Encoder(State*);
+    Encoder(Kimera*);
     ~Encoder();
 
     bool Push(AVFrame*);
@@ -53,7 +53,7 @@ private:
 
 class Resampler {
 public:
-    Resampler(State*, enum AVPixelFormat);
+    Resampler(Kimera*, enum AVPixelFormat);
     ~Resampler();
 
     bool Push(AVFrame*);
@@ -64,7 +64,7 @@ private:
     enum AVPixelFormat format;
     struct SwsContext* ctx = NULL;
     AVFrame* frame = NULL;
-    State* state = NULL;
+    Kimera* state = NULL;
 
     bool ConfigureResampler(AVFrame*);
 };

@@ -2,7 +2,7 @@ set(CMAKE_C_FLAGS "")
 
 if(LINUX)
     include(${CMAKE_SOURCE_DIR}/cmake/xcb.cmake)
-    file(GLOB TMP_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/linux/*.cc" "${CMAKE_CURRENT_SOURCE_DIR}/linux/*.c")
+    file(GLOB TMP_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/linux/*.cc")
     list(APPEND SOURCE_LIST ${TMP_LIST})
 endif()
 
