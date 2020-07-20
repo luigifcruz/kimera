@@ -5,9 +5,6 @@ Socket::Socket(Kimera* state) : crypto(state), router(state) {
 }
 
 Socket::~Socket() {
-    if (interf != NONE)
-        router.~Router();
-
     switch (interf) {
         case UDP:
             CloseUDP();
@@ -82,7 +79,11 @@ AVPacket* Socket::RecvPacket() {
     while (true) {
         size_t out = SendBuffer(router.GetBuffer(), router.GetPacketSize());
         if (out < (size_t)router.GetHeaderSize()) return NULL;
-        if (router.ParsePacket()) return router.GetPacket();
+        if (router.ParsePacket()) {
+            AVPacket* packet = av_packet_alloc();
+            av_init_packet(packet);
+            return packet;
+        } 
     }
 }
 

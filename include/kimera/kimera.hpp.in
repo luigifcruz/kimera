@@ -1,6 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <bits/stdint-uintn.h>
 #include <libavcodec/avcodec.h>
 #include <signal.h>
 #include <stdbool.h>
@@ -22,6 +23,8 @@
 
 #define HEADER_SIZE          20
 #define KIMERA_PSK_IDENTITY  "KIMERA_PSK_IDENTITY"
+#define MAX_KEY_LEN          256
+#define DEFAULT_KEY_LEN      64
 
 #define DEFAULT_PACKET_SIZE  1020
 #define DEFAULT_PORT         8080
@@ -33,6 +36,9 @@
 #define DEFAULT_BITRATE      3000000
 #define DEFAULT_CODEC        "libx264"
 #define DEFAULT_FORMAT       AV_PIX_FMT_YUV420P
+
+char* empty_string(size_t len);
+template<class T> inline T operator| (T a, T b) { return (T)((int)a | (int)b); }
 
 typedef enum {
     NONE         = 0 << 0,
@@ -54,33 +60,41 @@ typedef enum {
     RECEIVER    = 1 << 1,
 } Mode;
 
-class State {
+typedef struct {
+    uint64_t pts;
+    uint32_t len;
+    uint32_t i;
+    uint32_t n;
+    char* payload;
+} Packet;
+
+class Kimera {
 public:
-    int width;
-    int height;
-    int bitrate;
-    int framerate;
-    int port;
-    int packet_size;
+    Kimera();
+    ~Kimera();
+    
+    int width       = DEFAULT_WIDTH;
+    int height      = DEFAULT_HEIGHT;
+    int bitrate     = DEFAULT_BITRATE;
+    int framerate   = DEFAULT_FRAMERATE;
+    int port        = DEFAULT_PORT;
+    int packet_size = DEFAULT_PACKET_SIZE;
 
-    char* codec;
-    char* vert_shader;
-    char* frag_shader;
-    char* psk_key;
-    char* address;
-    char* loopback;
+    char* vert_shader = empty_string(256);
+    char* frag_shader = empty_string(256);
+    char* psk_key     = empty_string(256);
+    char* codec       = empty_string(64);
+    char* address     = empty_string(64);
+    char* loopback    = empty_string(64);
 
-    enum AVPixelFormat in_format;
-    enum AVPixelFormat out_format;
+    enum AVPixelFormat in_format  = DEFAULT_FORMAT;
+    enum AVPixelFormat out_format = DEFAULT_FORMAT;
 
     Mode mode;
 
-    Interfaces source;
-    Interfaces pipe;
-    Interfaces sink;
-
-    State();
-    ~State();
+    Interfaces source = NONE;
+    Interfaces pipe   = NONE;
+    Interfaces sink   = NONE;
 };
 
 #endif

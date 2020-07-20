@@ -10,9 +10,9 @@ Router::Router(Kimera* state) {
 
     if (packet == NULL || buffer == NULL) {
         printf("[ROUTER] Can't allocate router.\n");
-        throw "error";
+        throw;
     }
-
+    
     packet->pts = (uint64_t)0;
     packet->len = (uint32_t)0;
     packet->i   = (uint32_t)0;
@@ -35,12 +35,7 @@ char* Router::GetBuffer() {
     return buffer;
 }
 
-AVPacket* Router::GetPacket() {
-    AVPacket* packet = av_packet_alloc();
-    av_init_packet(packet);
-    packet->data = (uint8_t*)this->packet->payload;
-    packet->size = this->packet->len;
-    packet->pts = this->packet->pts;
+Packet* Router::GetPacket() {
     return packet;
 }
 
@@ -65,7 +60,7 @@ bool Router::ParsePacket() {
     uint32_t len = buffer_read32be((uint8_t*)(buffer+8));
     uint32_t i   = buffer_read32be((uint8_t*)(buffer+12));
     uint32_t n   = buffer_read32be((uint8_t*)(buffer+16));
-
+    
     if (pts < packet->pts)
         return false;
 

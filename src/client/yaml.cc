@@ -148,11 +148,11 @@ bool Client::ParseConfigFile(char* path) {
                             counter = CRYPTO;
 
                         if (direction == 1)
-                            state->source = static_cast<Interfaces>(counter | static_cast<Interfaces>(state->source));
+                            state->source = operator|(counter, state->source);
                         if (direction == 2)
-                            state->sink = static_cast<Interfaces>(counter | static_cast<Interfaces>(state->sink));
+                            state->sink = operator|(counter, state->sink);
                         if (direction == 3)
-                            state->pipe = static_cast<Interfaces>(counter | static_cast<Interfaces>(state->pipe));
+                            state->pipe = operator|(counter, state->pipe);
                     }
                 }
                 break;

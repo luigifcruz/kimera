@@ -2,11 +2,8 @@
 #define TRANSPORT_H
 
 #include "kimera/kimera.hpp"
-#include <cstddef>
 
-#define MAX_KEY_LEN     256
-#define DEFAULT_KEY_LEN 64
-
+extern "C" {
 #ifdef KIMERA_WINDOWS
 #include <ws2tcpip.h>
 #include <afunix.h>
@@ -23,18 +20,11 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
+}
 
 typedef struct sockaddr_in socket_in;
 typedef struct sockaddr_un socket_un;
 typedef struct sockaddr socket_t;
-
-typedef struct {
-    uint64_t pts;
-    uint32_t len;
-    uint32_t i;
-    uint32_t n;
-    char* payload;
-} Packet;
 
 class Router {
 public:
@@ -45,18 +35,18 @@ public:
     bool ParsePacket();
 
     char* GetBuffer();
-    AVPacket* GetPacket();
+    Packet* GetPacket();
 
     int GetHeaderSize();
     int GetPacketSize();
 
 private:
-    int payload_size;
     int header_size;
     int packet_size;
+    int payload_size;
     uint32_t checksum;
-    Packet* packet = NULL;
     char* buffer = NULL;
+    Packet* packet = NULL;
 
     size_t GetSize(Packet*, size_t);
 
@@ -79,15 +69,15 @@ public:
     Crypto(Kimera*);
     ~Crypto();
 
-    static bool NewKey(char*, size_t);
-    static int Bytes2Base(char*, size_t, char*);
-    static int Base2Bytes(char*, size_t, char*);
-
     bool Connect(unsigned int);
     bool Accept(unsigned int);
 
     int Send(const void*, size_t);
     int Recv(void*, size_t);
+
+    static bool NewKey(char*, size_t);
+    static int Bytes2Base(char*, size_t, char*);
+    static int Base2Bytes(char*, size_t, char*);
 
 private:
     const SSL_METHOD *method = NULL;
@@ -114,14 +104,10 @@ public:
 private:
     int server_fd;
     int client_fd;
+    Crypto crypto;
+    Router router;
     Interfaces interf;
     Kimera* state = NULL;
-
-    // Crypto
-    Crypto crypto;
-
-    // Router
-    Router router;
 
     // Socket Descriptors
     socket_in* client_in;

@@ -40,7 +40,8 @@ bool Socket::OpenTCPServer() {
         return false;
     }
 
-    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int)) < 0) {
+    const int opt = 1;
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(int)) < 0) {
         printf("[TCP_SOCKET] Failed trying to reuse socket.\n");
     }
 

@@ -15,9 +15,6 @@ Client::Client(Kimera* state) {
     this->stop = &stop_handler;
 }
 
-Client::~Client() {
-}
-
 Kimera* Client::GetState() {
     return this->state;
 }
@@ -169,7 +166,7 @@ int Client::Attach(int argc, char *argv[], void(*tx)(Client*), void(*rx)(Client*
 
             if (scanf("%s",  state->psk_key) != 1) {
                 printf("[CRYPTO] User entered an invalid pre-shared key. Exiting...\n");
-                throw "error";
+                throw;
             }
 
             printf("\n");

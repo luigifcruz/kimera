@@ -7,22 +7,9 @@ char* empty_string(size_t len) {
 }
 
 Kimera::Kimera() {
-    width         = DEFAULT_WIDTH;
-    height        = DEFAULT_HEIGHT;
-    bitrate       = DEFAULT_BITRATE;
-    port          = DEFAULT_PORT;
-    in_format     = DEFAULT_FORMAT;
-    out_format    = DEFAULT_FORMAT;
-    framerate     = DEFAULT_FRAMERATE;
-    packet_size   = DEFAULT_PACKET_SIZE;
-
-    psk_key       = empty_string(256);
-    vert_shader   = empty_string(256);
-    frag_shader   = empty_string(256);
-    loopback      = empty_string(64);
-    address       = empty_string(64);
-    codec         = empty_string(64);
-
+    AVPacket* packet = av_packet_alloc();
+            av_init_packet(packet);
+            
     strcpy(loopback, DEFAULT_LOOPBACK);
     strcpy(address, DEFAULT_ADDRESS);
     strcpy(codec, DEFAULT_CODEC);

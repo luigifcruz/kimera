@@ -15,13 +15,13 @@ Decoder::Decoder(Kimera* state) {
     AVCodec *codec = avcodec_find_decoder_by_name(state->codec);
     if (!codec) {
         printf("[DECODER] Selected decoder (%s) not found.\n", state->codec);
-        throw "error";
+        throw;;
     }
 
     this->codec_ctx = avcodec_alloc_context3(codec);
     if (!this->codec_ctx) {
         printf("[DECODER] Couldn't allocate codec context.\n");
-        throw "error";
+        throw;;
     }
 
     this->codec_ctx->bit_rate = state->bitrate;
@@ -36,7 +36,7 @@ Decoder::Decoder(Kimera* state) {
 
     if (avcodec_open2(this->codec_ctx, codec, NULL) < 0) {
         printf("[DECODER] Couldn't open codec.\n");
-        throw "error";
+        throw;;
     }
 
     this->frame = av_frame_alloc();
@@ -45,7 +45,7 @@ Decoder::Decoder(Kimera* state) {
     if (this->has_parser) {
         if (!(this->parser_ctx = av_parser_init(codec->id))) {
             printf("[DECODER] Couldn't initialize parser.\n");
-            throw "error";
+            throw;;
         }
         this->parser_ctx->flags |= PARSER_FLAG_COMPLETE_FRAMES;
         this->parser_ctx->format = state->in_format;

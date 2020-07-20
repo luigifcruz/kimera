@@ -58,21 +58,20 @@ void transmitter(Client* cli) {
     Kimera* state = cli->GetState();
     AVFrame* frame = NULL;
 
-//  RenderKimera* render = init_render();
-
     Socket socket(state);
     Loopback loopback(state);
     Encoder encoder(state);
     Resampler resampler(state, state->out_format);
+//  RenderKimera* render = init_render();
 
-    if (!socket.OpenClient()) return;
+    if (!socket.OpenServer()) return;
     if (!loopback.SetSource()) return;
 //  ok &= open_render(render, state);
 
     cli->PrintState();
 //  render_print_meta(render);
 
-    while (!(frame = loopback.Pull()) && cli->ShouldStop()) {
+    while ((frame = loopback.Pull()) && cli->ShouldStop()) {
 /*
         Interfaces pipe = state->pipe;
         Interfaces sink = state->source;

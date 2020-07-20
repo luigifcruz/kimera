@@ -8,6 +8,8 @@ extern "C" {
 #include <stdint.h>
 #include <stdlib.h>
 #include <yaml.h>
+
+#include <libavutil/avutil.h>
 }
 
 #include "kimera/transport.hpp"
@@ -16,7 +18,6 @@ extern "C" {
 class Client {
 public:
     Client(Kimera*);
-    ~Client();
 
     Kimera* GetState();
 
@@ -31,6 +32,7 @@ public:
     int Attach(int, char* argv[], void(*tx)(Client*), void(*rx)(Client*));
 
     bool ShouldStop();
+
 private:
     Kimera* state = NULL;
     volatile sig_atomic_t* stop;

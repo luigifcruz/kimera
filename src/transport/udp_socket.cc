@@ -30,7 +30,7 @@ bool Socket::OpenUDPClient() {
     return true;
 }
 
-bool Socket::OpenUDPServer () {
+bool Socket::OpenUDPServer() {
     server_in = (socket_in*)malloc(sizeof(socket_in));
 
     if ((server_fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
