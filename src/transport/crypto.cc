@@ -63,7 +63,7 @@ Crypto::Crypto(Kimera* state) {
 
     if (state->packet_size >= 31000) {
         printf("[CRYPTO] Invalid settings, packet_size must be smaller than 31 KB.\n");
-        throw;;
+        throw;
     }
 
     method = TLS_method();
@@ -71,7 +71,7 @@ Crypto::Crypto(Kimera* state) {
     if (!ctx) {
         printf("[CRYPTO] Unable to create SSL context.\n");
         ERR_print_errors_fp(stderr);
-        throw;;
+        throw;
     }
 
     crypto_state = state;

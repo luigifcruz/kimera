@@ -62,14 +62,6 @@ typedef enum {
     RECEIVER    = 1 << 1,
 } Mode;
 
-typedef struct {
-    uint64_t pts;
-    uint32_t len;
-    uint32_t i;
-    uint32_t n;
-    char* payload;
-} Packet;
-
 class Kimera {
 public:
     Kimera();

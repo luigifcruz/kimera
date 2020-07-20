@@ -22,6 +22,14 @@ extern "C" {
 #include <openssl/rand.h>
 }
 
+typedef struct {
+    uint64_t pts;
+    uint32_t len;
+    uint32_t i;
+    uint32_t n;
+    char* payload;
+} Packet;
+
 typedef struct sockaddr_in socket_in;
 typedef struct sockaddr_un socket_un;
 typedef struct sockaddr socket_t;

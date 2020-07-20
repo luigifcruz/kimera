@@ -5,13 +5,13 @@ Encoder::Encoder(Kimera* state) {
 
     if (!codec) {
         printf("[ENCODER] Selected encoder (%s) not found.\n", state->codec);
-        throw;;
+        throw;
     }
 
     this->codec_ctx = avcodec_alloc_context3(codec);
     if (!this->codec_ctx) {
         printf("[ENCODER] Couldn't allocate codec context.\n");
-        throw;;
+        throw;
     }
 
     this->codec_ctx->bit_rate = state->bitrate;
@@ -25,13 +25,13 @@ Encoder::Encoder(Kimera* state) {
     this->codec_ctx->flags |= AV_CODEC_FLAG_LOW_DELAY;
     if (avcodec_open2(this->codec_ctx, codec, NULL) < 0) {
         printf("[ENCODER] Couldn't open codec.\n");
-        throw;;
+        throw;
     }
 
     this->packet = av_packet_alloc();
     if (!this->packet) {
         printf("[ENCODER] Couldn't allocate packet.\n");
-        throw;;
+        throw;
     }
 }
 

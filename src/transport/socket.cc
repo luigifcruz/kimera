@@ -82,6 +82,9 @@ AVPacket* Socket::RecvPacket() {
         if (router.ParsePacket()) {
             AVPacket* packet = av_packet_alloc();
             av_init_packet(packet);
+            packet->data = (uint8_t*)router.GetPacket()->payload;
+            packet->size = router.GetPacket()->len;
+            packet->pts = router.GetPacket()->pts;
             return packet;
         } 
     }
