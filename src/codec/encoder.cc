@@ -1,5 +1,4 @@
 #include "kimera/codec.hpp"
-#include <libavcodec/avcodec.h>
 
 Encoder::Encoder(Kimera* state) {
     AVCodec *codec = avcodec_find_encoder_by_name(state->codec);

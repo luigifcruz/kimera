@@ -41,7 +41,7 @@ Pre-compiled binary packages will be available once this app reaches beta. For n
 
 #### Linux (Debian Based)
 ```shell
-$ sudo apt install libavcodec-dev libavfilter-dev libavutil-dev libavformat-dev libglfw3-dev libyaml-dev
+$ sudo apt install libavcodec-dev libavfilter-dev libavutil-dev libavformat-dev libglfw3-dev libyaml-dev libssl-deb build-essentials cmake git
 ```
 
 #### macOS

@@ -7,9 +7,11 @@
 #import "ReceiverContext.h"
 #import "FrameReceiver.h"
 
+extern "C" {
 #include <pthread.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/imgutils.h>
+}
 
 #include "kimera/state.h"
 

@@ -1,5 +1,4 @@
 include(${CMAKE_SOURCE_DIR}/cmake/ffmpeg.cmake)
-list(APPEND LIB_LIST ffmpeg)
 
 add_subdirectory(loopback)
 add_subdirectory(transport)

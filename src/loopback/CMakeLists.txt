@@ -1,4 +1,4 @@
-set(CMAKE_C_FLAGS "")
+set(CMAKE_CXX_FLAGS "")
 
 if(LINUX)
     include(${CMAKE_SOURCE_DIR}/cmake/xcb.cmake)
@@ -15,7 +15,7 @@ if(MACOS)
         "-framework CoreGraphics"
     )
 
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-declarations")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
 
     file(GLOB TMP_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/macos/*.m")
     list(APPEND SOURCE_LIST ${TMP_LIST})
@@ -26,6 +26,6 @@ if(WINDOWS)
     list(APPEND SOURCE_LIST ${TMP_LIST})
 endif()
 
-set_property(GLOBAL APPEND PROPERTY GLOBAL_CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
+set_property(GLOBAL APPEND PROPERTY GLOBAL_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 set_property(GLOBAL APPEND PROPERTY GLOBAL_SOURCE_LIST ${SOURCE_LIST})
 set_property(GLOBAL APPEND PROPERTY GLOBAL_LIB_LIST ${LIB_LIST})

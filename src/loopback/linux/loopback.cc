@@ -1,5 +1,4 @@
 #include "kimera/loopback/linux.hpp"
-#include <libavutil/frame.h>
 
 Loopback::Loopback(Kimera* state) : xcb(state), v4l2(state) {
     this->state = state;

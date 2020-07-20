@@ -1,10 +1,12 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+extern "C" {
 #include <bits/stdint-uintn.h>
 #include <libavcodec/avcodec.h>
 #include <signal.h>
 #include <stdbool.h>
+}
 
 //
 // CMake Defined Settings
@@ -72,7 +74,7 @@ class Kimera {
 public:
     Kimera();
     ~Kimera();
-    
+
     int width       = DEFAULT_WIDTH;
     int height      = DEFAULT_HEIGHT;
     int bitrate     = DEFAULT_BITRATE;
