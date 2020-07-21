@@ -20,7 +20,7 @@ bool Client::ParseConfigFile(char* path) {
     int* int_ptr = NULL;
     char* char_ptr = NULL;
 
-    Mode mode;
+    Mode mode = UNKNOW;
     int direction = 0;
     int mapping_index = 0;
     int sequence_index = 0;
@@ -118,7 +118,7 @@ bool Client::ParseConfigFile(char* path) {
                         int_ptr = &state->port;
 
                     if (sequence_index == 1) {
-                        Interfaces counter;
+                        Interfaces counter = NONE;
 
                         if (!strcmp((char*)event.data.scalar.value, "tcp"))
                             counter = TCP;

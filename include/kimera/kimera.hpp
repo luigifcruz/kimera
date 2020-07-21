@@ -58,6 +58,7 @@ typedef enum {
 } Interfaces;
 
 typedef enum {
+    UNKNOW      = 0 << 0,
     TRANSMITTER = 1 << 0,
     RECEIVER    = 1 << 1,
 } Mode;
@@ -84,7 +85,7 @@ public:
     enum AVPixelFormat in_format  = DEFAULT_FORMAT;
     enum AVPixelFormat out_format = DEFAULT_FORMAT;
 
-    Mode mode;
+    Mode mode = UNKNOW;
 
     Interfaces source = NONE;
     Interfaces pipe   = NONE;

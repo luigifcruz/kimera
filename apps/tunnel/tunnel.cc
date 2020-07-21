@@ -27,7 +27,7 @@ void receiver(Client* cli) {
     cli->PrintState();
 //  render_print_meta(render);
 
-    while (!(packet = socket.RecvPacket()) && !cli->ShouldStop()) {
+    while (!(packet = socket.Pull()) && !cli->ShouldStop()) {
         if (decoder.Push(packet)) {
             AVFrame* frame = decoder.Pull();
 
@@ -90,7 +90,7 @@ void transmitter(Client* cli) {
         if (!resampler.Push(frame)) break;
 
         if (encoder.Push(resampler.Pull()))
-            socket.SendPacket(encoder.Pull());
+            socket.Push(encoder.Pull());
     }
 }
 

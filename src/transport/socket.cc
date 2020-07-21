@@ -70,50 +70,34 @@ bool Socket::OpenServer() {
     return true;
 }
 
-void Socket::SendPacket(AVPacket* packet) {
-    while (router.MakePacket(packet))
-        SendBuffer(router.GetBuffer(), router.GetPacketSize());
+void Socket::Push(AVPacket* packet) {
+    while (router.Push(packet)) {
+        void* buf  = router.BufferPtr();
+        size_t len = router.BufferSize();
+
+        switch (interf) {
+            case UDP:  SendUDP(buf, len);  break;
+            case TCP:  SendTCP(buf, len);  break;
+            case UNIX: SendUNIX(buf, len); break;
+            default:   break;
+        }
+    }
 }
 
-AVPacket* Socket::RecvPacket() {
+AVPacket* Socket::Pull() {
     while (true) {
-        size_t out = SendBuffer(router.GetBuffer(), router.GetPacketSize());
-        if (out < (size_t)router.GetHeaderSize()) return NULL;
-        if (router.ParsePacket()) {
-            AVPacket* packet = av_packet_alloc();
-            av_init_packet(packet);
-            packet->data = (uint8_t*)router.GetPacket()->payload;
-            packet->size = router.GetPacket()->len;
-            packet->pts = router.GetPacket()->pts;
-            return packet;
-        } 
-    }
-}
+        void*  buf = router.BufferPtr();
+        size_t len = router.BufferSize();
+        size_t out = 0;
 
-int Socket::SendBuffer(const void* buf, size_t len) {
-    switch (interf) {
-        case UDP:
-            return SendUDP(buf, len);
-        case TCP:
-            return SendTCP(buf, len);
-        case UNIX:
-            return SendUNIX(buf, len);
-        default:
-            break;
-    }
-    return 0;
-}
+        switch (interf) {
+            case UDP:  out = RecvUDP(buf, len);  break;
+            case TCP:  out = RecvTCP(buf, len);  break;
+            case UNIX: out = RecvUNIX(buf, len); break;
+            default:   break;
+        }
 
-int Socket::RecvBuffer(void* buf, size_t len) {
-    switch (interf) {
-        case UDP:
-            return RecvUDP(buf, len);
-        case TCP:
-            return RecvTCP(buf, len);
-        case UNIX:
-            return RecvUNIX(buf, len);
-        default:
-            break;
+        AVPacket* packet = router.Pull(out);
+        if (packet) return packet;
     }
-    return 0;
 }

@@ -2,6 +2,7 @@
 #define TRANSPORT_H
 
 #include "kimera/kimera.hpp"
+#include <stdint.h>
 
 extern "C" {
 #ifdef KIMERA_WINDOWS
@@ -23,11 +24,12 @@ extern "C" {
 }
 
 typedef struct {
-    uint64_t pts;
-    uint32_t len;
-    uint32_t i;
-    uint32_t n;
-    char* payload;
+    uint64_t pts = (uint32_t)0;
+    uint32_t len = (uint32_t)0;
+    uint32_t i   = (uint32_t)0;
+    uint32_t n   = (uint32_t)0;
+
+    char* payload = NULL;
 } Packet;
 
 typedef struct sockaddr_in socket_in;
@@ -39,24 +41,21 @@ public:
     Router(Kimera*);
     ~Router();
 
-    bool MakePacket(AVPacket*);
-    bool ParsePacket();
+    bool Push(AVPacket*);
+    AVPacket* Pull(size_t);
 
-    char* GetBuffer();
-    Packet* GetPacket();
-
-    int GetHeaderSize();
-    int GetPacketSize();
+    char*  BufferPtr();
+    size_t BufferSize();
 
 private:
-    int header_size;
-    int packet_size;
-    int payload_size;
-    uint32_t checksum;
-    char* buffer = NULL;
-    Packet* packet = NULL;
+    int header_size   = 0;
+    int packet_size   = 0;
+    int payload_size  = 0;
+    uint32_t checksum = 0;
+    char* buffer      = NULL;
+    Packet* packet    = NULL;
 
-    size_t GetSize(Packet*, size_t);
+    size_t GetPacketSize(Packet*, size_t);
 
     // Utils
     static inline uint32_t
@@ -84,13 +83,13 @@ public:
     int Recv(void*, size_t);
 
     static bool NewKey(char*, size_t);
-    static int Bytes2Base(char*, size_t, char*);
-    static int Base2Bytes(char*, size_t, char*);
+    static int  Bytes2Base(char*, size_t, char*);
+    static int  Base2Bytes(char*, size_t, char*);
 
 private:
+    SSL *ssl                 = NULL;
+    SSL_CTX *ctx             = NULL;
     const SSL_METHOD *method = NULL;
-    SSL_CTX *ctx = NULL;
-    SSL *ssl = NULL;
 
     const char* GetCypher();
 };
@@ -103,11 +102,8 @@ public:
     bool OpenServer();
     bool OpenClient();
 
-    void SendPacket(AVPacket*);
-    AVPacket* RecvPacket();
-
-    int SendBuffer(const void*, size_t);
-    int RecvBuffer(void*, size_t);
+    void Push(AVPacket*);
+    AVPacket* Pull();
 
 private:
     int server_fd;

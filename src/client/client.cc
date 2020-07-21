@@ -1,4 +1,5 @@
 #include "kimera/client.hpp"
+#include "kimera/kimera.hpp"
 
 volatile sig_atomic_t stop_handler;
 
@@ -63,6 +64,11 @@ void Client::PrintState() {
     printf("├── Framerate:  %d FPS\n", state->framerate);
     printf("├── Bitrate:    %d bps\n", state->bitrate);
     printf("└── Packet Len: %d Bytes\n", state->packet_size);
+
+    if (state->mode == UNKNOW) {
+        printf("    .   MODE UNKNOW\n");
+        return;
+    }
 
     if (state->mode == TRANSMITTER)
         printf("    .   TRANSMITTER\n");
