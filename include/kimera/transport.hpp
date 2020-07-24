@@ -1,7 +1,7 @@
 #ifndef TRANSPORT_H
 #define TRANSPORT_H
 
-#include "kimera/kimera.hpp"
+#include "kimera/state.hpp"
 #include <stdint.h>
 
 extern "C" {

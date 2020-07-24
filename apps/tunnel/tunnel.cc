@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "kimera/kimera.hpp"
+#include "kimera/state.hpp"
 #include "kimera/transport.hpp"
 #include "kimera/loopback.hpp"
 #include "kimera/codec.hpp"

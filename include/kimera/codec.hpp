@@ -17,7 +17,7 @@ extern "C" {
 #include <libavutil/pixdesc.h>
 }
 
-#include "kimera/kimera.hpp"
+#include "kimera/state.hpp"
 
 class Decoder {
 public:

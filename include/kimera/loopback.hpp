@@ -1,7 +1,7 @@
 #ifndef LOOPBACK_H
 #define LOOPBACK_H
 
-#include "kimera/kimera.hpp"
+#include "kimera/state.hpp"
 
 #if	  defined(KIMERA_LINUX)
 #include "kimera/loopback/linux.hpp"

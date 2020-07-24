@@ -17,7 +17,7 @@ extern "C" {
 #include <unistd.h>
 }
 
-#include "kimera/kimera.hpp"
+#include "kimera/state.hpp"
 
 class XCB {
 public:

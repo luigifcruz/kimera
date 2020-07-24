@@ -13,7 +13,7 @@ extern "C" {
 }
 
 #include "kimera/transport.hpp"
-#include "kimera/kimera.hpp"
+#include "kimera/state.hpp"
 
 #include <string>
 #include <memory>

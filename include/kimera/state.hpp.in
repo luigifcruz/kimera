@@ -18,12 +18,12 @@ using namespace magic_enum::bitwise_operators;
 // CMake Defined Settings
 //
 
-/* #undef KIMERA_WINDOWS */
-/* #undef KIMERA_MACOS */
-#define KIMERA_LINUX
+#cmakedefine KIMERA_WINDOWS
+#cmakedefine KIMERA_MACOS
+#cmakedefine KIMERA_LINUX
 
-#define KIMERA_VERSION_MAJOR 1
-#define KIMERA_VERSION_MINOR 0
+#define KIMERA_VERSION_MAJOR @kimera_VERSION_MAJOR@
+#define KIMERA_VERSION_MINOR @kimera_VERSION_MINOR@
 
 //
 // Default Settings
@@ -51,14 +51,19 @@ enum class Interfaces : uint16_t {
     CRYPTO       = 1 << 8,
 };
 
+inline bool CHECK(Interfaces value, Interfaces flag) {
+    return (flag & value) == flag;
+}
+
 enum class Mode : uint16_t {
     NONE        = 0 << 0,
     TRANSMITTER = 1 << 0,
     RECEIVER    = 1 << 1,
 };
 
-bool CHECK(Interfaces value, Interfaces flag);
-bool CHECK(Mode value, Mode flag);
+inline bool CHECK(Mode value, Mode flag) {
+    return (flag & value) == flag;
+}
 
 typedef struct {
     int width;
@@ -78,7 +83,7 @@ typedef struct {
     enum AVPixelFormat out_format = DEFAULT_FORMAT;
     int packet_size = DEFAULT_PACKET_SIZE;
 
-    Mode mode        = Mode::NONE;
+    Mode mode         = Mode::NONE;
     Interfaces source = Interfaces::NONE;
     Interfaces pipe   = Interfaces::NONE;
     Interfaces sink   = Interfaces::NONE;

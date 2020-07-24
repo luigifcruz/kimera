@@ -1,5 +1,5 @@
 #include "kimera/client.hpp"
-#include "kimera/kimera.hpp"
+#include "kimera/state.hpp"
 
 volatile sig_atomic_t stop_handler;
 
