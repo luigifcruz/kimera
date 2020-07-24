@@ -11,14 +11,14 @@
 #include "kimera/client.hpp"
 
 void receiver(Client* cli) {
-    Kimera* state = cli->GetState();
+    State* state = cli->GetState();
     AVPacket* packet = NULL;
 
     Socket socket(state);
     Loopback loopback(state);
     Decoder decoder(state);
     Resampler resampler(state, state->out_format);
-//  RenderKimera* render = init_render();
+//  RenderState* render = init_render();
 
     if (!loopback.SetSink()) return;
     if (!socket.OpenClient()) return;
@@ -48,21 +48,21 @@ void receiver(Client* cli) {
 */
             if (!resampler.Push(frame)) break;
 
-            if (state->sink & LOOPBACK)
+            if (CHECK(state->sink, Interfaces::LOOPBACK))
                 if (!loopback.Push(resampler.Pull())) break;
         }
     }
 }
 
 void transmitter(Client* cli) {
-    Kimera* state = cli->GetState();
+    State* state = cli->GetState();
     AVFrame* frame = NULL;
 
     Socket socket(state);
     Loopback loopback(state);
     Encoder encoder(state);
     Resampler resampler(state, state->out_format);
-//  RenderKimera* render = init_render();
+//  RenderState* render = init_render();
 
     if (!socket.OpenServer()) return;
     if (!loopback.SetSource()) return;
@@ -95,7 +95,7 @@ void transmitter(Client* cli) {
 }
 
 int main(int argc, char *argv[]) {
-    Kimera state;
+    State state;
     Client client(&state);
     return client.Attach(argc, argv, transmitter, receiver);
 }

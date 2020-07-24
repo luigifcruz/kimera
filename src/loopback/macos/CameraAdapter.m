@@ -135,14 +135,14 @@
     ctx.session = [[AVCaptureSession alloc] init];
 
     switch (state->source) {
-        case DISPLAY:
+        case Interfaces::DISPLAY:
             if ([self initDisplay:state]) {
                 [ctx.session addInput: ctx.displayInput];
             } else {
                 return false;
             }
             break;
-        case LOOPBACK:
+        case Interfaces::LOOPBACK:
             if ([self initCamera:state]) {
                 [ctx.session addInput: ctx.cameraInput];
             } else {

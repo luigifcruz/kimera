@@ -13,7 +13,7 @@ bool Socket::OpenTCPClient() {
     server_in->sin_family = AF_INET;
     server_in->sin_port = htons(state->port);
 
-    if (inet_pton(AF_INET, state->address, &server_in->sin_addr) < 0) {
+    if (inet_pton(AF_INET, state->address.c_str(), &server_in->sin_addr) < 0) {
         printf("[TCP_SOCKET] Invalid address.\n");
         return false;
     }
@@ -23,11 +23,11 @@ bool Socket::OpenTCPClient() {
         return false;
     }
 
-    if (state->pipe & CRYPTO) {
+    if (CHECK(state->pipe, Interfaces::CRYPTO)) {
         if (!crypto.Connect(server_fd)) return false;
     }
 
-    interf = TCP;
+    interf = Interfaces::TCP;
     return true;
 }
 
@@ -70,30 +70,30 @@ bool Socket::OpenTCPServer() {
         return false;
     }
 
-    if (state->pipe & CRYPTO) {
+    if (CHECK(state->pipe, Interfaces::CRYPTO)) {
         if (!crypto.Accept(client_fd)) return false;
     }
 
     printf("[TCP_SOCKET] Client connected.\n");
 
-    interf = TCP;
+    interf = Interfaces::TCP;
     return true;
 }
 
 void Socket::CloseTCP() {
     close(client_fd);
     close(server_fd);
-    interf = NONE;
+    interf = Interfaces::NONE;
 }
 
 int Socket::SendTCP(const void* buf, size_t len) {
-    if (state->pipe & CRYPTO)
+    if (CHECK(state->pipe, Interfaces::CRYPTO))
         return crypto.Send(buf, len);
     return write(client_fd, buf, len);
 }
 
 int Socket::RecvTCP(void* buf, size_t len) {
-    if (state->pipe & CRYPTO)
+    if (CHECK(state->pipe, Interfaces::CRYPTO))
         return crypto.Recv(buf, len);
     return recv(server_fd, buf, len, MSG_WAITALL);
 }

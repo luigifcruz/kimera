@@ -1,18 +1,18 @@
 #include "kimera/transport.hpp"
 
-Socket::Socket(Kimera* state) : crypto(state), router(state) {
+Socket::Socket(State* state) : crypto(state), router(state) {
     this->state = state;
 }
 
 Socket::~Socket() {
     switch (interf) {
-        case UDP:
+        case Interfaces::UDP:
             CloseUDP();
             break;
-        case TCP:
+        case Interfaces::TCP:
             CloseTCP();
             break;
-        case UNIX:
+        case Interfaces::UNIX:
             CloseUNIX();
             break;
         default:
@@ -30,16 +30,16 @@ bool Socket::OpenClient() {
     WSAStartup(WINSOCK_VERSION, &wsd);
 #endif
 
-    if (state->source & TCP)
+    if (CHECK(state->source, Interfaces::TCP))
         OpenTCPClient();
 
-    if (state->source & UDP)
+    if (CHECK(state->source, Interfaces::UDP))
         OpenUDPClient();
 
-    if (state->source & UNIX)
+    if (CHECK(state->source, Interfaces::UNIX))
         OpenUNIXClient();
 
-    if (interf == NONE) {
+    if (interf == Interfaces::NONE) {
         printf("[SOCKET] Can't initiate socket client.\n");
         return false;
     }
@@ -53,16 +53,16 @@ bool Socket::OpenServer() {
     WSAStartup(WINSOCK_VERSION, &wsd);
 #endif
 
-    if (state->sink & TCP)
+    if (CHECK(state->sink, Interfaces::TCP))
         OpenTCPServer();
 
-    if (state->sink & UDP)
+    if (CHECK(state->sink, Interfaces::UDP))
         OpenUDPServer();
 
-    if (state->sink & UNIX)
+    if (CHECK(state->sink, Interfaces::UNIX))
         OpenUNIXServer();
 
-    if (interf == NONE) {
+    if (interf == Interfaces::NONE) {
         printf("[SOCKET] Can't initiate socket server.\n");
         return false;
     }
@@ -76,9 +76,9 @@ void Socket::Push(AVPacket* packet) {
         size_t len = router.BufferSize();
 
         switch (interf) {
-            case UDP:  SendUDP(buf, len);  break;
-            case TCP:  SendTCP(buf, len);  break;
-            case UNIX: SendUNIX(buf, len); break;
+            case Interfaces::UDP:  SendUDP(buf, len);  break;
+            case Interfaces::TCP:  SendTCP(buf, len);  break;
+            case Interfaces::UNIX: SendUNIX(buf, len); break;
             default:   break;
         }
     }
@@ -91,9 +91,9 @@ AVPacket* Socket::Pull() {
         size_t out = 0;
 
         switch (interf) {
-            case UDP:  out = RecvUDP(buf, len);  break;
-            case TCP:  out = RecvTCP(buf, len);  break;
-            case UNIX: out = RecvUNIX(buf, len); break;
+            case Interfaces::UDP:  out = RecvUDP(buf, len);  break;
+            case Interfaces::TCP:  out = RecvTCP(buf, len);  break;
+            case Interfaces::UNIX: out = RecvUNIX(buf, len); break;
             default:   break;
         }
 

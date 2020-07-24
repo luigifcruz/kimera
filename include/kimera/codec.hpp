@@ -21,7 +21,7 @@ extern "C" {
 
 class Decoder {
 public:
-    Decoder(Kimera*);
+    Decoder(State*);
     ~Decoder();
 
     bool Push(AVPacket*);
@@ -40,7 +40,7 @@ private:
 
 class Encoder {
 public:
-    Encoder(Kimera*);
+    Encoder(State*);
     ~Encoder();
 
     bool Push(AVFrame*);
@@ -53,7 +53,7 @@ private:
 
 class Resampler {
 public:
-    Resampler(Kimera*, enum AVPixelFormat);
+    Resampler(State*, enum AVPixelFormat);
     ~Resampler();
 
     bool Push(AVFrame*);
@@ -64,7 +64,7 @@ private:
     enum AVPixelFormat format;
     struct SwsContext* ctx = NULL;
     AVFrame* frame = NULL;
-    Kimera* state = NULL;
+    State* state = NULL;
 
     bool ConfigureResampler(AVFrame*);
 };

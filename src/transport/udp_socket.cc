@@ -26,7 +26,7 @@ bool Socket::OpenUDPClient() {
         return false;
     }
 
-    interf = UDP;
+    interf = Interfaces::UDP;
     return true;
 }
 
@@ -42,16 +42,16 @@ bool Socket::OpenUDPServer() {
 
     server_in->sin_family = AF_INET;
     server_in->sin_port = htons(state->port);
-    server_in->sin_addr.s_addr = inet_addr(state->address);
+    server_in->sin_addr.s_addr = inet_addr(state->address.c_str());
 
-    interf = UDP;
+    interf = Interfaces::UDP;
     return true;
 }
 
 void Socket::CloseUDP() {
     close(client_fd);
     close(server_fd);
-    interf = NONE;
+    interf = Interfaces::NONE;
 }
 
 int Socket::SendUDP(const void* buf, size_t len) {

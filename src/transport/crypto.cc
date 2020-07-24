@@ -1,6 +1,6 @@
 #include "kimera/transport.hpp"
 
-const Kimera* crypto_state;
+const State* crypto_state;
 
 static unsigned int psk_client_cb(SSL *ssl, const char *hint, char *id, unsigned int max_id_len, unsigned char *psk, unsigned int max_psk_len) {
     (void)(ssl);
@@ -17,7 +17,7 @@ static unsigned int psk_client_cb(SSL *ssl, const char *hint, char *id, unsigned
         return 0;
     }
 
-    size_t b64_len = strlen(crypto_state->psk_key);
+    size_t b64_len = crypto_state->crypto_key.size();
     if ((size_t)(((float)b64_len/0.75)+0.5) >= max_psk_len) {
         printf("[CRYPTO] Pre-shared key is too long.");
         return 0;
@@ -25,7 +25,7 @@ static unsigned int psk_client_cb(SSL *ssl, const char *hint, char *id, unsigned
 
     strcpy(id, KIMERA_PSK_IDENTITY);
 
-    return Crypto::Base2Bytes(crypto_state->psk_key, b64_len, (char*)psk);
+    return Crypto::Base2Bytes((char*)crypto_state->crypto_key.c_str(), b64_len, (char*)psk);
 }
 
 static unsigned int psk_server_cb(SSL* ssl, const char* id, unsigned char* psk, unsigned int max_len) {
@@ -46,17 +46,17 @@ static unsigned int psk_server_cb(SSL* ssl, const char* id, unsigned char* psk, 
         return 0;
     }
 
-    size_t b64_len = strlen(crypto_state->psk_key);
+    size_t b64_len = crypto_state->crypto_key.size();
     if ((size_t)(((float)b64_len*0.75)+0.5) >= max_len) {
         printf("[CRYPTO] Pre-shared key is too long.");
         return 0;
     }
 
-    return Crypto::Base2Bytes(crypto_state->psk_key, b64_len, (char*)psk);
+    return Crypto::Base2Bytes((char*)crypto_state->crypto_key.c_str(), b64_len, (char*)psk);
 }
 
-Crypto::Crypto(Kimera* state) {
-    if (!(state->pipe & CRYPTO)) return;
+Crypto::Crypto(State* state) {
+    if (!CHECK(state->pipe, Interfaces::CRYPTO)) return;
 
     SSL_load_error_strings();
     OpenSSL_add_all_algorithms();

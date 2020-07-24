@@ -7,7 +7,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <yaml.h>
+
 
 #include <libavutil/avutil.h>
 }
@@ -15,11 +15,16 @@ extern "C" {
 #include "kimera/transport.hpp"
 #include "kimera/kimera.hpp"
 
+#include <string>
+#include <memory>
+#include <iostream>
+#include <yaml-cpp/yaml.h>
+
 class Client {
 public:
-    Client(Kimera*);
+    Client(State*);
 
-    Kimera* GetState();
+    State* GetState();
 
     bool ParseConfigFile(char*);
 
@@ -34,8 +39,12 @@ public:
     bool ShouldStop();
 
 private:
-    Kimera* state = NULL;
+    State* state = NULL;
     volatile sig_atomic_t* stop;
+
+    void ParseHeader(const YAML::Node&);
+    void ParseBody(const YAML::Node&);
+    void ParseInterfaces(const YAML::Node&, Interfaces&);
 };
 
 #endif

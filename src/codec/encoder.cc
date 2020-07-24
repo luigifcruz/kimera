@@ -1,10 +1,10 @@
 #include "kimera/codec.hpp"
 
-Encoder::Encoder(Kimera* state) {
-    AVCodec *codec = avcodec_find_encoder_by_name(state->codec);
+Encoder::Encoder(State* state) {
+    AVCodec *codec = avcodec_find_encoder_by_name(state->coder_name.c_str());
 
     if (!codec) {
-        printf("[ENCODER] Selected encoder (%s) not found.\n", state->codec);
+        printf("[ENCODER] Selected encoder (%s) not found.\n", state->coder_name.c_str());
         throw;
     }
 

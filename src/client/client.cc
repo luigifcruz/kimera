@@ -11,12 +11,12 @@ void InterruptHandler(int signum) {
     stop_handler = 1;
 }
 
-Client::Client(Kimera* state) {
+Client::Client(State* state) {
     this->state = state;
     this->stop = &stop_handler;
 }
 
-Kimera* Client::GetState() {
+State* Client::GetState() {
     return this->state;
 }
 
@@ -35,25 +35,25 @@ void Client::PrintHelp() {
 }
 
 void Client::PrintInterface(Interfaces interfaces) {
-    if (interfaces == NONE)
+    if (interfaces == Interfaces::NONE)
         printf(" NONE");
-    if (interfaces & TCP)
+    if (CHECK(interfaces, Interfaces::TCP))
         printf(" TCP");
-    if (interfaces & UDP)
+    if (CHECK(interfaces, Interfaces::UDP))
         printf(" UDP");
-    if (interfaces & UNIX)
+    if (CHECK(interfaces, Interfaces::UNIX))
         printf(" UNIX");
-    if (interfaces & DISPLAY)
+    if (CHECK(interfaces, Interfaces::DISPLAY))
         printf(" DISPLAY");
-    if (interfaces & LOOPBACK)
+    if (CHECK(interfaces, Interfaces::LOOPBACK))
         printf(" LOOPBACK");
-    if (interfaces & FILTER)
+    if (CHECK(interfaces, Interfaces::FILTER))
         printf(" FILTER");
-    if (interfaces & RESAMPLE)
+    if (CHECK(interfaces, Interfaces::RESAMPLE))
         printf(" RESAMPLE");
-    if (interfaces & GPU_RESAMPLE)
+    if (CHECK(interfaces, Interfaces::GPU_RESAMPLE))
         printf(" GPU_RESAMPLE");
-    if (interfaces & CRYPTO)
+    if (CHECK(interfaces, Interfaces::CRYPTO))
         printf(" CRYPTO");
     printf("\n");
 }
@@ -65,15 +65,15 @@ void Client::PrintState() {
     printf("├── Bitrate:    %d bps\n", state->bitrate);
     printf("└── Packet Len: %d Bytes\n", state->packet_size);
 
-    if (state->mode == UNKNOW) {
+    if (state->mode == Mode::NONE) {
         printf("    .   MODE UNKNOW\n");
         return;
     }
 
-    if (state->mode == TRANSMITTER)
+    if (state->mode == Mode::TRANSMITTER)
         printf("    .   TRANSMITTER\n");
 
-    if (state->mode == RECEIVER)
+    if (state->mode == Mode::RECEIVER)
         printf("    .   RECEIVER\n");
 
     printf("    ├── Source: ");
@@ -83,10 +83,10 @@ void Client::PrintState() {
     printf("    ├── Sink:   ");
     PrintInterface(state->sink);
 
-    printf("    ├── Device:  %s\n", state->loopback);
-    printf("    ├── Address: %s\n", state->address);
+    printf("    ├── Device:  %s\n", state->loopback.c_str());
+    printf("    ├── Address: %s\n", state->address.c_str());
     printf("    ├── Port:    %d\n", state->port);
-    printf("    └── Codec:   %s\n", state->codec);
+    printf("    └── Codec:   %s\n", state->coder_name.c_str());
 }
 
 void Client::PrintKey() {
@@ -140,11 +140,11 @@ int Client::Attach(int argc, char *argv[], void(*tx)(Client*), void(*rx)(Client*
     switch (argv[1][0]) {
         case 't':
         case 'T':
-            state->mode = TRANSMITTER;
+            state->mode = Mode::TRANSMITTER;
             break;
         case 'r':
         case 'R':
-            state->mode = RECEIVER;
+            state->mode = Mode::RECEIVER;
             break;
         default:
             printf("Mode (%s) not valid.\n", argv[1]);
@@ -154,23 +154,23 @@ int Client::Attach(int argc, char *argv[], void(*tx)(Client*), void(*rx)(Client*
 
     if (!ParseConfigFile(config_path)) return -1;
 
-    if (state->pipe & CRYPTO && strlen(state->psk_key) < 8) {
-        if (state->mode & TRANSMITTER) {
+    if (CHECK(state->pipe, Interfaces::CRYPTO) && state->crypto_key.size() < 8) {
+        if (CHECK(state->mode, Mode::TRANSMITTER)) {
             char bin_key[DEFAULT_KEY_LEN];
             if (!Crypto::NewKey(bin_key, DEFAULT_KEY_LEN)) return -1;
-            Crypto::Bytes2Base((char*)&bin_key, DEFAULT_KEY_LEN, state->psk_key);
+            Crypto::Bytes2Base((char*)&bin_key, DEFAULT_KEY_LEN, (char*)state->crypto_key.c_str());
 
             printf("\nNo pre-shared key found, generating one...\n");
-            printf("TIP: This can be pre-defined in the configuration file as `psk_key`.\n\n");
-            printf("%s\n\n", state->psk_key);
+            printf("TIP: This can be pre-defined in the configuration file as `crypto_key`.\n\n");
+            printf("%s\n\n", state->crypto_key.c_str());
         }
 
-        if (state->mode & RECEIVER) {
+        if (CHECK(state->mode, Mode::RECEIVER)) {
             printf("\nNo pre-shared key found! Type the Transmitter Pre-shared Key:\n");
-            printf("TIP: This can be pre-defined in the configuration file as `psk_key`.\n\n");
+            printf("TIP: This can be pre-defined in the configuration file as `crypto_key`.\n\n");
             printf("KEY> ");
 
-            if (scanf("%s",  state->psk_key) != 1) {
+            if (state->crypto_key.empty()) {
                 printf("[CRYPTO] User entered an invalid pre-shared key. Exiting...\n");
                 throw;
             }
@@ -180,10 +180,10 @@ int Client::Attach(int argc, char *argv[], void(*tx)(Client*), void(*rx)(Client*
     }
 
     switch (state->mode) {
-        case TRANSMITTER:
+        case Mode::TRANSMITTER:
             (void)(*tx)(this);
             break;
-        case RECEIVER:
+        case Mode::RECEIVER:
             (void)(*rx)(this);
             break;
         default: break;

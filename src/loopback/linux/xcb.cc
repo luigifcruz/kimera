@@ -1,6 +1,6 @@
 #include "kimera/loopback/linux.hpp"
 
-XCB::XCB(Kimera* state) {
+XCB::XCB(State* state) {
     this->state = state;
 }
 
@@ -10,9 +10,9 @@ XCB::~XCB() {
 
 bool XCB::SetSource() {
     int error;
-    this->connection = xcb_connect(state->loopback, NULL);
+    this->connection = xcb_connect(state->loopback.c_str(), NULL);
     if ((error = xcb_connection_has_error(this->connection))) {
-        printf("[LOOPBACK] Cannot open selected display %s, error %d.\n", state->loopback, error);
+        printf("[LOOPBACK] Cannot open selected display %s, error %d.\n", state->loopback.c_str(), error);
         return false;
     }
 

@@ -1,24 +1,24 @@
 #include "kimera/loopback/linux.hpp"
 
-V4L2::V4L2(Kimera* state) {
+V4L2::V4L2(State* state) {
     this->state = state;
 }
 
 V4L2::~V4L2() {
-    if (this->state->mode & TRANSMITTER) {
+    if (CHECK(this->state->mode, Mode::TRANSMITTER)) {
         ioctl(this->dev_fd, VIDIOC_STREAMOFF, &this->info.type);
         if (frame)
             av_frame_free(&frame);
     }
 
-    if (this->state->mode & RECEIVER) {
+    if (CHECK(this->state->mode, Mode::RECEIVER)) {
         if (this->buffer)
             free(this->buffer);
     }
 }
 
 bool V4L2::SetSource() {
-	if ((this->dev_fd = open(state->loopback, O_RDWR)) < 0) {
+	if ((this->dev_fd = open(state->loopback.c_str(), O_RDWR)) < 0) {
         printf("[LOOPBACK] Couldn't open loopback interface.\n");
         return false;
 	}
@@ -115,7 +115,7 @@ AVFrame* V4L2::Pull() {
 }
 
 bool V4L2::SetSink() {
-	if ((dev_fd = open(state->loopback, O_RDWR)) < 0) {
+	if ((dev_fd = open(state->loopback.c_str(), O_RDWR)) < 0) {
         printf("[LOOPBACK] Couldn't open interface.\n");
         return false;
 	}

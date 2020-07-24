@@ -1,10 +1,10 @@
-project(yaml2)
+project(yaml)
 
 add_library(yaml INTERFACE IMPORTED GLOBAL)
 
 if(LINUX OR MACOS)
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(YAML REQUIRED IMPORTED_TARGET yaml-0.1)
+    pkg_check_modules(YAML REQUIRED IMPORTED_TARGET yaml-cpp)
 endif()
 
 if(WINDOWS)

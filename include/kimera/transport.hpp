@@ -38,7 +38,7 @@ typedef struct sockaddr socket_t;
 
 class Router {
 public:
-    Router(Kimera*);
+    Router(State*);
     ~Router();
 
     bool Push(AVPacket*);
@@ -73,7 +73,7 @@ private:
 
 class Crypto {
 public:
-    Crypto(Kimera*);
+    Crypto(State*);
     ~Crypto();
 
     bool Connect(unsigned int);
@@ -96,7 +96,7 @@ private:
 
 class Socket {
 public:
-    Socket(Kimera*);
+    Socket(State*);
     ~Socket();
 
     bool OpenServer();
@@ -111,7 +111,7 @@ private:
     Crypto crypto;
     Router router;
     Interfaces interf;
-    Kimera* state = NULL;
+    State* state = NULL;
 
     // Socket Descriptors
     socket_in* client_in;

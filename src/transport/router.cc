@@ -1,6 +1,6 @@
 #include "kimera/transport.hpp"
 
-Router::Router(Kimera* state) {
+Router::Router(State* state) {
     header_size = HEADER_SIZE;
     packet_size = state->packet_size;
     payload_size = state->packet_size - header_size;

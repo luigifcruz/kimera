@@ -9,14 +9,14 @@ bool Socket::OpenUNIXClient() {
     }
 
     server_un->sun_family = AF_UNIX;
-    strcpy(server_un->sun_path, state->address);
+    strcpy(server_un->sun_path, state->address.c_str());
 
     if (connect(server_fd, (socket_t*)server_un, sizeof(socket_un)) < 0) {
         printf("[UNIX_SOCKET] Couldn't connect to server.\n");
         return false;
     }
 
-    interf = UNIX;
+    interf = Interfaces::UNIX;
     return true;
 }
 
@@ -30,7 +30,7 @@ bool Socket::OpenUNIXServer() {
     }
 
     server_un->sun_family = AF_UNIX;
-    strcpy(server_un->sun_path, state->address);
+    strcpy(server_un->sun_path, state->address.c_str());
     unlink(server_un->sun_path);
 
     if (bind(server_fd, (socket_t*)server_un, sizeof(socket_un)) < 0) {
@@ -53,14 +53,14 @@ bool Socket::OpenUNIXServer() {
 
     printf("[UNIX_SOCKET] Client connected.\n");
 
-    interf = UNIX;
+    interf = Interfaces::UNIX;
     return true;
 }
 
 void Socket::CloseUNIX() {
     close(server_fd);
     close(client_fd);
-    interf = NONE;
+    interf = Interfaces::NONE;
 }
 
 int Socket::SendUNIX(const void* buf, size_t len) {

@@ -24,10 +24,10 @@ void close_device(DeviceState* device) {
 char* device_window_name(RenderState* render) {
     static char* name[32];
     switch (render->state->mode) {
-        case TRANSMITTER:
+        case Mode::TRANSMITTER:
             sprintf((char*)name, "Kimera - Transmitter Display");
             break;
-        case RECEIVER:
+        case Mode::RECEIVER:
             sprintf((char*)name, "Kimera - Receiver Display");
             break;
     }
@@ -60,7 +60,7 @@ bool open_device(RenderState* render) {
         get_egl_error(__LINE__);
         return false;
     }
-    
+
     if (!eglInitialize(device->display, NULL, NULL)) {
         printf("[RENDER] Failed to initialize EGL.\n");
         get_egl_error(__LINE__);
@@ -104,7 +104,7 @@ bool open_device(RenderState* render) {
         }
 
         EGLNativeWindowType surface = 0;
-    
+
         #if   defined(KIMERA_MACOS)
             surface = glfwGetCocoaWindow(device->adapter);
         #elif defined(KIMERA_LINUX)
@@ -159,7 +159,7 @@ bool device_render(RenderState* render) {
 
     eglSwapBuffers(render->device->display, render->device->surface);
     if (get_egl_error(__LINE__)) return false;
-    
+
     glfwPollEvents();
     glfwGetWindowSize(render->device->adapter, &render->d_size.w, &render->d_size.h);
     return !glfwWindowShouldClose(render->device->adapter);

@@ -1,6 +1,6 @@
 #include "kimera/loopback/linux.hpp"
 
-Loopback::Loopback(Kimera* state) : xcb(state), v4l2(state) {
+Loopback::Loopback(State* state) : xcb(state), v4l2(state) {
     this->state = state;
 }
 
@@ -9,9 +9,9 @@ bool Loopback::SetSink() {
 }
 
 bool Loopback::SetSource() {
-    if (this->state->source & DISPLAY)
+    if (CHECK(this->state->source, Interfaces::DISPLAY))
         return this->xcb.SetSource();
-    if (this->state->source & LOOPBACK)
+    if (CHECK(this->state->source, Interfaces::LOOPBACK))
         return this->v4l2.SetSource();
     return false;
 }
@@ -21,9 +21,9 @@ bool Loopback::Push(AVFrame* frame) {
 }
 
 AVFrame* Loopback::Pull() {
-    if (this->state->source & DISPLAY)
+    if (CHECK(this->state->source, Interfaces::DISPLAY))
         return this->xcb.Pull();
-    if (this->state->source & LOOPBACK)
+    if (CHECK(this->state->source, Interfaces::LOOPBACK))
         return this->v4l2.Pull();
     return NULL;
 }

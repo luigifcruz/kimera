@@ -39,7 +39,7 @@ bool open_render(RenderState* render, State* state) {
     if (!is_format_supported(render->out_format, output_formats, output_formats_size))
         render->out_format = output_formats[0];
 
-    if (state->sink & DISPLAY)
+    if (CHECK(state->sink, DISPLAY))
         render->use_display = true;
 
     render->time = mticks();

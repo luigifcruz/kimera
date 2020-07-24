@@ -11,10 +11,10 @@ Decoder::~Decoder() {
         av_packet_free(&this->retard);
 }
 
-Decoder::Decoder(Kimera* state) {
-    AVCodec *codec = avcodec_find_decoder_by_name(state->codec);
+Decoder::Decoder(State* state) {
+    AVCodec *codec = avcodec_find_decoder_by_name(state->coder_name.c_str());
     if (!codec) {
-        printf("[DECODER] Selected decoder (%s) not found.\n", state->codec);
+        printf("[DECODER] Selected decoder (%s) not found.\n", state->coder_name.c_str());
         throw;
     }
 

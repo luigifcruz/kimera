@@ -8,6 +8,12 @@ extern "C" {
 #include <stdbool.h>
 }
 
+#include <string>
+#include <bitset>
+#include "magic_enum.hpp"
+
+using namespace magic_enum::bitwise_operators;
+
 //
 // CMake Defined Settings
 //
@@ -27,22 +33,10 @@ extern "C" {
 #define KIMERA_PSK_IDENTITY  "KIMERA_PSK_IDENTITY"
 #define MAX_KEY_LEN          256
 #define DEFAULT_KEY_LEN      64
-
 #define DEFAULT_PACKET_SIZE  1020
-#define DEFAULT_PORT         8080
-#define DEFAULT_ADDRESS      "0.0.0.0"
-#define DEFAULT_LOOPBACK     "/dev/video0"
-#define DEFAULT_FRAMERATE    25
-#define DEFAULT_WIDTH        1280
-#define DEFAULT_HEIGHT       720
-#define DEFAULT_BITRATE      3000000
-#define DEFAULT_CODEC        "libx264"
 #define DEFAULT_FORMAT       AV_PIX_FMT_YUV420P
 
-char* empty_string(size_t len);
-template<class T> inline T operator| (T a, T b) { return (T)((int)a | (int)b); }
-
-typedef enum {
+enum class Interfaces : uint16_t {
     NONE         = 0 << 0,
     // Source/Sink Options
     UNIX         = 1 << 0,
@@ -55,41 +49,39 @@ typedef enum {
     RESAMPLE     = 1 << 6,
     GPU_RESAMPLE = 1 << 7,
     CRYPTO       = 1 << 8,
-} Interfaces;
+};
 
-typedef enum {
-    UNKNOW      = 0 << 0,
+enum class Mode : uint16_t {
+    NONE        = 0 << 0,
     TRANSMITTER = 1 << 0,
     RECEIVER    = 1 << 1,
-} Mode;
+};
 
-class Kimera {
-public:
-    Kimera();
-    ~Kimera();
+bool CHECK(Interfaces value, Interfaces flag);
+bool CHECK(Mode value, Mode flag);
 
-    int width       = DEFAULT_WIDTH;
-    int height      = DEFAULT_HEIGHT;
-    int bitrate     = DEFAULT_BITRATE;
-    int framerate   = DEFAULT_FRAMERATE;
-    int port        = DEFAULT_PORT;
-    int packet_size = DEFAULT_PACKET_SIZE;
+typedef struct {
+    int width;
+    int height;
+    int bitrate;
+    int framerate;
+    int port;
 
-    char* vert_shader = empty_string(256);
-    char* frag_shader = empty_string(256);
-    char* psk_key     = empty_string(256);
-    char* codec       = empty_string(64);
-    char* address     = empty_string(64);
-    char* loopback    = empty_string(64);
+    std::string vert_shader;
+    std::string frag_shader;
+    std::string crypto_key;
+    std::string coder_name;
+    std::string address;
+    std::string loopback;
 
     enum AVPixelFormat in_format  = DEFAULT_FORMAT;
     enum AVPixelFormat out_format = DEFAULT_FORMAT;
+    int packet_size = DEFAULT_PACKET_SIZE;
 
-    Mode mode = UNKNOW;
-
-    Interfaces source = NONE;
-    Interfaces pipe   = NONE;
-    Interfaces sink   = NONE;
-};
+    Mode mode        = Mode::NONE;
+    Interfaces source = Interfaces::NONE;
+    Interfaces pipe   = Interfaces::NONE;
+    Interfaces sink   = Interfaces::NONE;
+} State;
 
 #endif

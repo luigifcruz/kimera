@@ -21,7 +21,7 @@ extern "C" {
 
 class XCB {
 public:
-    XCB(Kimera*);
+    XCB(State*);
     ~XCB();
 
     bool SetSource();
@@ -32,7 +32,7 @@ public:
 private:
     int64_t last_frame;
     int64_t frame_duration;
-    Kimera* state = NULL;
+    State* state = NULL;
     xcb_get_image_reply_t* img = NULL;
     xcb_connection_t *connection = NULL;
     xcb_screen_t *screen = NULL;
@@ -41,7 +41,7 @@ private:
 
 class V4L2 {
 public:
-    V4L2(Kimera*);
+    V4L2(State*);
     ~V4L2();
 
     bool SetSink();
@@ -56,13 +56,13 @@ private:
     struct v4l2_format format;
     struct v4l2_requestbuffers req;
     char* buffer = NULL;
-    Kimera* state = NULL;
+    State* state = NULL;
     AVFrame* frame = NULL;
 };
 
 class Loopback {
 public:
-    Loopback(Kimera*);
+    Loopback(State*);
 
     bool SetSink();
     bool SetSource();
@@ -74,7 +74,7 @@ private:
     XCB xcb;
     V4L2 v4l2;
 
-    Kimera* state = NULL;
+    State* state = NULL;
 };
 
 unsigned int ff_to_v4l(enum AVPixelFormat);
