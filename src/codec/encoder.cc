@@ -1,5 +1,7 @@
 #include "kimera/codec.hpp"
 
+namespace Kimera {
+
 Encoder::Encoder(State& state) : state(state) {
     AVCodec *codec = avcodec_find_encoder_by_name(state.coder_name.c_str());
 
@@ -68,3 +70,5 @@ bool Encoder::Push(AVFrame* frame) {
 AVPacket* Encoder::Pull() {
     return this->packet;
 }
+
+} // namespace Kimera

@@ -1,5 +1,7 @@
 #include "kimera/transport.hpp"
 
+namespace Kimera {
+
 bool Socket::OpenTCPClient() {
     server_in = (socket_in*)malloc(sizeof(socket_in));
 
@@ -97,3 +99,5 @@ int Socket::RecvTCP(void* buf, size_t len) {
         return crypto.Recv(buf, len);
     return recv(server_fd, buf, len, MSG_WAITALL);
 }
+
+} // namespace Kimera

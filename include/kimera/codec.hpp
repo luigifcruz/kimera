@@ -14,6 +14,8 @@ extern "C" {
 
 #include "kimera/state.hpp"
 
+namespace Kimera {
+
 class Decoder {
 public:
     Decoder(State&);
@@ -70,5 +72,6 @@ private:
     bool ConfigureResampler(AVFrame*);
 };
 
+} // namespace Kimera
 
 #endif

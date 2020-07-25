@@ -1,5 +1,7 @@
 #include "kimera/transport.hpp"
 
+namespace Kimera {
+
 bool Socket::OpenUDPClient() {
     server_in = (socket_in*)malloc(sizeof(socket_in));
     client_in = (socket_in*)malloc(sizeof(socket_in));
@@ -63,3 +65,5 @@ int Socket::RecvUDP(void* buf, size_t len) {
     socklen_t slen = sizeof(*client_in);
     return recvfrom(server_fd, buf, len, MSG_WAITALL, (socket_t*)client_in, &slen);
 }
+
+} // namespace Kimera

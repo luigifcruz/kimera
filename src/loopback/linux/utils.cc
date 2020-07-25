@@ -1,5 +1,7 @@
 #include "kimera/loopback/linux.hpp"
 
+namespace Kimera {
+
 unsigned int ff_to_v4l(enum AVPixelFormat input) {
     switch (input) {
     case AV_PIX_FMT_RGB24:          return V4L2_PIX_FMT_RGB24;
@@ -94,3 +96,5 @@ unsigned int find_v4l_format(int fd, unsigned int preferred) {
     }
     return opt;
 }
+
+} // namespace Kimera

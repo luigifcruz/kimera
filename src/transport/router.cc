@@ -1,5 +1,7 @@
 #include "kimera/transport.hpp"
 
+namespace Kimera {
+
 Router::Router(State& state) : state(state) {
     header_size = HEADER_SIZE;
     packet_size = state.packet_size;
@@ -119,3 +121,5 @@ char* Router::BufferPtr() {
 size_t Router::BufferSize() {
     return packet_size;
 }
+
+} // namespace Kimera

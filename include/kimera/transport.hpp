@@ -23,6 +23,8 @@ extern "C" {
 
 #include "kimera/state.hpp"
 
+namespace Kimera {
+
 typedef struct {
     uint64_t pts = (uint32_t)0;
     uint32_t len = (uint32_t)0;
@@ -148,5 +150,7 @@ private:
     int SendUNIX(const void*, size_t);
     int RecvUNIX(void*, size_t);
 };
+
+} // namespace Kimera
 
 #endif

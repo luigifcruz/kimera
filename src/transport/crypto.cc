@@ -1,5 +1,7 @@
 #include "kimera/transport.hpp"
 
+namespace Kimera {
+
 State* crypto_state = nullptr;
 
 static unsigned int psk_client_cb(SSL *ssl, const char *hint, char *id, unsigned int max_id_len, unsigned char *psk, unsigned int max_psk_len) {
@@ -142,3 +144,5 @@ int Crypto::Send(const void* buf, size_t len) {
 int Crypto::Recv(void* buf, size_t len) {
     return SSL_read(ssl, buf, len);
 }
+
+} // namespace Kimera

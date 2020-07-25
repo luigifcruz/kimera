@@ -1,5 +1,7 @@
 #include "kimera/loopback/linux.hpp"
 
+namespace Kimera {
+
 Loopback::Loopback(State& state) : state(state), xcb(state), v4l2(state) {}
 
 bool Loopback::LoadSink() {
@@ -25,3 +27,5 @@ AVFrame* Loopback::Pull() {
         return this->v4l2.Pull();
     return NULL;
 }
+
+} // namespace Kimera

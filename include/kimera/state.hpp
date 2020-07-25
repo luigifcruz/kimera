@@ -13,6 +13,8 @@ extern "C" {
 #include <signal.h>
 }
 
+namespace Kimera {
+
 /* #undef KIMERA_WINDOWS */
 /* #undef KIMERA_MACOS */
 #define KIMERA_LINUX
@@ -81,5 +83,7 @@ typedef struct {
     Interfaces pipe   = Interfaces::NONE;
     Interfaces sink   = Interfaces::NONE;
 } State;
+
+} // namespace Kimera
 
 #endif

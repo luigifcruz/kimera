@@ -1,5 +1,7 @@
 #include "kimera/transport.hpp"
 
+namespace Kimera {
+
 bool Socket::OpenUNIXClient() {
     server_un = (socket_un*)malloc(sizeof(socket_un));
 
@@ -70,3 +72,5 @@ int Socket::SendUNIX(const void* buf, size_t len) {
 int Socket::RecvUNIX(void* buf, size_t len) {
     return recv(server_fd, buf, len, MSG_WAITALL);
 }
+
+} // namespace Kimera

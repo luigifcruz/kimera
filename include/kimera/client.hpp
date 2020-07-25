@@ -15,6 +15,8 @@ extern "C" {
 #include "kimera/transport.hpp"
 #include "kimera/state.hpp"
 
+namespace Kimera {
+
 class Client {
 public:
     Client(State&);
@@ -40,5 +42,7 @@ private:
     void ParseBody(const YAML::Node&);
     void ParseInterfaces(const YAML::Node&, Interfaces&);
 };
+
+} // namespace Kimera
 
 #endif

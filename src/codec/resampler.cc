@@ -1,5 +1,7 @@
 #include "kimera/codec.hpp"
 
+namespace Kimera {
+
 Resampler::Resampler(State& state, enum AVPixelFormat format) : state(state), format(format), configured(false) {};
 
 Resampler::~Resampler() {
@@ -80,3 +82,5 @@ bool Resampler::Push(AVFrame* in) {
 AVFrame* Resampler::Pull() {
     return this->frame;
 }
+
+} // namespace Kimera

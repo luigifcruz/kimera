@@ -1,5 +1,7 @@
 #include "kimera/codec.hpp"
 
+namespace Kimera {
+
 Decoder::Decoder(State& state) : state(state) {
     AVCodec *codec = avcodec_find_decoder_by_name(state.coder_name.c_str());
     if (!codec) {
@@ -149,3 +151,5 @@ bool Decoder::HasParser(enum AVCodecID codec_id) {
             return true;
     }
 }
+
+} // namespace Kimera

@@ -1,5 +1,7 @@
 #include "kimera/loopback/linux.hpp"
 
+namespace Kimera {
+
 V4L2::V4L2(State& state) : state(state) {}
 
 V4L2::~V4L2() {
@@ -158,3 +160,5 @@ bool V4L2::Push(AVFrame* frame) {
 
     return true;
 }
+
+} // namespace Kimera

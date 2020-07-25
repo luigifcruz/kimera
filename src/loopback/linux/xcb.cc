@@ -1,5 +1,7 @@
 #include "kimera/loopback/linux.hpp"
 
+namespace Kimera {
+
 XCB::XCB(State& state) : state(state) {}
 
 XCB::~XCB() {
@@ -69,3 +71,5 @@ AVFrame* XCB::Pull() {
 
     return frame;
 }
+
+} // namespace Kimera

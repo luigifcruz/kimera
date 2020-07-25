@@ -1,5 +1,6 @@
 #include "kimera/client.hpp"
-#include "kimera/state.hpp"
+
+namespace Kimera {
 
 volatile sig_atomic_t stop_handler;
 
@@ -190,3 +191,5 @@ int Client::Attach(int argc, char *argv[], void(*tx)(State&, Client&), void(*rx)
 bool Client::ShouldStop() {
     return this->stop;
 }
+
+} // namespace Kimera

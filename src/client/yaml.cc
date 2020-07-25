@@ -1,5 +1,7 @@
 #include "kimera/client.hpp"
 
+namespace Kimera {
+
 void Client::ParseHeader(const YAML::Node& config) {
     if (config["width"])
         state.width = config["width"].as<int>();
@@ -61,3 +63,5 @@ bool Client::ParseConfigFile(char* path) {
 
     return true;
 }
+
+} // namespace Kimera

@@ -4,6 +4,8 @@
 #include "kimera/codec.hpp"
 #include "kimera/client.hpp"
 
+using namespace Kimera;
+
 void receiver(State& state, Client& cli) {
     Socket socket(state);
     Loopback loopback(state);
@@ -88,7 +90,7 @@ void transmitter(State& state, Client& cli) {
 }
 
 int main(int argc, char *argv[]) {
-    State state;
-    Client client(state);
+    Kimera::State state;
+    Kimera::Client client(state);
     return client.Attach(argc, argv, transmitter, receiver);
 }

@@ -1,5 +1,7 @@
 #include "kimera/transport.hpp"
 
+namespace Kimera {
+
 Socket::Socket(State& state) : state(state), crypto(state), router(state) {}
 
 Socket::~Socket() {
@@ -100,3 +102,5 @@ AVPacket* Socket::Pull() {
         if (packet) return packet;
     }
 }
+
+} // namespace Kimera
