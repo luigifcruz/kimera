@@ -1,8 +1,6 @@
 #include "kimera/transport.hpp"
 
-Socket::Socket(State* state) : crypto(state), router(state) {
-    this->state = state;
-}
+Socket::Socket(State& state) : state(state), crypto(state), router(state) {}
 
 Socket::~Socket() {
     switch (interf) {
@@ -24,19 +22,19 @@ Socket::~Socket() {
 #endif
 }
 
-bool Socket::OpenClient() {
+bool Socket::LoadClient() {
 #ifdef KIMERA_WINDOWS
     WSADATA wsd;
     WSAStartup(WINSOCK_VERSION, &wsd);
 #endif
 
-    if (CHECK(state->source, Interfaces::TCP))
+    if (CHECK(state.source, Interfaces::TCP))
         OpenTCPClient();
 
-    if (CHECK(state->source, Interfaces::UDP))
+    if (CHECK(state.source, Interfaces::UDP))
         OpenUDPClient();
 
-    if (CHECK(state->source, Interfaces::UNIX))
+    if (CHECK(state.source, Interfaces::UNIX))
         OpenUNIXClient();
 
     if (interf == Interfaces::NONE) {
@@ -47,19 +45,19 @@ bool Socket::OpenClient() {
     return true;
 }
 
-bool Socket::OpenServer() {
+bool Socket::LoadServer() {
 #ifdef KIMERA_WINDOWS
     WSADATA wsd;
     WSAStartup(WINSOCK_VERSION, &wsd);
 #endif
 
-    if (CHECK(state->sink, Interfaces::TCP))
+    if (CHECK(state.sink, Interfaces::TCP))
         OpenTCPServer();
 
-    if (CHECK(state->sink, Interfaces::UDP))
+    if (CHECK(state.sink, Interfaces::UDP))
         OpenUDPServer();
 
-    if (CHECK(state->sink, Interfaces::UNIX))
+    if (CHECK(state.sink, Interfaces::UNIX))
         OpenUNIXServer();
 
     if (interf == Interfaces::NONE) {
@@ -71,6 +69,7 @@ bool Socket::OpenServer() {
 }
 
 void Socket::Push(AVPacket* packet) {
+    if (packet == NULL) return;
     while (router.Push(packet)) {
         void* buf  = router.BufferPtr();
         size_t len = router.BufferSize();

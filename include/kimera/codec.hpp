@@ -4,11 +4,6 @@
 #include <cstddef>
 
 extern "C" {
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <assert.h>
 #include <libavutil/frame.h>
 #include <libavutil/pixfmt.h>
 #include <libavcodec/avcodec.h>
@@ -21,13 +16,15 @@ extern "C" {
 
 class Decoder {
 public:
-    Decoder(State*);
+    Decoder(State&);
     ~Decoder();
 
     bool Push(AVPacket*);
     AVFrame* Pull();
 
 private:
+    State& state;
+
     AVCodecContext *codec_ctx = NULL;
     AVCodecParserContext *parser_ctx = NULL;
     AVPacket* retard = NULL;
@@ -40,31 +37,35 @@ private:
 
 class Encoder {
 public:
-    Encoder(State*);
+    Encoder(State&);
     ~Encoder();
 
     bool Push(AVFrame*);
     AVPacket* Pull();
 
 private:
+    State& state;
+
+    bool packet_valid = false;
     AVCodecContext *codec_ctx = NULL;
     AVPacket* packet = NULL;
 };
 
 class Resampler {
 public:
-    Resampler(State*, enum AVPixelFormat);
+    Resampler(State&, enum AVPixelFormat);
     ~Resampler();
 
     bool Push(AVFrame*);
     AVFrame* Pull();
 
 private:
-    bool configured;
+    State& state;
+
     enum AVPixelFormat format;
     struct SwsContext* ctx = NULL;
     AVFrame* frame = NULL;
-    State* state = NULL;
+    bool configured;
 
     bool ConfigureResampler(AVFrame*);
 };

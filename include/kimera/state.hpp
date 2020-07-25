@@ -1,22 +1,17 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <string>
+#include <bitset>
+#include <cstdbool>
+#include <iostream>
+#include "magic_enum.hpp"
+
 extern "C" {
 #include <bits/stdint-uintn.h>
 #include <libavcodec/avcodec.h>
 #include <signal.h>
-#include <stdbool.h>
 }
-
-#include <string>
-#include <bitset>
-#include "magic_enum.hpp"
-
-using namespace magic_enum::bitwise_operators;
-
-//
-// CMake Defined Settings
-//
 
 /* #undef KIMERA_WINDOWS */
 /* #undef KIMERA_MACOS */
@@ -25,16 +20,14 @@ using namespace magic_enum::bitwise_operators;
 #define KIMERA_VERSION_MAJOR 1
 #define KIMERA_VERSION_MINOR 0
 
-//
-// Default Settings
-//
-
 #define HEADER_SIZE          20
 #define KIMERA_PSK_IDENTITY  "KIMERA_PSK_IDENTITY"
 #define MAX_KEY_LEN          256
 #define DEFAULT_KEY_LEN      64
 #define DEFAULT_PACKET_SIZE  1020
 #define DEFAULT_FORMAT       AV_PIX_FMT_YUV420P
+
+using namespace magic_enum::bitwise_operators;
 
 enum class Interfaces : uint16_t {
     NONE         = 0 << 0,

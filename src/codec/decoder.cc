@@ -1,20 +1,9 @@
 #include "kimera/codec.hpp"
 
-Decoder::~Decoder() {
-    if (this->frame)
-        av_frame_free(&this->frame);
-    if (this->parser_ctx)
-        av_parser_close(this->parser_ctx);
-    if (this->codec_ctx)
-        avcodec_free_context(&this->codec_ctx);
-    if (this->retard)
-        av_packet_free(&this->retard);
-}
-
-Decoder::Decoder(State* state) {
-    AVCodec *codec = avcodec_find_decoder_by_name(state->coder_name.c_str());
+Decoder::Decoder(State& state) : state(state) {
+    AVCodec *codec = avcodec_find_decoder_by_name(state.coder_name.c_str());
     if (!codec) {
-        printf("[DECODER] Selected decoder (%s) not found.\n", state->coder_name.c_str());
+        printf("[DECODER] Selected decoder (%s) not found.\n", state.coder_name.c_str());
         throw;
     }
 
@@ -24,14 +13,14 @@ Decoder::Decoder(State* state) {
         throw;
     }
 
-    this->codec_ctx->bit_rate = state->bitrate;
-    this->codec_ctx->width = state->width;
-    this->codec_ctx->height = state->height;
-    this->codec_ctx->time_base = (AVRational){1, state->framerate};
-    this->codec_ctx->framerate = (AVRational){state->framerate, 1};
+    this->codec_ctx->bit_rate = state.bitrate;
+    this->codec_ctx->width = state.width;
+    this->codec_ctx->height = state.height;
+    this->codec_ctx->time_base = (AVRational){1, state.framerate};
+    this->codec_ctx->framerate = (AVRational){state.framerate, 1};
     this->codec_ctx->gop_size = 10;
     this->codec_ctx->max_b_frames = 0;
-    this->codec_ctx->pix_fmt = state->in_format;
+    this->codec_ctx->pix_fmt = state.in_format;
     this->codec_ctx->flags |= AV_CODEC_FLAG_LOW_DELAY;
 
     if (avcodec_open2(this->codec_ctx, codec, NULL) < 0) {
@@ -48,8 +37,19 @@ Decoder::Decoder(State* state) {
             throw;
         }
         this->parser_ctx->flags |= PARSER_FLAG_COMPLETE_FRAMES;
-        this->parser_ctx->format = state->in_format;
+        this->parser_ctx->format = state.in_format;
     }
+}
+
+Decoder::~Decoder() {
+    if (this->frame)
+        av_frame_free(&this->frame);
+    if (this->parser_ctx)
+        av_parser_close(this->parser_ctx);
+    if (this->codec_ctx)
+        avcodec_free_context(&this->codec_ctx);
+    if (this->retard)
+        av_packet_free(&this->retard);
 }
 
 bool Decoder::Push(AVPacket* packet) {

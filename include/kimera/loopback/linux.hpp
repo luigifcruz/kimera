@@ -21,7 +21,7 @@ extern "C" {
 
 class XCB {
 public:
-    XCB(State*);
+    XCB(State&);
     ~XCB();
 
     bool SetSource();
@@ -30,9 +30,10 @@ public:
     AVFrame* Pull();
 
 private:
+    State& state;
+
     int64_t last_frame;
     int64_t frame_duration;
-    State* state = NULL;
     xcb_get_image_reply_t* img = NULL;
     xcb_connection_t *connection = NULL;
     xcb_screen_t *screen = NULL;
@@ -41,7 +42,7 @@ private:
 
 class V4L2 {
 public:
-    V4L2(State*);
+    V4L2(State&);
     ~V4L2();
 
     bool SetSink();
@@ -51,30 +52,31 @@ public:
     AVFrame* Pull();
 
 private:
+    State& state;
+
     int dev_fd;
     struct v4l2_buffer info;
     struct v4l2_format format;
     struct v4l2_requestbuffers req;
     char* buffer = NULL;
-    State* state = NULL;
     AVFrame* frame = NULL;
 };
 
 class Loopback {
 public:
-    Loopback(State*);
+    Loopback(State&);
 
-    bool SetSink();
-    bool SetSource();
+    bool LoadSink();
+    bool LoadSource();
 
     bool Push(AVFrame*);
     AVFrame* Pull();
 
 private:
+    State& state;
+
     XCB xcb;
     V4L2 v4l2;
-
-    State* state = NULL;
 };
 
 unsigned int ff_to_v4l(enum AVPixelFormat);

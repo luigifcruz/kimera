@@ -1,36 +1,34 @@
 #include "kimera/loopback/linux.hpp"
 
-V4L2::V4L2(State* state) {
-    this->state = state;
-}
+V4L2::V4L2(State& state) : state(state) {}
 
 V4L2::~V4L2() {
-    if (CHECK(this->state->mode, Mode::TRANSMITTER)) {
+    if (CHECK(this->state.mode, Mode::TRANSMITTER)) {
         ioctl(this->dev_fd, VIDIOC_STREAMOFF, &this->info.type);
         if (frame)
             av_frame_free(&frame);
     }
 
-    if (CHECK(this->state->mode, Mode::RECEIVER)) {
+    if (CHECK(this->state.mode, Mode::RECEIVER)) {
         if (this->buffer)
             free(this->buffer);
     }
 }
 
 bool V4L2::SetSource() {
-	if ((this->dev_fd = open(state->loopback.c_str(), O_RDWR)) < 0) {
+	if ((this->dev_fd = open(state.loopback.c_str(), O_RDWR)) < 0) {
         printf("[LOOPBACK] Couldn't open loopback interface.\n");
         return false;
 	}
 
-    state->in_format = v4l_to_ff(
-        find_v4l_format(this->dev_fd, ff_to_v4l(state->in_format)));
+    state.in_format = v4l_to_ff(
+        find_v4l_format(this->dev_fd, ff_to_v4l(state.in_format)));
 
     this->format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	this->format.fmt.pix.width = state->width;
-	this->format.fmt.pix.height = state->height;
+	this->format.fmt.pix.width = state.width;
+	this->format.fmt.pix.height = state.height;
     this->format.fmt.pix.field = V4L2_FIELD_ANY;
-    this->format.fmt.pix.pixelformat = ff_to_v4l(state->in_format);
+    this->format.fmt.pix.pixelformat = ff_to_v4l(state.in_format);
 
 	if (ioctl(this->dev_fd, VIDIOC_S_FMT, &this->format) < 0) {
         printf("[LOOPBACK] Couldn't open interface.\n");
@@ -81,9 +79,9 @@ bool V4L2::SetSource() {
     }
 
     this->frame = av_frame_alloc();
-    this->frame->width = state->width;
-    this->frame->height = state->height;
-    this->frame->format = state->in_format;
+    this->frame->width = state.width;
+    this->frame->height = state.height;
+    this->frame->format = state.in_format;
     this->frame->pts = 0;
     if (av_frame_get_buffer(frame, 0) < 0){
         printf("[LOOPBACK] Couldn't allocate frame.\n");
@@ -115,23 +113,23 @@ AVFrame* V4L2::Pull() {
 }
 
 bool V4L2::SetSink() {
-	if ((dev_fd = open(state->loopback.c_str(), O_RDWR)) < 0) {
+	if ((dev_fd = open(state.loopback.c_str(), O_RDWR)) < 0) {
         printf("[LOOPBACK] Couldn't open interface.\n");
         return false;
 	}
 
     unsigned int frame_size = 0;
-    switch (state->out_format) {
+    switch (state.out_format) {
     case AV_PIX_FMT_YUV420P:
-        frame_size = (state->width*state->height*3/2);
+        frame_size = (state.width*state.height*3/2);
         break;
     default:
         return false;
     }
 
 	format.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
-	format.fmt.pix.width = state->width;
-	format.fmt.pix.height = state->height;
+	format.fmt.pix.width = state.width;
+	format.fmt.pix.height = state.height;
 	format.fmt.pix.sizeimage = frame_size;
     format.fmt.pix.field = V4L2_FIELD_NONE;
 

@@ -1,10 +1,6 @@
 #include "kimera/codec.hpp"
 
-Resampler::Resampler(State* state, enum AVPixelFormat format) {
-    this->configured = false;
-    this->format = format;
-    this->state = state;
-}
+Resampler::Resampler(State& state, enum AVPixelFormat format) : state(state), format(format), configured(false) {};
 
 Resampler::~Resampler() {
     if (this->frame)
@@ -22,8 +18,8 @@ bool Resampler::ConfigureResampler(AVFrame* in) {
 
     // Allocate new frame for the resampler.
     this->frame = av_frame_alloc();
-    this->frame->width = state->width;
-    this->frame->height = state->height;
+    this->frame->width = state.width;
+    this->frame->height = state.height;
     this->frame->format = this->format;
     this->frame->pts = in->pts;
     if (av_frame_get_buffer(this->frame, 0) < 0){

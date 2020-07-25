@@ -14,7 +14,7 @@ bool Socket::OpenUDPClient() {
 
     server_in->sin_family = AF_INET;
     server_in->sin_addr.s_addr = INADDR_ANY;
-    server_in->sin_port = htons(state->port);
+    server_in->sin_port = htons(state.port);
 
     int n = 1024 * 1024;
     if (setsockopt(server_fd, SOL_SOCKET, SO_RCVBUF, &n, sizeof(n)) == -1) {
@@ -41,8 +41,8 @@ bool Socket::OpenUDPServer() {
     memset(server_in, 0, sizeof(socket_in));
 
     server_in->sin_family = AF_INET;
-    server_in->sin_port = htons(state->port);
-    server_in->sin_addr.s_addr = inet_addr(state->address.c_str());
+    server_in->sin_port = htons(state.port);
+    server_in->sin_addr.s_addr = inet_addr(state.address.c_str());
 
     interf = Interfaces::UDP;
     return true;

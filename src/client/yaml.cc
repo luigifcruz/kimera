@@ -2,15 +2,15 @@
 
 void Client::ParseHeader(const YAML::Node& config) {
     if (config["width"])
-        state->width = config["width"].as<int>();
+        state.width = config["width"].as<int>();
     if (config["height"])
-        state->height = config["height"].as<int>();
+        state.height = config["height"].as<int>();
     if (config["framerate"])
-        state->framerate = config["framerate"].as<int>();
+        state.framerate = config["framerate"].as<int>();
     if (config["bitrate"])
-        state->bitrate = config["bitrate"].as<int>();
+        state.bitrate = config["bitrate"].as<int>();
     if (config["packet_size"])
-        state->packet_size = config["packet_size"].as<int>();
+        state.packet_size = config["packet_size"].as<int>();
 }
 
 void Client::ParseInterfaces(const YAML::Node& config, Interfaces& out) {
@@ -23,20 +23,20 @@ void Client::ParseInterfaces(const YAML::Node& config, Interfaces& out) {
 
 void Client::ParseBody(const YAML::Node& config) {
     if (config["source"])
-        ParseInterfaces(config["source"], state->source);
+        ParseInterfaces(config["source"], state.source);
     if (config["pipe"])
-        ParseInterfaces(config["pipe"], state->pipe);
+        ParseInterfaces(config["pipe"], state.pipe);
     if (config["sink"])
-        ParseInterfaces(config["sink"], state->sink);
+        ParseInterfaces(config["sink"], state.sink);
 
     if (config["codec"])
-        state->coder_name = config["codec"].as<std::string>();
+        state.coder_name = config["codec"].as<std::string>();
     if (config["address"])
-        state->address = config["address"].as<std::string>();
+        state.address = config["address"].as<std::string>();
     if (config["device"])
-        state->loopback = config["device"].as<std::string>();
+        state.loopback = config["device"].as<std::string>();
     if (config["port"])
-        state->port = config["port"].as<int>();
+        state.port = config["port"].as<int>();
 }
 
 bool Client::ParseConfigFile(char* path) {
@@ -45,7 +45,7 @@ bool Client::ParseConfigFile(char* path) {
 
         ParseHeader(config);
 
-        switch (state->mode) {
+        switch (state.mode) {
         case Mode::TRANSMITTER:
             ParseBody(config["transmitter"]);
             break;

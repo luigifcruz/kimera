@@ -1,8 +1,8 @@
 #ifndef TRANSPORT_H
 #define TRANSPORT_H
 
-#include "kimera/state.hpp"
-#include <stdint.h>
+#include <cstdbool>
+#include <cstdint>
 
 extern "C" {
 #ifdef KIMERA_WINDOWS
@@ -13,15 +13,15 @@ extern "C" {
 #include <sys/un.h>
 #include <unistd.h>
 #include <arpa/inet.h>
-#endif
-
 #include <sys/types.h>
-#include <stdbool.h>
+#endif
 
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
 }
+
+#include "kimera/state.hpp"
 
 typedef struct {
     uint64_t pts = (uint32_t)0;
@@ -38,7 +38,7 @@ typedef struct sockaddr socket_t;
 
 class Router {
 public:
-    Router(State*);
+    Router(State&);
     ~Router();
 
     bool Push(AVPacket*);
@@ -48,6 +48,8 @@ public:
     size_t BufferSize();
 
 private:
+    State& state;
+
     int header_size   = 0;
     int packet_size   = 0;
     int payload_size  = 0;
@@ -73,7 +75,7 @@ private:
 
 class Crypto {
 public:
-    Crypto(State*);
+    Crypto(State&);
     ~Crypto();
 
     bool Connect(unsigned int);
@@ -87,6 +89,8 @@ public:
     static int  Base2Bytes(char*, size_t, char*);
 
 private:
+    State& state;
+
     SSL *ssl                 = NULL;
     SSL_CTX *ctx             = NULL;
     const SSL_METHOD *method = NULL;
@@ -96,22 +100,23 @@ private:
 
 class Socket {
 public:
-    Socket(State*);
+    Socket(State&);
     ~Socket();
 
-    bool OpenServer();
-    bool OpenClient();
+    bool LoadServer();
+    bool LoadClient();
 
     void Push(AVPacket*);
     AVPacket* Pull();
 
 private:
+    State& state;
+
     int server_fd;
     int client_fd;
     Crypto crypto;
     Router router;
     Interfaces interf;
-    State* state = NULL;
 
     // Socket Descriptors
     socket_in* client_in;

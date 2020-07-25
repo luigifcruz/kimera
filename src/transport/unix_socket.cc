@@ -9,7 +9,7 @@ bool Socket::OpenUNIXClient() {
     }
 
     server_un->sun_family = AF_UNIX;
-    strcpy(server_un->sun_path, state->address.c_str());
+    strcpy(server_un->sun_path, state.address.c_str());
 
     if (connect(server_fd, (socket_t*)server_un, sizeof(socket_un)) < 0) {
         printf("[UNIX_SOCKET] Couldn't connect to server.\n");
@@ -30,7 +30,7 @@ bool Socket::OpenUNIXServer() {
     }
 
     server_un->sun_family = AF_UNIX;
-    strcpy(server_un->sun_path, state->address.c_str());
+    strcpy(server_un->sun_path, state.address.c_str());
     unlink(server_un->sun_path);
 
     if (bind(server_fd, (socket_t*)server_un, sizeof(socket_un)) < 0) {

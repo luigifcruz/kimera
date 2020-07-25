@@ -1,9 +1,3 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <string.h>
-
 #include "kimera/transport.h"
 #include "kimera/codec.h"
 #include "kimera/loopback.h"

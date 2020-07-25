@@ -1,10 +1,10 @@
 #include "kimera/codec.hpp"
 
-Encoder::Encoder(State* state) {
-    AVCodec *codec = avcodec_find_encoder_by_name(state->coder_name.c_str());
+Encoder::Encoder(State& state) : state(state) {
+    AVCodec *codec = avcodec_find_encoder_by_name(state.coder_name.c_str());
 
     if (!codec) {
-        printf("[ENCODER] Selected encoder (%s) not found.\n", state->coder_name.c_str());
+        printf("[ENCODER] Selected encoder (%s) not found.\n", state.coder_name.c_str());
         throw;
     }
 
@@ -14,14 +14,14 @@ Encoder::Encoder(State* state) {
         throw;
     }
 
-    this->codec_ctx->bit_rate = state->bitrate;
-    this->codec_ctx->width = state->width;
-    this->codec_ctx->height = state->height;
-    this->codec_ctx->time_base = (AVRational){1, state->framerate};
-    this->codec_ctx->framerate = (AVRational){state->framerate, 1};
+    this->codec_ctx->bit_rate = state.bitrate;
+    this->codec_ctx->width = state.width;
+    this->codec_ctx->height = state.height;
+    this->codec_ctx->time_base = (AVRational){1, state.framerate};
+    this->codec_ctx->framerate = (AVRational){state.framerate, 1};
     this->codec_ctx->gop_size = 10;
     this->codec_ctx->max_b_frames = 0;
-    this->codec_ctx->pix_fmt = state->out_format;
+    this->codec_ctx->pix_fmt = state.out_format;
     this->codec_ctx->flags |= AV_CODEC_FLAG_LOW_DELAY;
     if (avcodec_open2(this->codec_ctx, codec, NULL) < 0) {
         printf("[ENCODER] Couldn't open codec.\n");

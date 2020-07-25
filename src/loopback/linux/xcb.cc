@@ -1,8 +1,6 @@
 #include "kimera/loopback/linux.hpp"
 
-XCB::XCB(State* state) {
-    this->state = state;
-}
+XCB::XCB(State& state) : state(state) {}
 
 XCB::~XCB() {
     xcb_disconnect(this->connection);
@@ -10,9 +8,9 @@ XCB::~XCB() {
 
 bool XCB::SetSource() {
     int error;
-    this->connection = xcb_connect(state->loopback.c_str(), NULL);
+    this->connection = xcb_connect(state.loopback.c_str(), NULL);
     if ((error = xcb_connection_has_error(this->connection))) {
-        printf("[LOOPBACK] Cannot open selected display %s, error %d.\n", state->loopback.c_str(), error);
+        printf("[LOOPBACK] Cannot open selected display %s, error %d.\n", state.loopback.c_str(), error);
         return false;
     }
 
@@ -20,15 +18,15 @@ bool XCB::SetSource() {
     this->screen = xcb_setup_roots_iterator(setup).data;
     this->img = NULL;
 
-    AVRational time_base = (AVRational){ 1, state->framerate };
+    AVRational time_base = (AVRational){ 1, state.framerate };
     frame_duration = av_rescale_q(1, time_base, AV_TIME_BASE_Q);
 
-    state->in_format = 	AV_PIX_FMT_BGRA;
+    state.in_format = 	AV_PIX_FMT_BGRA;
 
     frame = av_frame_alloc();
     frame->width = screen->width_in_pixels;
     frame->height = screen->height_in_pixels;
-    frame->format = state->in_format;
+    frame->format = state.in_format;
     frame->pts = 0;
     if (av_frame_get_buffer(frame, 0) < 0){
         printf("[LOOPBACK] Couldn't allocate frame.\n");

@@ -1,31 +1,24 @@
 #ifndef KIMERA_H
 #define KIMERA_H
 
+#include <string>
+#include <memory>
+#include <cstdbool>
+#include <cstdlib>
+#include <yaml-cpp/yaml.h>
+
 extern "C" {
 #include <bits/types/sig_atomic_t.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
-
-
 #include <libavutil/avutil.h>
 }
 
 #include "kimera/transport.hpp"
 #include "kimera/state.hpp"
 
-#include <string>
-#include <memory>
-#include <iostream>
-#include <yaml-cpp/yaml.h>
-
 class Client {
 public:
-    Client(State*);
-
-    State* GetState();
-
+    Client(State&);
+    
     bool ParseConfigFile(char*);
 
     void PrintInterface(Interfaces);
@@ -34,12 +27,13 @@ public:
     void PrintHelp();
     void PrintKey();
 
-    int Attach(int, char* argv[], void(*tx)(Client*), void(*rx)(Client*));
+    int Attach(int, char* argv[], void(*)(State&, Client&), void(*)(State&, Client&));
 
     bool ShouldStop();
 
 private:
-    State* state = NULL;
+    State& state;
+
     volatile sig_atomic_t* stop;
 
     void ParseHeader(const YAML::Node&);

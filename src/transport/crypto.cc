@@ -1,6 +1,6 @@
 #include "kimera/transport.hpp"
 
-const State* crypto_state;
+State* crypto_state = nullptr;
 
 static unsigned int psk_client_cb(SSL *ssl, const char *hint, char *id, unsigned int max_id_len, unsigned char *psk, unsigned int max_psk_len) {
     (void)(ssl);
@@ -55,13 +55,13 @@ static unsigned int psk_server_cb(SSL* ssl, const char* id, unsigned char* psk, 
     return Crypto::Base2Bytes((char*)crypto_state->crypto_key.c_str(), b64_len, (char*)psk);
 }
 
-Crypto::Crypto(State* state) {
-    if (!CHECK(state->pipe, Interfaces::CRYPTO)) return;
+Crypto::Crypto(State& state) : state(state) {
+    if (!CHECK(state.pipe, Interfaces::CRYPTO)) return;
 
     SSL_load_error_strings();
     OpenSSL_add_all_algorithms();
 
-    if (state->packet_size >= 31000) {
+    if (state.packet_size >= 31000) {
         printf("[CRYPTO] Invalid settings, packet_size must be smaller than 31 KB.\n");
         throw;
     }
@@ -74,7 +74,7 @@ Crypto::Crypto(State* state) {
         throw;
     }
 
-    crypto_state = state;
+    crypto_state = &state;
 }
 
 Crypto::~Crypto() {

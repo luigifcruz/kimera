@@ -1,33 +1,25 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <string.h>
-
 #include "kimera/state.hpp"
 #include "kimera/transport.hpp"
 #include "kimera/loopback.hpp"
 #include "kimera/codec.hpp"
 #include "kimera/client.hpp"
 
-void receiver(Client* cli) {
-    State* state = cli->GetState();
-    AVPacket* packet = NULL;
-
+void receiver(State& state, Client& cli) {
     Socket socket(state);
     Loopback loopback(state);
     Decoder decoder(state);
-    Resampler resampler(state, state->out_format);
+    Resampler resampler(state, state.out_format);
 //  RenderState* render = init_render();
 
-    if (!loopback.SetSink()) return;
-    if (!socket.OpenClient()) return;
+    if (!loopback.LoadSink()) return;
+    if (!socket.LoadClient()) return;
 //  ok &= open_render(render, state);
 
-    cli->PrintState();
+    cli.PrintState();
 //  render_print_meta(render);
 
-    while (!(packet = socket.Pull()) && !cli->ShouldStop()) {
+    AVPacket* packet = NULL;
+    while (!(packet = socket.Pull()) && !cli.ShouldStop()) {
         if (decoder.Push(packet)) {
             AVFrame* frame = decoder.Pull();
 
@@ -46,32 +38,33 @@ void receiver(Client* cli) {
                 frame = render->frame;
             }
 */
+
             if (!resampler.Push(frame)) break;
 
-            if (CHECK(state->sink, Interfaces::LOOPBACK))
+            if (CHECK(state.sink, Interfaces::LOOPBACK))
                 if (!loopback.Push(resampler.Pull())) break;
         }
     }
 }
 
-void transmitter(Client* cli) {
-    State* state = cli->GetState();
-    AVFrame* frame = NULL;
-
+void transmitter(State& state, Client& cli) {
     Socket socket(state);
     Loopback loopback(state);
     Encoder encoder(state);
-    Resampler resampler(state, state->out_format);
+    Resampler resampler(state, state.out_format);
 //  RenderState* render = init_render();
 
-    if (!socket.OpenServer()) return;
-    if (!loopback.SetSource()) return;
+    if (!socket.LoadServer()) return;
+    if (!loopback.LoadSource()) return;
 //  ok &= open_render(render, state);
 
-    cli->PrintState();
+    cli.PrintState();
 //  render_print_meta(render);
 
-    while ((frame = loopback.Pull()) && cli->ShouldStop()) {
+    while (cli.ShouldStop()) {
+        AVFrame* frame = loopback.Pull();
+        if (!frame) break;
+
 /*
         Interfaces pipe = state->pipe;
         Interfaces sink = state->source;
@@ -87,8 +80,8 @@ void transmitter(Client* cli) {
             frame = render->frame;
         }
 */
-        if (!resampler.Push(frame)) break;
 
+        resampler.Push(frame);
         if (encoder.Push(resampler.Pull()))
             socket.Push(encoder.Pull());
     }
@@ -96,6 +89,6 @@ void transmitter(Client* cli) {
 
 int main(int argc, char *argv[]) {
     State state;
-    Client client(&state);
+    Client client(state);
     return client.Attach(argc, argv, transmitter, receiver);
 }
