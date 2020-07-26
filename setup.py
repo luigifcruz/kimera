@@ -67,7 +67,7 @@ setup(
     author_email='luigifcruz@gmail.com',
     description='',
     long_description='',
-    ext_modules=[CMakeExtension('cmake_example')],
+    ext_modules=[CMakeExtension('kimera')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
 )
