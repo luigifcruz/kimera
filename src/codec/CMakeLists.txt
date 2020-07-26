@@ -1,3 +1,4 @@
+# Find FFMPEG Dependency
 if(LINUX OR MACOS)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(AVCODEC     REQUIRED IMPORTED_TARGET libavcodec)
@@ -29,7 +30,6 @@ target_link_libraries(kimera PRIVATE
     ${SWSCALE_LDFLAGS}
 )
 
-if(LINUX OR MACOS OR WINDOWS)
-    file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cc")
-    target_sources(kimera PRIVATE ${SOURCE_LIST})
-endif()
+# Add module source list
+file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cc")
+target_sources(kimera PRIVATE ${SOURCE_LIST})

@@ -1,3 +1,4 @@
+# Add Linux dependencies and source list
 if(LINUX)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb)
@@ -9,6 +10,7 @@ if(LINUX)
     target_sources(kimera PRIVATE ${SOURCE_LIST})
 endif()
 
+# Add macOS dependencies and source list
 if(MACOS)
     list(APPEND LIB_LIST
         "-framework Foundation"
@@ -23,5 +25,6 @@ if(MACOS)
     target_sources(kimera PRIVATE ${SOURCE_LIST})
 endif()
 
+# Add Windows dependences and source list
 if(WINDOWS)
 endif()
