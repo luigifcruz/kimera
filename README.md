@@ -28,7 +28,7 @@
 | OMX          | ✅      | ✅      | Broadcom SoC (Raspberry Pi) |
 | VAAPI        | ❌      | ❌      | Modern Intel CPUs           |
 
-## Installation 
+## Installation
 Pre-compiled binary packages will be available once this app reaches beta. For now, if you want to try the pre-release version of the app, you should compile it yourself by following the instructions below.
 
 ### Dependencies
@@ -64,12 +64,12 @@ $ sudo make install
 ## Usage
 Create a server with the `/dev/video0` as input and localhost TCP as output.
 ```shell
-$ ./bin/tunnel tx ../examples/linux.yml
+$ kimera tx ../examples/linux.yml
 ```
 
 Receive the video from the TCP server and display it on the screen.
 ```shell
-$ ./bin/tunnel rx ../examples/linux.yml
+$ kimera rx ../examples/linux.yml
 ```
 
 ## License

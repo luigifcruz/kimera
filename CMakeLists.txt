@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.13)
 project(kimera VERSION 1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
@@ -56,9 +57,13 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 
-add_library(kimera ${SOURCE_LIST})
+add_library(kimera SHARED ${SOURCE_LIST})
 target_link_libraries(kimera ${LIB_LIST})
 target_include_directories(kimera PUBLIC include)
+
+install(TARGETS kimera
+        LIBRARY DESTINATION lib
+        INCLUDES DESTINATION include)
 
 if(DEPENDENCIES)
 add_dependencies(kimera ${DEPENDENCIES})
