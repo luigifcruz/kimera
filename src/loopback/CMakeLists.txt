@@ -1,9 +1,12 @@
-set(CMAKE_CXX_FLAGS "")
-
 if(LINUX)
-    include(${CMAKE_SOURCE_DIR}/cmake/xcb.cmake)
-    file(GLOB TMP_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/linux/*.cc")
-    list(APPEND SOURCE_LIST ${TMP_LIST})
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb)
+
+    target_include_directories(kimera PUBLIC ${XCB_INCLUDE_DIRS})
+    target_link_libraries(kimera PUBLIC ${XCB_LDFLAGS})
+
+    file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/linux/*.cc")
+    target_sources(kimera PRIVATE ${SOURCE_LIST})
 endif()
 
 if(MACOS)
@@ -14,18 +17,11 @@ if(MACOS)
         "-framework CoreVideo"
         "-framework CoreGraphics"
     )
+    target_link_libraries(kimera PUBLIC ${LIB_LIST})
 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
-
-    file(GLOB TMP_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/macos/*.m")
-    list(APPEND SOURCE_LIST ${TMP_LIST})
+    file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/macos/*.m")
+    target_sources(kimera PRIVATE ${SOURCE_LIST})
 endif()
 
 if(WINDOWS)
-    file(GLOB TMP_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/windows/*.c")
-    list(APPEND SOURCE_LIST ${TMP_LIST})
 endif()
-
-set_property(GLOBAL APPEND PROPERTY GLOBAL_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-set_property(GLOBAL APPEND PROPERTY GLOBAL_SOURCE_LIST ${SOURCE_LIST})
-set_property(GLOBAL APPEND PROPERTY GLOBAL_LIB_LIST ${LIB_LIST})

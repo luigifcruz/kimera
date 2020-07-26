@@ -4,6 +4,6 @@ add_executable(tunnel ${SOURCE_LIST})
 
 set_target_properties(tunnel PROPERTIES OUTPUT_NAME kimera)
 
-target_link_libraries(tunnel PRIVATE kimera)
+target_link_libraries(tunnel PUBLIC kimera)
 
-install(TARGETS tunnel RUNTIME DESTINATION bin)
+install(TARGETS tunnel RUNTIME)
