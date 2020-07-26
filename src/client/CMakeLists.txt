@@ -1,15 +1,7 @@
-if(LINUX OR MACOS)
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(YAML REQUIRED IMPORTED_TARGET yaml-cpp)
-endif()
+option(YAML_BUILD_SHARED_LIBS "" ON)
+option(BUILD_STATIC_WITH_PIC "" ON)
+add_subdirectory(${PROJECT_SOURCE_DIR}/dependencies/yaml-cpp build)
+target_link_libraries(kimera PRIVATE yaml-cpp)
 
-if(WINDOWS)
-endif()
-
-target_include_directories(kimera PUBLIC ${YAML_INCLUDE_DIRS})
-target_link_libraries(kimera PUBLIC ${YAML_LDFLAGS})
-
-if(LINUX OR MACOS OR WINDOWS)
-    file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cc")
-    target_sources(kimera PRIVATE ${SOURCE_LIST})
-endif()
+file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cc")
+target_sources(kimera PRIVATE ${SOURCE_LIST})

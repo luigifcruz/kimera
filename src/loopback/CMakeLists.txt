@@ -2,8 +2,8 @@ if(LINUX)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(XCB REQUIRED IMPORTED_TARGET xcb)
 
-    target_include_directories(kimera PUBLIC ${XCB_INCLUDE_DIRS})
-    target_link_libraries(kimera PUBLIC ${XCB_LDFLAGS})
+    target_include_directories(kimera PRIVATE ${XCB_INCLUDE_DIRS})
+    target_link_libraries(kimera PRIVATE ${XCB_LDFLAGS})
 
     file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/linux/*.cc")
     target_sources(kimera PRIVATE ${SOURCE_LIST})
