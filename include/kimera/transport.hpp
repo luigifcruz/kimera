@@ -108,7 +108,7 @@ public:
     bool LoadServer();
     bool LoadClient();
 
-    void Push(AVPacket*);
+    bool Push(AVPacket*);
     AVPacket* Pull();
 
 private:

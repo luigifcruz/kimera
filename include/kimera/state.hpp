@@ -6,6 +6,7 @@
 #include <cstdbool>
 #include <iostream>
 #include "magic_enum.hpp"
+#include <yaml-cpp/yaml.h>
 
 extern "C" {
 #include <bits/stdint-uintn.h>
@@ -61,6 +62,7 @@ inline bool CHECK(Mode value, Mode flag) {
 }
 
 typedef struct {
+public:
     int width;
     int height;
     int bitrate;
@@ -82,6 +84,16 @@ typedef struct {
     Interfaces source = Interfaces::NONE;
     Interfaces pipe   = Interfaces::NONE;
     Interfaces sink   = Interfaces::NONE;
+
+    void LoadTransmitter();
+    void LoadReceiver();
+
+    bool ParseConfigFile(char*);
+
+private:
+    void ParseHeader(const YAML::Node&);
+    void ParseBody(const YAML::Node&);
+    void ParseInterfaces(const YAML::Node&, Interfaces&);
 } State;
 
 } // namespace Kimera

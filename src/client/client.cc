@@ -18,7 +18,7 @@ Client::Client(State& state) : state(state) {
 
 void Client::PrintVersion() {
     printf("Kimera Version: %d.%d\n", KIMERA_VERSION_MAJOR, KIMERA_VERSION_MINOR);
-    printf("Ffmpeg Version: %s\n", av_version_info());
+    printf("FFMPEG Version: %s\n", av_version_info());
 }
 
 void Client::PrintHelp() {
@@ -54,7 +54,7 @@ void Client::PrintInterface(Interfaces interfaces) {
     printf("\n");
 }
 
-void Client::PrintState() {
+void Client::PrintState(State& state) {
     printf(".   CURRENT STATE\n");
     printf("├── Dimensions: %dx%d\n", state.width, state.height);
     printf("├── Framerate:  %d FPS\n", state.framerate);
@@ -136,11 +136,11 @@ int Client::Attach(int argc, char *argv[], void(*tx)(State&, Client&), void(*rx)
     switch (argv[1][0]) {
         case 't':
         case 'T':
-            state.mode = Mode::TRANSMITTER;
+            state.LoadTransmitter();
             break;
         case 'r':
         case 'R':
-            state.mode = Mode::RECEIVER;
+            state.LoadReceiver();
             break;
         default:
             printf("Mode (%s) not valid.\n", argv[1]);
@@ -148,7 +148,7 @@ int Client::Attach(int argc, char *argv[], void(*tx)(State&, Client&), void(*rx)
             return -1;
     }
 
-    if (!ParseConfigFile(config_path)) return -1;
+    if (!state.ParseConfigFile(config_path)) return -1;
 
     if (CHECK(state.pipe, Interfaces::CRYPTO) && state.crypto_key.size() < 8) {
         if (CHECK(state.mode, Mode::TRANSMITTER)) {

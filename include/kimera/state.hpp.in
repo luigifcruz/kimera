@@ -1,11 +1,13 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <libavutil/frame.h>
 #include <string>
 #include <bitset>
 #include <cstdbool>
 #include <iostream>
 #include "magic_enum.hpp"
+#include <yaml-cpp/yaml.h>
 
 extern "C" {
 #include <bits/stdint-uintn.h>
@@ -60,7 +62,44 @@ inline bool CHECK(Mode value, Mode flag) {
     return (flag & value) == flag;
 }
 
+class Frame {
+public:
+    Frame() {
+        frame = av_frame_alloc();
+    }
+
+    ~Frame() {
+        av_frame_free(&frame);
+    }
+
+    AVFrame* GetRawPtr() {
+        return frame;
+    }
+
+private:
+    AVFrame* frame;
+};
+
+class Packet {
+public:
+    Packet() {
+        packet = av_packet_alloc();
+    }
+
+    ~Packet() {
+        av_packet_free(&packet);
+    }
+
+    AVPacket* GetRawPtr() {
+        return packet;
+    }
+
+private:
+    AVPacket* packet;
+};
+
 typedef struct {
+public:
     int width;
     int height;
     int bitrate;
@@ -82,6 +121,16 @@ typedef struct {
     Interfaces source = Interfaces::NONE;
     Interfaces pipe   = Interfaces::NONE;
     Interfaces sink   = Interfaces::NONE;
+
+    void LoadTransmitter();
+    void LoadReceiver();
+
+    bool ParseConfigFile(char*);
+
+private:
+    void ParseHeader(const YAML::Node&);
+    void ParseBody(const YAML::Node&);
+    void ParseInterfaces(const YAML::Node&, Interfaces&);
 } State;
 
 } // namespace Kimera

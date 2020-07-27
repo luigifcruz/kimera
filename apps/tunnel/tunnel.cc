@@ -17,7 +17,7 @@ void receiver(State& state, Client& cli) {
     if (!socket.LoadClient()) return;
 //  ok &= open_render(render, state);
 
-    cli.PrintState();
+    Client::PrintState(state);
 //  render_print_meta(render);
 
     AVPacket* packet = NULL;
@@ -60,7 +60,7 @@ void transmitter(State& state, Client& cli) {
     if (!loopback.LoadSource()) return;
 //  ok &= open_render(render, state);
 
-    cli.PrintState();
+    Client::PrintState(state);
 //  render_print_meta(render);
 
     while (cli.ShouldStop()) {

@@ -5,7 +5,6 @@
 #include <memory>
 #include <cstdbool>
 #include <cstdlib>
-#include <yaml-cpp/yaml.h>
 
 extern "C" {
 #include <bits/types/sig_atomic_t.h>
@@ -20,27 +19,21 @@ namespace Kimera {
 class Client {
 public:
     Client(State&);
-    
-    bool ParseConfigFile(char*);
-
-    void PrintInterface(Interfaces);
-    void PrintVersion();
-    void PrintState();
-    void PrintHelp();
-    void PrintKey();
-
-    int Attach(int, char* argv[], void(*)(State&, Client&), void(*)(State&, Client&));
 
     bool ShouldStop();
+    int Attach(int, char* argv[], void(*)(State&, Client&), void(*)(State&, Client&));
+
+    static void PrintState(State&);
+    static void PrintVersion();
+    static void PrintHelp();
+    static void PrintKey();
 
 private:
     State& state;
 
     volatile sig_atomic_t* stop;
 
-    void ParseHeader(const YAML::Node&);
-    void ParseBody(const YAML::Node&);
-    void ParseInterfaces(const YAML::Node&, Interfaces&);
+    static void PrintInterface(Interfaces);
 };
 
 } // namespace Kimera

@@ -70,8 +70,8 @@ bool Socket::LoadServer() {
     return true;
 }
 
-void Socket::Push(AVPacket* packet) {
-    if (packet == NULL) return;
+bool Socket::Push(AVPacket* packet) {
+    if (packet == NULL) return true;
     while (router.Push(packet)) {
         void* buf  = router.BufferPtr();
         size_t len = router.BufferSize();
@@ -80,9 +80,10 @@ void Socket::Push(AVPacket* packet) {
             case Interfaces::UDP:  SendUDP(buf, len);  break;
             case Interfaces::TCP:  SendTCP(buf, len);  break;
             case Interfaces::UNIX: SendUNIX(buf, len); break;
-            default:   break;
+            default: return false;
         }
     }
+    return true;
 }
 
 AVPacket* Socket::Pull() {
