@@ -12,6 +12,6 @@ void init_transport(py::module &m) {
         }))
         .def("LoadServer", &Socket::LoadServer)
         .def("LoadClient", &Socket::LoadClient)
-        .def("Push", &Socket::Push)
-        .def("Pull", &Socket::Pull);
+        .def("Push", &Socket::Push, py::return_value_policy::reference)
+        .def("Pull", &Socket::Pull, py::return_value_policy::reference);
 }

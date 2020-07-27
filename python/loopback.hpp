@@ -12,6 +12,6 @@ void init_loopback(py::module &m) {
         }))
         .def("LoadSink", &Loopback::LoadSink)
         .def("LoadSource", &Loopback::LoadSource)
-        .def("Push", &Loopback::Push)
-        .def("Pull", &Loopback::Pull);
+        .def("Push", &Loopback::Push, py::return_value_policy::reference)
+        .def("Pull", &Loopback::Pull, py::return_value_policy::reference);
 }

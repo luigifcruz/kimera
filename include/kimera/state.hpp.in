@@ -62,42 +62,6 @@ inline bool CHECK(Mode value, Mode flag) {
     return (flag & value) == flag;
 }
 
-class Frame {
-public:
-    Frame() {
-        frame = av_frame_alloc();
-    }
-
-    ~Frame() {
-        av_frame_free(&frame);
-    }
-
-    AVFrame* GetRawPtr() {
-        return frame;
-    }
-
-private:
-    AVFrame* frame;
-};
-
-class Packet {
-public:
-    Packet() {
-        packet = av_packet_alloc();
-    }
-
-    ~Packet() {
-        av_packet_free(&packet);
-    }
-
-    AVPacket* GetRawPtr() {
-        return packet;
-    }
-
-private:
-    AVPacket* packet;
-};
-
 typedef struct {
 public:
     int width;

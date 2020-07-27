@@ -16,7 +16,7 @@ def StartTransmiter(state):
     while (True):
         resampler.Push(loopback.Pull())
         if encoder.Push(resampler.Pull()):
-            socket.Push(encoder.Pull())
+           socket.Push(encoder.Pull())
 
 def StartReceiver(state):
     pass

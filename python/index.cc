@@ -10,6 +10,9 @@ using namespace Kimera;
 namespace py = pybind11;
 
 PYBIND11_MODULE(kimera, m) {
+    py::class_<AVPacket>(m, "AVPacket");
+    py::class_<AVFrame>(m, "AVFrame");
+
     init_loopback(m);
     init_client(m);
     init_codec(m);

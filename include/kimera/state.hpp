@@ -1,6 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <libavutil/frame.h>
 #include <string>
 #include <bitset>
 #include <cstdbool>
