@@ -79,10 +79,12 @@ void Client::PrintState(State& state) {
     printf("    ├── Sink:   ");
     PrintInterface(state.sink);
 
-    printf("    ├── Device:  %s\n", state.loopback.c_str());
-    printf("    ├── Address: %s\n", state.address.c_str());
-    printf("    ├── Port:    %d\n", state.port);
-    printf("    └── Codec:   %s\n", state.coder_name.c_str());
+    printf("    ├── Device:     %s\n", state.loopback.c_str());
+    printf("    ├── Address:    %s\n", state.address.c_str());
+    printf("    ├── Port:       %d\n", state.port);
+    std::cout << "    ├── Input Fmt:  " << magic_enum::enum_name(state.in_format) << std::endl;
+    std::cout << "    ├── Output Fmt: " << magic_enum::enum_name(state.out_format) << std::endl;
+    printf("    └── Codec:      %s\n", state.coder_name.c_str());
 }
 
 void Client::PrintKey() {

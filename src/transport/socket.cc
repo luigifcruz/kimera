@@ -96,12 +96,13 @@ AVPacket* Socket::Pull() {
             case Interfaces::UDP:  out = RecvUDP(buf, len);  break;
             case Interfaces::TCP:  out = RecvTCP(buf, len);  break;
             case Interfaces::UNIX: out = RecvUNIX(buf, len); break;
-            default:   break;
+            default: return NULL;
         }
 
         AVPacket* packet = router.Pull(out);
         if (packet) return packet;
     }
+    return NULL;
 }
 
 } // namespace Kimera

@@ -1,4 +1,5 @@
 #include "kimera/state.hpp"
+#include <libavutil/pixfmt.h>
 
 namespace Kimera {
 
@@ -19,8 +20,16 @@ void State::ParseInterfaces(const YAML::Node& config, Interfaces& out) {
     for (const auto& it : config) {
         std::string src_str = it.as<std::string>();
         auto interface = magic_enum::enum_cast<Interfaces>(src_str);
-        out = interface.value() | out;
+        if (interface.has_value())
+            out = interface.value() | out;
     }
+}
+
+void State::ParsePixelFormat(const YAML::Node& config, enum AVPixelFormat& fmt) {
+    auto pfmt_str = config.as<std::string>();
+    auto pfmt = magic_enum::enum_cast<AVPixelFormat>(pfmt_str);
+    if (pfmt.has_value())
+        fmt = pfmt.value();
 }
 
 void State::ParseBody(const YAML::Node& config) {
@@ -30,6 +39,11 @@ void State::ParseBody(const YAML::Node& config) {
         ParseInterfaces(config["pipe"], pipe);
     if (config["sink"])
         ParseInterfaces(config["sink"], sink);
+
+    if (config["in_format"])
+        ParsePixelFormat(config["in_format"], in_format);
+    if (config["out_format"])
+        ParsePixelFormat(config["out_format"], out_format);
 
     if (config["codec"])
         coder_name = config["codec"].as<std::string>();

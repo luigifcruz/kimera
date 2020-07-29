@@ -17,7 +17,7 @@ lib64
 .DS_Store
 /build
 /captures
-include/kimera/state.h
+include/kimera/state.hpp
 .externalNativeBuild
 .cxx
 .vs

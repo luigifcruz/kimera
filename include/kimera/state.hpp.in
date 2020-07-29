@@ -2,6 +2,7 @@
 #define CONFIG_H
 
 #include <libavutil/frame.h>
+#include <libavutil/pixfmt.h>
 #include <string>
 #include <bitset>
 #include <cstdbool>
@@ -48,17 +49,13 @@ enum class Interfaces : uint16_t {
     CRYPTO       = 1 << 8,
 };
 
-inline bool CHECK(Interfaces value, Interfaces flag) {
-    return (flag & value) == flag;
-}
-
 enum class Mode : uint16_t {
     NONE        = 0 << 0,
     TRANSMITTER = 1 << 0,
     RECEIVER    = 1 << 1,
 };
 
-inline bool CHECK(Mode value, Mode flag) {
+template<class T> bool CHECK(T value, T flag) {
     return (flag & value) == flag;
 }
 
@@ -95,6 +92,7 @@ private:
     void ParseHeader(const YAML::Node&);
     void ParseBody(const YAML::Node&);
     void ParseInterfaces(const YAML::Node&, Interfaces&);
+    void ParsePixelFormat(const YAML::Node&, enum AVPixelFormat&);
 } State;
 
 } // namespace Kimera

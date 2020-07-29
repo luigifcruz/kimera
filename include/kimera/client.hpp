@@ -5,6 +5,7 @@
 #include <memory>
 #include <cstdbool>
 #include <cstdlib>
+#include "magic_enum.hpp"
 
 extern "C" {
 #include <bits/types/sig_atomic_t.h>
