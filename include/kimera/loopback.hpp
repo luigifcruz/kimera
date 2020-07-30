@@ -6,9 +6,9 @@
 #if	  defined(KIMERA_LINUX)
 #include "kimera/loopback/linux.hpp"
 #elif defined(KIMERA_MACOS)
-#include "kimera/loopback/macos/loopback.h"
+#include "kimera/loopback/macos/loopback.hpp"
 #elif defined(KIMERA_WINDOWS)
-#include "kimera/loopback/windows.h"
+#include "kimera/loopback/windows.hpp"
 #endif
 
 #endif

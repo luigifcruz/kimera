@@ -1,7 +1,7 @@
 # Compile YAML-CPP
 option(CMAKE_POSITION_INDEPENDENT_CODE "" ON)
 add_subdirectory(${PROJECT_SOURCE_DIR}/dependencies/yaml-cpp build)
-target_link_libraries(kimera PRIVATE yaml-cpp)
+target_link_libraries(kimera PUBLIC yaml-cpp)
 
 # Add module source list
 file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cc")

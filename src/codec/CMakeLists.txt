@@ -12,7 +12,7 @@ endif()
 if(WINDOWS)
 endif()
 
-target_include_directories(kimera PRIVATE
+target_include_directories(kimera PUBLIC
     ${AVCODEC_INCLUDE_DIRS}
     ${AVFORMAT_INCLUDE_DIRS}
     ${AVFILTER_INCLUDE_DIRS}
@@ -21,7 +21,7 @@ target_include_directories(kimera PRIVATE
     ${SWSCALE_INCLUDE_DIRS}
 )
 
-target_link_libraries(kimera PRIVATE
+target_link_libraries(kimera PUBLIC
     ${AVCODEC_LDFLAGS}
     ${AVFORMAT_LDFLAGS}
     ${AVFILTER_LDFLAGS}

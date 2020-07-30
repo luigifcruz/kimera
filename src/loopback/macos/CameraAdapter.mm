@@ -1,21 +1,12 @@
-#import "kimera/loopback/macos/CameraAdapter.h"
+#import "kimera/loopback/macos/CameraAdapter.hpp"
 
 #import <AppKit/AppKit.h>
 
 @implementation CameraAdapter
 
-- (int)atoi: (char*)str
+- (NSString*) toString: (std::string)str
 {
-    if (!str)
-        NSLog(@"Enter valid string");
-    
-	int result = 0;
-    char *p = str;
-	while ((*p>='0') && (*p<='9')) {
-        result = result*10 + (*p - '0');
-        p++;
-    }
-	return result;
+    return [NSString stringWithCString:str.c_str() encoding:[NSString defaultCStringEncoding]];
 }
 
 - (int) getFrameWidth
@@ -28,12 +19,12 @@
     return ctx.height;
 }
 
-- (bool)initDisplay: (State*)state
+- (bool) initDisplay: (Kimera::State*)state
 {
     uint32_t num_screens = 0;
     CGGetActiveDisplayList(0, NULL, &num_screens);
 
-    NSUInteger selectedDevice = (NSUInteger)atoi(state->loopback);
+    NSUInteger selectedDevice = (NSUInteger)[[self toString:state->loopback] integerValue];
     if (selectedDevice >= num_screens) {
         NSLog(@"[LOOPBACK] Selected screen (%lu) doesn't exist!\n", selectedDevice);
         return false;
@@ -50,11 +41,11 @@
     return true;
 }
 
-- (bool)initCamera: (State*)state
+- (bool)initCamera: (Kimera::State*)state
 {
     NSError* error = nil;
-    NSArray * devices = [ AVCaptureDevice devicesWithMediaType: AVMediaTypeVideo ];
-    NSUInteger selectedDevice = (NSUInteger)atoi(state->loopback);
+    NSArray * devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+    NSUInteger selectedDevice = (NSUInteger)[[self toString:state->loopback] integerValue];
 
     if (selectedDevice >= [devices count]) {
         NSLog(@"[LOOPBACK] Selected device (%lu) isn't available!\n", selectedDevice);
@@ -76,11 +67,9 @@
         for (AVFrameRateRange *range in format.videoSupportedFrameRateRanges) {
             CMFormatDescriptionRef desc = format.formatDescription;
             CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(desc);
-
             if (
-                range.minFrameRate <= state->framerate  && 
-                state->framerate <= range.maxFrameRate  && 
-                dimensions.width == state->width        &&
+                range.minFrameRate <= state->framerate &&
+                dimensions.width == state->width &&
                 dimensions.height == state->height
             ) {
                 selectedFormat = format;
@@ -89,8 +78,18 @@
         }
     }
 
+    NSLog(@"STATE: FPS: %d Size: %dx%d", state->framerate, state->width, state->height);
+
     if (!selectedFormat || !frameRateRange) {
         NSLog(@"[LOOPBACK] Device doesn't support requested settings.");
+        NSLog(@"[LOOPBACK] Available Formats & Dimensions:");
+        for (AVCaptureDeviceFormat *format in [ctx.device formats]) {
+            for (AVFrameRateRange *range in format.videoSupportedFrameRateRanges) {
+                CMFormatDescriptionRef desc = format.formatDescription;
+                CMVideoDimensions dims = CMVideoFormatDescriptionGetDimensions(desc);
+                NSLog(@"    - FPS: %.00f Size: %dx%d", range.minFrameRate, dims.width, dims.height);
+            }
+        }
         return false;
     }
 
@@ -116,7 +115,7 @@
     return true;
 }
 
-- (bool)startCapture: (State*)state
+- (bool)startCapture: (Kimera::State*)state
 {
     pthread_mutex_init(&ctx.frame_lock, NULL);
     pthread_cond_init(&ctx.frame_wait_cond, NULL);
@@ -135,18 +134,18 @@
     ctx.session = [[AVCaptureSession alloc] init];
 
     switch (state->source) {
-        case Interfaces::DISPLAY:
+        case Kimera::Interfaces::DISPLAY:
             if ([self initDisplay:state]) {
                 [ctx.session addInput: ctx.displayInput];
             } else {
                 return false;
             }
             break;
-        case Interfaces::LOOPBACK:
+        case Kimera::Interfaces::LOOPBACK:
             if ([self initCamera:state]) {
                 [ctx.session addInput: ctx.cameraInput];
             } else {
-                return false;
+                return false; 
             }
             break;
         default:

@@ -1,4 +1,4 @@
-#import "kimera/loopback/macos/FrameReceiver.h"
+#import "kimera/loopback/macos/FrameReceiver.hpp"
 
 @implementation FrameReceiver
 

@@ -19,6 +19,8 @@ extern "C" {
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
+
+#include <libavcodec/avcodec.h>
 }
 
 #include "kimera/state.hpp"
