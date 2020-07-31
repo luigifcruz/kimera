@@ -1,4 +1,4 @@
-# 🐙 Kimera (Work-in-Progress)
+# 🐙 Kimera (Alpha Work-in-Progress)
 ### Low-latency hardware accelerated codec based video streaming utility.
 
 ## Features
@@ -7,6 +7,7 @@
 - 🔋 Low-overhead with Hardware Acceleration.
 - 🖼️ Works with any codec (HEVC, AVC, VP9, VP8, AV1).
 - 🧳 Supports multiple transport streams (UDP, TCP, UNIX, GNURadio).
+- 🔑 Encrypted tunnel between TCP peers (TLS v1.3).
 
 <p align="center">
 <img src="https://github.com/luigifreitas/kimera/raw/master/assets/kimera_macos.png" />
@@ -47,7 +48,7 @@ $ sudo apt install libavcodec-dev libavfilter-dev libavutil-dev libavformat-dev 
 
 #### macOS
 ```shell
-$ brew install libyaml glfw3 libav cmake
+$ brew install yaml-cpp glfw3 libav cmake pybind11
 ```
 
 ### Compilation

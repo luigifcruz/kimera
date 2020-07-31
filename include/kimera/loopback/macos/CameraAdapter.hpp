@@ -4,16 +4,14 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 
-#import "ReceiverContext.h"
-#import "FrameReceiver.h"
+#import "ReceiverContext.hpp"
+#import "FrameReceiver.hpp"
 
-extern "C" {
 #include <pthread.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/imgutils.h>
-}
 
-#include "kimera/state.h"
+#import "kimera/state.hpp"
 
 @interface CameraAdapter : NSObject
 {
@@ -22,7 +20,7 @@ extern "C" {
 
 - (int) getFrameWidth;
 - (int) getFrameHeight;
-- (bool) startCapture: (State*)state;
+- (bool) startCapture: (Kimera::State*)state;
 - (void) stopCapture;
 - (bool) pullFrame: (AVFrame*)frame;
 

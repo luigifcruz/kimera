@@ -7,8 +7,8 @@ endif()
 if(WINDOWS)
 endif()
 
-target_include_directories(kimera PRIVATE ${OPENSSL_INCLUDE_DIRS})
-target_link_libraries(kimera PRIVATE ${OPENSSL_LDFLAGS})
+target_include_directories(kimera PUBLIC ${OPENSSL_INCLUDE_DIRS})
+target_link_libraries(kimera PUBLIC ${OPENSSL_LDFLAGS})
 
 # Add module source list
 file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cc")

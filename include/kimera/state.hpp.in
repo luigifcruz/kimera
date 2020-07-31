@@ -1,8 +1,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <libavutil/frame.h>
-#include <libavutil/pixfmt.h>
 #include <string>
 #include <bitset>
 #include <cstdbool>
@@ -11,8 +9,8 @@
 #include <yaml-cpp/yaml.h>
 
 extern "C" {
-#include <bits/stdint-uintn.h>
-#include <libavcodec/avcodec.h>
+    //#include <libavcodec/avcodec.h>
+    #include <libavutil/pixfmt.h>
 #include <signal.h>
 }
 
