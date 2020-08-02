@@ -1,7 +1,10 @@
 #ifndef FRAME_RECEIVER_H
 #define FRAME_RECEIVER_H
 
-#import "ReceiverContext.hpp"
+#import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
+
+#import "ReceiverContext.h"
 
 #include <pthread.h>
 

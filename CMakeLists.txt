@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(kimera VERSION 1.0 LANGUAGES CXX)
+project(kimera VERSION 1.0 LANGUAGES CXX C)
 
 if(UNIX AND NOT APPLE)
     message(STATUS "Assuming Linux system...")

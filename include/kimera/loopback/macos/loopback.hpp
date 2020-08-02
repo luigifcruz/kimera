@@ -3,6 +3,11 @@
 
 #include "kimera/state.hpp"
 
+extern "C" {
+    #include <libavcodec/avcodec.h>
+    #include "kimera/loopback/macos/interface.h"
+}
+
 namespace Kimera {
 
 class Loopback {
@@ -20,7 +25,7 @@ private:
     State& state;
 
     AVFrame* frame = NULL;
-    void* processor = NULL;
+    void* proc = NULL;
 };
 
 } // namespace Kimera

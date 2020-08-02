@@ -1,13 +1,11 @@
 #include "kimera/loopback/macos/loopback.hpp"
 
-#import "kimera/loopback/macos/CameraAdapter.hpp"
-
 namespace Kimera {
 
 Loopback::Loopback(Kimera::State& state) : state(state) {}
 
 Loopback::~Loopback() {
-    [(id)processor stopCapture];
+    stop_capture(proc);
     if (frame) av_frame_free(&frame);
 }
 
@@ -22,15 +20,16 @@ bool Loopback::Push(AVFrame* frame) {
 }
 
 bool Loopback::LoadSource() {
-    processor = [CameraAdapter new];
+    proc = init_capture();
 
-    if (![(id)processor startCapture:&state]) {
+    bool display = CHECK(Interfaces::DISPLAY, state.source);
+    if (!start_capture(proc, display, (char*)state.loopback.c_str(), state.framerate, state.width, state.height)) {
         return false;
     }
     
     frame = av_frame_alloc();
-    frame->width = [(id)processor getFrameWidth];
-    frame->height = [(id)processor getFrameHeight];
+    frame->width = get_frame_width(proc);
+    frame->height = get_frame_height(proc);
     frame->format = state.in_format;
     frame->pts = 0;
 
@@ -48,7 +47,7 @@ AVFrame* Loopback::Pull() {
         return nullptr;
     }
 
-    if (![(id)processor pullFrame: frame]) {
+    if (!pull_frame(proc, (char**)frame->data, frame->linesize)) {
         return nullptr;
     }
 

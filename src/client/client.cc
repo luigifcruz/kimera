@@ -4,7 +4,7 @@ namespace Kimera {
 
 volatile sig_atomic_t stop_handler;
 
-void InterruptHandler(int signum) {
+void InterruptHandler(int) {
     if (stop_handler == 1) {
       exit(-1);
     }
@@ -32,25 +32,25 @@ void Client::PrintHelp() {
 
 void Client::PrintInterface(Interfaces interfaces) {
     if (interfaces == Interfaces::NONE)
-        printf(" NONE");
+        printf("    NONE");
     if (CHECK(interfaces, Interfaces::TCP))
-        printf(" TCP");
+        printf("    TCP");
     if (CHECK(interfaces, Interfaces::UDP))
-        printf(" UDP");
+        printf("    UDP");
     if (CHECK(interfaces, Interfaces::UNIX))
-        printf(" UNIX");
+        printf("    UNIX");
     if (CHECK(interfaces, Interfaces::DISPLAY))
-        printf(" DISPLAY");
+        printf("    DISPLAY");
     if (CHECK(interfaces, Interfaces::LOOPBACK))
-        printf(" LOOPBACK");
+        printf("    LOOPBACK");
     if (CHECK(interfaces, Interfaces::FILTER))
-        printf(" FILTER");
+        printf("    FILTER");
     if (CHECK(interfaces, Interfaces::RESAMPLE))
-        printf(" RESAMPLE");
+        printf("    RESAMPLE");
     if (CHECK(interfaces, Interfaces::GPU_RESAMPLE))
-        printf(" GPU_RESAMPLE");
+        printf("    GPU_RESAMPLE");
     if (CHECK(interfaces, Interfaces::CRYPTO))
-        printf(" CRYPTO");
+        printf("    CRYPTO");
     printf("\n");
 }
 

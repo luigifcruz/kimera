@@ -21,7 +21,8 @@ if(MACOS)
     )
     target_link_libraries(kimera PUBLIC ${LIB_LIST})
 
-    file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/macos/*.mm")
+    file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/macos/*.mm"
+                                            "${CMAKE_CURRENT_SOURCE_DIR}/macos/*.m")
     target_sources(kimera PRIVATE ${SOURCE_LIST})
 endif()
 
