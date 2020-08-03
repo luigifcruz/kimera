@@ -14,7 +14,7 @@ bool Loopback::LoadSink() {
     return false;
 }
 
-bool Loopback::Push(AVFrame* frame) {
+bool Loopback::Push(AVFrame*) {
     printf("[LOOPBACK] Sink isn't supported yet on macOS.\n");
     return false;
 }
@@ -22,8 +22,12 @@ bool Loopback::Push(AVFrame* frame) {
 bool Loopback::LoadSource() {
     proc = init_capture();
 
-    bool display = CHECK(Interfaces::DISPLAY, state.source);
-    if (!start_capture(proc, display, (char*)state.loopback.c_str(), state.framerate, state.width, state.height)) {
+    if (!start_capture(proc,
+                       CHECK(Interfaces::DISPLAY, state.source),
+                       (char*)state.loopback.c_str(),
+                       state.framerate,
+                       state.width,
+                       state.height)) {
         return false;
     }
     

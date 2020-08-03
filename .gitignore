@@ -17,12 +17,12 @@ lib64
 .DS_Store
 /build
 /captures
+include/kimera/state.h
 include/kimera/state.hpp
 .externalNativeBuild
 .cxx
 .vs
 out
-examples
 CMakeSettings.json
 shaders.h
 .vscode/settings.json
