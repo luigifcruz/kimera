@@ -1,38 +1,16 @@
 #ifndef RENDER_H
 #define RENDER_H
 
-/*
-//  -> INPUT (RGB, RGBA, YUV420, NV12, YUV422) [in]
-//      - Color Planes (1 to 3).
-//  -> PROCESSING (RGBA only) [proc]
-//      - Texture A.
-//      - Texture B.
-//  -> DISPLAY (RGBA) [disp]
-//      - Display Texture with borders.
-//  -> OUPUT (YUV420, YUV422, NV12) [out]
-//      - Color Planes (1 to 3).
-*/
-
 //
 // Includes
 //
 
-#include "kimera/state.h"
-
-#include "glad/glad.h"
-#include "glad/glad_egl.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-
-
-//
-// Global Definitions
-//
-
 #define MAX_PROC 2
 #define MAX_PLANES 3
+
+extern "C" {
+#include "glad/glad.h"
+#include "glad/glad_egl.h"
 
 #if   defined(KIMERA_MACOS)
     #define GLFW_EXPOSE_NATIVE_COCOA
@@ -49,6 +27,11 @@
 
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
+}
+
+#include "kimera/state.hpp"
+
+#include <iostream>
 
 //
 // Global Constant Variables
