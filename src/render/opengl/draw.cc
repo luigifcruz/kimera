@@ -1,5 +1,4 @@
-#include "kimera/render.h"
-#include "kimera/shaders.h"
+#include "kimera/render.hpp"
 
 bool load_display(RenderState* render) {
     render->disp_shader = load_shader(1, (char*)display_vs, (char*)display_fs);

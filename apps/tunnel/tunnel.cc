@@ -3,6 +3,7 @@
 #include "kimera/loopback.hpp"
 #include "kimera/codec.hpp"
 #include "kimera/client.hpp"
+#include "kimera/render.hpp"
 
 using namespace Kimera;
 
@@ -54,8 +55,8 @@ void transmitter(State& state, Client& cli) {
     Loopback loopback(state);
     Encoder encoder(state);
     Resampler resampler(state, state.out_format);
-//  RenderState* render = init_render();
-
+    Render render(state);
+    render.PrintMeta();
     if (!socket.LoadServer()) return;
     if (!loopback.LoadSource()) return;
 //  ok &= open_render(render, state);

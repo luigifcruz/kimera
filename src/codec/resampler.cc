@@ -2,7 +2,7 @@
 
 namespace Kimera {
 
-Resampler::Resampler(State& state, enum AVPixelFormat format) : state(state), format(format), configured(false) {};
+Resampler::Resampler(State& state, PixelFormat format) : state(state), format(format), configured(false) {};
 
 Resampler::~Resampler() {
     if (this->frame)
@@ -32,10 +32,10 @@ bool Resampler::ConfigureResampler(AVFrame* in) {
     // Create resampler with the current settings.
     this->ctx = sws_getContext(in->width,
                                in->height,
-                               (enum AVPixelFormat)in->format,
+                               (PixelFormat)in->format,
                                this->frame->width,
                                this->frame->height,
-                               (enum AVPixelFormat)this->frame->format,
+                               (PixelFormat)this->frame->format,
                                SWS_BICUBIC, 0, 0, 0);
 
     // Performance Degradation Check
@@ -43,7 +43,7 @@ bool Resampler::ConfigureResampler(AVFrame* in) {
         printf("[RESAMPLER] Performance Degradation:\n");
         printf("              Output pixel format is different than the input.\n");
         printf("                - Input: %s -> Output: %s\n",
-               av_get_pix_fmt_name((enum AVPixelFormat)in->format),
+               av_get_pix_fmt_name((PixelFormat)in->format),
                av_get_pix_fmt_name(this->format));
     }
 

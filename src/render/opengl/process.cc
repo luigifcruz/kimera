@@ -1,5 +1,4 @@
-#include "kimera/render.h"
-#include "kimera/shaders.h"
+#include "kimera/render.hpp"
 
 bool load_process(RenderState* render) {
     render->proc_shader = load_shader(1, (char*)filter_vs, (char*)filter_fs);

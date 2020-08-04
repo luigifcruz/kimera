@@ -2,7 +2,7 @@
 
 namespace Kimera {
 
-unsigned int ff_to_v4l(enum AVPixelFormat input) {
+unsigned int ff_to_v4l(PixelFormat input) {
     switch (input) {
     case AV_PIX_FMT_RGB24:          return V4L2_PIX_FMT_RGB24;
     case AV_PIX_FMT_YUYV422:        return V4L2_PIX_FMT_YUYV;
@@ -39,7 +39,7 @@ unsigned int ff_to_v4l(enum AVPixelFormat input) {
     }
 }
 
-enum AVPixelFormat v4l_to_ff(unsigned int input) {
+PixelFormat v4l_to_ff(unsigned int input) {
     switch (input) {
     case V4L2_PIX_FMT_RGB24:        return AV_PIX_FMT_RGB24;
     case V4L2_PIX_FMT_YUYV:         return AV_PIX_FMT_YUYV422;

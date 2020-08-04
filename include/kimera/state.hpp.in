@@ -9,8 +9,7 @@
 #include <yaml-cpp/yaml.h>
 
 extern "C" {
-    //#include <libavcodec/avcodec.h>
-    #include <libavutil/pixfmt.h>
+#include <libavutil/pixfmt.h>
 #include <signal.h>
 }
 
@@ -19,6 +18,9 @@ namespace Kimera {
 #cmakedefine KIMERA_WINDOWS
 #cmakedefine KIMERA_MACOS
 #cmakedefine KIMERA_LINUX
+
+#cmakedefine VULKAN_BACKEND_AVAILABLE
+#cmakedefine OPENGL_BACKEND_AVAILABLE
 
 #define KIMERA_VERSION_MAJOR @kimera_VERSION_MAJOR@
 #define KIMERA_VERSION_MINOR @kimera_VERSION_MINOR@
@@ -31,6 +33,8 @@ namespace Kimera {
 #define DEFAULT_FORMAT       AV_PIX_FMT_YUV420P
 
 using namespace magic_enum::bitwise_operators;
+
+typedef enum AVPixelFormat PixelFormat;
 
 enum class Interfaces : uint16_t {
     NONE         = 0 << 0,
@@ -72,8 +76,8 @@ public:
     std::string address;
     std::string loopback;
 
-    enum AVPixelFormat in_format  = DEFAULT_FORMAT;
-    enum AVPixelFormat out_format = DEFAULT_FORMAT;
+    PixelFormat in_format  = DEFAULT_FORMAT;
+    PixelFormat out_format = DEFAULT_FORMAT;
     int packet_size = DEFAULT_PACKET_SIZE;
 
     Mode mode         = Mode::NONE;
@@ -90,7 +94,7 @@ private:
     void ParseHeader(const YAML::Node&);
     void ParseBody(const YAML::Node&);
     void ParseInterfaces(const YAML::Node&, Interfaces&);
-    void ParsePixelFormat(const YAML::Node&, enum AVPixelFormat&);
+    void ParsePixelFormat(const YAML::Node&, PixelFormat&);
 } State;
 
 } // namespace Kimera

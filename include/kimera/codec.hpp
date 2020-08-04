@@ -55,7 +55,7 @@ private:
 
 class Resampler {
 public:
-    Resampler(State&, enum AVPixelFormat);
+    Resampler(State&, PixelFormat);
     ~Resampler();
 
     bool Push(AVFrame*);
@@ -64,7 +64,7 @@ public:
 private:
     State& state;
 
-    enum AVPixelFormat format;
+    PixelFormat format;
     struct SwsContext* ctx = NULL;
     AVFrame* frame = NULL;
     bool configured;

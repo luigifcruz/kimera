@@ -24,7 +24,7 @@ void init_codec(py::module &m) {
         .def(py::init([](State& state) {
             return std::unique_ptr<Resampler>(new Resampler(state, state.out_format));
         }))
-        .def(py::init([](State& state, enum AVPixelFormat fmt) {
+        .def(py::init([](State& state, PixelFormat fmt) {
             return std::unique_ptr<Resampler>(new Resampler(state, fmt));
         }))
         .def("Push", &Resampler::Push, py::return_value_policy::reference)

@@ -1,5 +1,4 @@
-#include "kimera/render.h"
-#include "kimera/shaders.h"
+#include "kimera/render.hpp"
 
 bool load_output(RenderState* render) {
     render->frame = av_frame_alloc();

@@ -81,8 +81,8 @@ private:
     V4L2 v4l2;
 };
 
-unsigned int ff_to_v4l(enum AVPixelFormat);
-enum AVPixelFormat v4l_to_ff(unsigned int);
+unsigned int ff_to_v4l(PixelFormat);
+PixelFormat v4l_to_ff(unsigned int);
 unsigned int find_v4l_format(int, unsigned int);
 
 } // namespace Kimera

@@ -1,4 +1,4 @@
-#include "kimera/render.h"
+#include "kimera/render.hpp"
 
 #ifdef KIMERA_WINDOWS
 typedef struct timeval {
@@ -23,6 +23,24 @@ static int gettimeofday(struct timeval* tp, struct timezone* tzp) {
     return 0;
 }
 #endif
+
+// name: EGL_CLIENT_APIS, EGL_VENDOR, EGL_VERSION, EGL_EXTENSIONS
+const char* egl_query(RenderState* render, int name) {
+    return eglQueryString(render->device->display, name);
+}
+
+// name: GL_VENDOR, GL_RENDERER, GL_VERSION, GL_SHADING_LANGUAGE_VERSION, GL_EXTENSIONS
+const char* gl_query(GLenum name) {
+    return (const char*)glGetString(name);
+}
+
+const char* render_mode_query(RenderState* render) {
+    return (render->use_display) ? "WINDOWED" : "HEADLESS";
+}
+
+const char* render_api_query(RenderState* render) {
+    return (render->use_opengles) ? "OpenGL ES" : "OpenGL";
+}
 
 size_t get_file_size(FILE* fp) {
     fseek(fp, 0L, SEEK_END);
@@ -223,8 +241,22 @@ double mticks() {
     return (double) tv.tv_usec / 1000 + tv.tv_sec * 1000;
 }
 
-bool is_format_supported(enum AVPixelFormat format, const enum AVPixelFormat formats[], int size) {
+bool is_format_supported(PixelFormat format, const PixelFormat formats[], int size) {
     for (int i = 0; i < size; i++)
         if (format == formats[i]) return true;
     return false;
+}
+
+unsigned int punch_framebuffer(RenderState* render) {
+    unsigned int index = render->proc_tex[render->proc_index];
+    render->proc_index = (render->proc_index + 1) % MAX_PROC;
+    return index;
+}
+
+unsigned int get_framebuffer(RenderState* render) {
+    return render->proc_tex[render->proc_index];
+}
+
+unsigned int get_last_framebuffer(RenderState* render) {
+    return render->proc_tex[!render->proc_index];
 }

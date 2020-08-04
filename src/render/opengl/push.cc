@@ -1,5 +1,4 @@
-#include "kimera/render.h"
-#include "kimera/shaders.h"
+#include "kimera/render.hpp"
 
 bool load_input(RenderState* render, AVFrame* frame) {
     if (!get_planes_size(frame, &render->in_size[0], &render->in_planes))

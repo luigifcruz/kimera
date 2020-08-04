@@ -25,7 +25,7 @@ void State::ParseInterfaces(const YAML::Node& config, Interfaces& out) {
     }
 }
 
-void State::ParsePixelFormat(const YAML::Node& config, enum AVPixelFormat& fmt) {
+void State::ParsePixelFormat(const YAML::Node& config, PixelFormat& fmt) {
     auto pfmt_str = config.as<std::string>();
     auto pfmt = magic_enum::enum_cast<AVPixelFormat>(pfmt_str);
     if (pfmt.has_value())
