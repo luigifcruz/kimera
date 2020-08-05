@@ -57,6 +57,11 @@ enum class Mode : uint16_t {
     RECEIVER    = 1 << 1,
 };
 
+enum class Backends : uint16_t {
+    VULKAN = 1 << 0,
+    OPENGL = 1 << 1,
+};
+
 template<class T> bool CHECK(T value, T flag) {
     return (flag & value) == flag;
 }
@@ -81,6 +86,7 @@ public:
     int packet_size = DEFAULT_PACKET_SIZE;
 
     Mode mode         = Mode::NONE;
+    Backends backend  = Backends::VULKAN;
     Interfaces source = Interfaces::NONE;
     Interfaces pipe   = Interfaces::NONE;
     Interfaces sink   = Interfaces::NONE;

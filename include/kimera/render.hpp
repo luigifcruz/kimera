@@ -1,9 +1,18 @@
 #ifndef RENDER_H
 #define RENDER_H
 
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <memory>
+
 extern "C" {
 #include <libavcodec/avcodec.h>
 }
+
+#include "kimera/state.hpp"
+#include "kimera/magic_enum.hpp"
+#include "kimera/render/backend.hpp"
 
 #ifdef OPENGL_BACKEND_AVAILABLE
 #include "kimera/render/opengl/backend.hpp"
@@ -13,17 +22,7 @@ extern "C" {
 #include "kimera/render/vukan/backend.hpp"
 #endif
 
-#include "kimera/state.hpp"
-
-#include <iostream>
-#include <vector>
-
 namespace Kimera {
-
-enum class Backend {
-    Vulkan,
-    OpenGL,
-};
 
 class Render {
 public:
@@ -39,15 +38,18 @@ public:
 
 private:
     State& state;
+    std::shared_ptr<Backend> backend;
 
-    std::vector<Backend> AvailableBackends = {
+    std::vector<Backends> AvailableBackends = {
         #ifdef OPENGL_BACKEND_AVAILABLE
-        Backend::OpenGL,
+        Backends::OPENGL,
         #endif
         #ifdef VULKAN_BACKEND_AVAILABLE
-        Backend::Vulkan,
+        Backends::VULKAN,
         #endif
     };
+
+    bool CheckBackend();
 };
 
 } // namespace Kimera

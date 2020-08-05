@@ -27,6 +27,7 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 }
 
+#include "kimera/render/backend.hpp"
 #include "kimera/state.hpp"
 
 #include <iostream>
@@ -83,19 +84,15 @@ typedef struct {
     EGLContext   context;
 } DeviceState;
 
-class OpenGLES {
+class OpenGL : public Backend {
 public:
-    OpenGLES(int, int);
-    ~OpenGLES();
+    OpenGL();
+    ~OpenGL();
 
-    std::vector<PixelFormat> InputFormats = {
-        AV_PIX_FMT_YUV420P,
-        AV_PIX_FMT_BGRA
-    };
+    void PrintMeta();
 
-    std::vector<PixelFormat> OutputFormats = {
-        AV_PIX_FMT_YUV420P,
-    };
+    std::vector<PixelFormat> GetInputFormats();
+    std::vector<PixelFormat> GetOutputFormats();
 
     bool LoadInput(PixelFormat);
     bool LoadDisplay();
@@ -107,9 +104,16 @@ public:
     bool Filter();
     AVFrame* Pull();
 
-    void PrintMeta();
-
 private:
+    std::vector<PixelFormat> InputFormats = {
+        AV_PIX_FMT_YUV420P,
+        AV_PIX_FMT_BGRA
+    };
+
+    std::vector<PixelFormat> OutputFormats = {
+        AV_PIX_FMT_YUV420P,
+    };
+
     bool use_opengles;
     bool use_display;
 

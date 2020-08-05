@@ -56,7 +56,7 @@ void transmitter(State& state, Client& cli) {
     Encoder encoder(state);
     Resampler resampler(state, state.out_format);
     Render render(state);
-    render.PrintMeta();
+
     if (!socket.LoadServer()) return;
     if (!loopback.LoadSource()) return;
 //  ok &= open_render(render, state);

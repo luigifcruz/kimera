@@ -1,4 +1,39 @@
-#include "kimera/render.hpp"
+#include "kimera/render/opengl/backend.hpp"
+
+namespace Kimera {
+
+OpenGL::OpenGL() {
+    std::cout << "[BACKEND] Initializing OpenGL backend." << std::endl;
+}
+
+OpenGL::~OpenGL() {
+    std::cout << "[BACKEND] Exiting OpenGL backend." << std::endl;
+}
+
+void OpenGL::PrintMeta() {
+    std::cout << "meta" << std::endl;
+}
+
+std::vector<PixelFormat> OpenGL::GetInputFormats() {
+    return InputFormats;
+}
+
+std::vector<PixelFormat> OpenGL::GetOutputFormats() {
+    return OutputFormats;
+}
+
+bool OpenGL::LoadInput(PixelFormat) {}
+bool OpenGL::LoadDisplay() {}
+bool OpenGL::LoadFilter() {}
+bool OpenGL::LoadOutput(PixelFormat) {}
+
+bool OpenGL::Push(AVFrame*) {}
+bool OpenGL::Draw() {}
+bool OpenGL::Filter() {}
+AVFrame* OpenGL::Pull() {}
+
+} // namespace Kimera
+
 /*
 void render_print_meta(RenderState* render) {
     printf(".   [Render Meta]\n");

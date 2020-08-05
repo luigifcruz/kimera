@@ -1,9 +1,40 @@
 #include "kimera/render.hpp"
-#include "kimera/magic_enum.hpp"
 
 namespace Kimera {
 
+bool Render::CheckBackend() {
+    auto a = AvailableBackends;
+    if (std::find(a.begin(), a.end(), state.backend) == a.end()) {
+        for (const auto& b : AvailableBackends) {
+            std::cout << "[RENDER] Selected "
+                      << magic_enum::enum_name(state.backend)
+                      << " backend not available, switching to "
+                      << magic_enum::enum_name(b)
+                      << "." << std::endl;
+            state.backend = b;
+            return true;
+        }
+
+        std::cerr << "[RENDER] No backend available." << std::endl;
+        return false;
+    }
+    return true;
+}
+
 Render::Render(State& state) : state(state) {
+    if (!CheckBackend()) throw "error";
+
+    switch (state.backend) {
+        case Backends::OPENGL:
+            backend = std::make_shared<OpenGL>();
+            break;
+        case Backends::VULKAN:
+            break;
+    }
+
+    backend->GetInputFormats();
+    // Check input format.
+    // Check output format.
 /*
     render->f_size.w = state->width;
     render->f_size.h = state->height;

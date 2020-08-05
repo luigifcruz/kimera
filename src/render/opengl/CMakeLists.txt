@@ -24,8 +24,6 @@ target_link_libraries(kimera PUBLIC ${EGL_LDFLAGS})
 file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/opengl.cc")
 target_sources(kimera PRIVATE ${SOURCE_LIST})
 
-# Compile Shaders
-
 #set(SHADER_COMPILER_BIN ${CMAKE_SOURCE_DIR}/utils/compile_shaders.py)
 #set(SHADER_COMPILER_SRC ${PROJECT_SOURCE_DIR}/shaders)
 #set(SHADER_COMPILER_DST ${CMAKE_SOURCE_DIR}/include/kimera)
