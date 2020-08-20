@@ -59,6 +59,7 @@ void transmitter(State& state, Client& cli) {
 
     if (!socket.LoadServer()) return;
     if (!loopback.LoadSource()) return;
+    if (!render.Load()) return;
 //  ok &= open_render(render, state);
 
     Client::PrintState(state);

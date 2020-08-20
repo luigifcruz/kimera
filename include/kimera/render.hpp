@@ -11,6 +11,7 @@ extern "C" {
 }
 
 #include "kimera/state.hpp"
+#include "kimera/codec.hpp"
 #include "kimera/magic_enum.hpp"
 #include "kimera/render/backend.hpp"
 
@@ -29,16 +30,25 @@ public:
     Render(State&);
     ~Render();
 
+    bool LoadInput(PixelFormat);
+    bool LoadDisplay();
+    bool LoadFilter();
+    bool LoadOutput(PixelFormat);
+
     bool Push(AVFrame*);
-    bool Filter();
-    bool Draw();
     AVFrame* Pull();
 
     void PrintMeta();
 
 private:
     State& state;
+
     std::shared_ptr<Backend> backend;
+    std::shared_ptr<Resampler> in_resampler;
+    std::shared_ptr<Resampler> out_resampler;
+
+    PixelFormat in_fmt;
+    PixelFormat out_fmt;
 
     std::vector<Backends> AvailableBackends = {
         #ifdef OPENGL_BACKEND_AVAILABLE
@@ -50,6 +60,7 @@ private:
     };
 
     bool CheckBackend();
+    PixelFormat SelectFormat(std::vector<PixelFormat>, PixelFormat);
 };
 
 } // namespace Kimera

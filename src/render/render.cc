@@ -21,6 +21,21 @@ bool Render::CheckBackend() {
     return true;
 }
 
+PixelFormat Render::SelectFormat(std::vector<PixelFormat> fmts, PixelFormat target) {
+    auto av_fmt = std::find(fmts.begin(), fmts.end(), target);
+
+    if (av_fmt == fmts.end()) {
+        std::cout << "[RENDER] Backend doesn't support "
+                  << magic_enum::enum_name(target)
+                  << ", using software to convert it to "
+                  << magic_enum::enum_name(fmts.at(0))
+                  << "." << std::endl;
+        return fmts.at(0);
+    }
+
+    return *av_fmt;
+}
+
 Render::Render(State& state) : state(state) {
     if (!CheckBackend()) throw "error";
 
@@ -31,42 +46,41 @@ Render::Render(State& state) : state(state) {
         case Backends::VULKAN:
             break;
     }
-
-    backend->GetInputFormats();
-    // Check input format.
-    // Check output format.
-/*
-    render->f_size.w = state->width;
-    render->f_size.h = state->height;
-    render->f_size.pix = GL_RGBA;
-
-    render->d_size.w = state->width / 2;
-    render->d_size.h = state->height / 2;
-
-    int input_formats_size = sizeof(input_formats)/sizeof(PixelFormat);
-    int output_formats_size = sizeof(output_formats)/sizeof(PixelFormat);
-
-    render->in_format = state->in_format;
-    if (!is_format_supported(render->in_format, input_formats, input_formats_size))
-        render->in_format = input_formats[0];
-    if (!open_resampler(render->resampler, render->in_format)) return;
-
-    render->out_format = state->out_format;
-    if (!is_format_supported(render->out_format, output_formats, output_formats_size))
-        render->out_format = output_formats[0];
-
-    if (state->sink & DISPLAY)
-        render->use_display = true;
-
-    render->time = mticks();
-    render->state = state;
-
-    if (!open_device(render)) return;
-    if (!load_default(render)) return;
-*/
 }
 
 Render::~Render() {
+}
+
+bool Render::LoadInput(PixelFormat fmt) {
+    in_fmt = SelectFormat(backend->GetInputFormats(), fmt);
+    in_resampler = std::make_shared<Resampler>(state, in_fmt);
+    return backend->LoadInput(in_fmt);
+}
+
+bool Render::LoadOutput(PixelFormat fmt) {
+    out_fmt = SelectFormat(backend->GetOutputFormats(), fmt);
+    out_resampler = std::make_shared<Resampler>(state, out_fmt);
+    return backend->LoadOutput(out_fmt);
+}
+
+bool Render::LoadDisplay() {
+    return backend->LoadDisplay();
+}
+
+bool Render::LoadFilter() {
+    return backend->LoadFilter();
+}
+
+bool Render::Push(AVFrame* frame) {
+    if (!in_resampler->Push(frame)) return false;
+    if (!backend->Push(in_resampler->Pull())) return false;
+    if (!backend->Filter()) return false;
+    if (!backend->Draw()) return false;
+}
+
+AVFrame* Render::Pull() {
+    if (!out_resampler->Push(backend->Pull())) return NULL;
+    return out_resampler->Pull();
 }
 
 void Render::PrintMeta() {

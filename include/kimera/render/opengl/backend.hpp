@@ -73,7 +73,7 @@ typedef struct {
     int w;
     int h;
     GLenum pix;
-} Resolution;
+} Format;
 
 typedef struct {
     GLFWwindow*  adapter;
@@ -128,11 +128,11 @@ private:
     PixelFormat in_format;
     PixelFormat out_format;
 
-    Resolution f_size;
-    Resolution d_size;
+    Format f_size;
+    Format d_size;
 
-    Resolution in_size[MAX_PLANES];
-    Resolution out_size[MAX_PLANES];
+    Format in_size[MAX_PLANES];
+    Format out_size[MAX_PLANES];
 
     unsigned int vertex_buffer;
     unsigned int index_buffer;
@@ -151,6 +151,12 @@ private:
     unsigned int in_tex[MAX_PLANES];
     unsigned int out_tex[MAX_PLANES];
     unsigned int proc_tex[MAX_PROC];
+
+    bool GetErrorGL(int);
+    bool GetErrorEGL(int);
+
+    void CreateTexture(unsigned int, Format);
+    void SetDrawBuffer(unsigned int);
 };
 
 } // namespace Kimera

@@ -21,6 +21,7 @@ public:
     virtual bool LoadDisplay() = 0;
     virtual bool LoadFilter() = 0;
     virtual bool LoadOutput(PixelFormat) = 0;
+    virtual bool CommitPipeline() = 0;
 
     virtual bool Push(AVFrame*) = 0;
     virtual bool Draw() = 0;

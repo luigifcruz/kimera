@@ -63,7 +63,7 @@ char* open_shader(char* filepath) {
         fclose(fp);
         return NULL;
     }
-    
+
     size_t r_size = fread(buffer, sizeof(char), size, fp);
     if (r_size != size) {
         printf("[RENDER] Failed to read file properly (S: %ld, R: %ld)", size, r_size);
@@ -77,29 +77,11 @@ char* open_shader(char* filepath) {
     return buffer;
 }
 
-bool get_gl_error(int line) {
-    int error = glGetError();
-    if (error != GL_NO_ERROR) {
-        printf("[RENDER] GL returned an error #%d at line #%d.\n", error, line);
-        return true;
-    }
-    return false;
-}
-
-bool get_egl_error(int line) {
-    int error = eglGetError();
-    if (error != EGL_SUCCESS) {
-        printf("[RENDER] EGL returned an error #%d at line #%d.\n", error, line);
-        return true;
-    }
-    return false;
-}
-
 unsigned int compile_shader(unsigned int type, char* code_str) {
     unsigned int shader = glCreateShader(type);
     glShaderSource(shader, 1, (const GLchar* const*)&code_str, NULL);
     glCompileShader(shader);
-    
+
     int success;
     char info_log[1024];
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
@@ -177,7 +159,7 @@ bool get_planes_size(AVFrame* frame, Resolution* size, unsigned int* planes) {
                 return false;
         }
     }
-    
+
     if ((*planes) > MAX_PLANES) {
         printf("[RENDER] Too many planes (%d), format unsupported.\n", (*planes));
         return false;
@@ -188,20 +170,6 @@ bool get_planes_size(AVFrame* frame, Resolution* size, unsigned int* planes) {
 
 void read_texture(Resolution size, uint8_t* data) {
     glReadPixels(0, 0, size.w, size.h, size.pix, GL_UNSIGNED_BYTE, data);
-}
-
-void fill_texture(Resolution size, uint8_t* data) {
-    glTexImage2D(GL_TEXTURE_2D, 0, size.pix, size.w, size.h, 0, size.pix, GL_UNSIGNED_BYTE, data);
-}
-
-void create_texture(unsigned int id, Resolution size) {
-    glBindTexture(GL_TEXTURE_2D, id);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    fill_texture(size, NULL);
-    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void set_uniform4f(int program, char* name, float v0, float v1, float v2, float v3) {
@@ -227,12 +195,6 @@ void set_uniform1f(int program, char* name, float v0) {
 void set_uniform1i(int program, char* name, int v0) {
     int location = glGetUniformLocation(program, name);
     glUniform1i(location, v0);
-}
-
-void set_draw_buffer(GLenum attachment) {
-    GLenum targets[1] = { GL_COLOR_ATTACHMENT0 };
-    targets[0] = attachment;
-    glDrawBuffers(1, targets);
 }
 
 double mticks() {
