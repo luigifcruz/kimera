@@ -26,7 +26,7 @@ public:
     virtual bool Push(AVFrame*) = 0;
     virtual bool Draw() = 0;
     virtual bool Filter() = 0;
-    virtual AVFrame* Pull() = 0;
+    virtual AVFrame* Pull(AVFrame*) = 0;
 };
 
 } // namespace Kimera

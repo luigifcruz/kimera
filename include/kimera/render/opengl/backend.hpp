@@ -27,6 +27,7 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 }
 
+#include "kimera/render/shaders.hpp"
 #include "kimera/render/backend.hpp"
 #include "kimera/state.hpp"
 
@@ -98,11 +99,12 @@ public:
     bool LoadDisplay();
     bool LoadFilter();
     bool LoadOutput(PixelFormat);
+    bool CommitPipeline();
 
     bool Push(AVFrame*);
     bool Draw();
     bool Filter();
-    AVFrame* Pull();
+    AVFrame* Pull(AVFrame*);
 
 private:
     std::vector<PixelFormat> InputFormats = {
@@ -122,8 +124,10 @@ private:
     bool output_ready;
     bool process_ready;
 
-    int pts;
     double time;
+
+    AVFrame* frame;
+    DeviceState device;
 
     PixelFormat in_format;
     PixelFormat out_format;
@@ -152,8 +156,16 @@ private:
     unsigned int out_tex[MAX_PLANES];
     unsigned int proc_tex[MAX_PROC];
 
-    bool GetErrorGL(int);
-    bool GetErrorEGL(int);
+    // Utils
+    const char* EGLQuery(int);
+    const char* GLQuery(GLenum);
+
+    bool GetErrorGL(std::string);
+    bool GetErrorEGL(std::string);
+
+    char* OpenShader(char*);
+    unsigned int CompileShader(unsigned int, char*);
+    unsigned int LoadShader(int type, char*, char*);
 
     void CreateTexture(unsigned int, Format);
     void SetDrawBuffer(unsigned int);

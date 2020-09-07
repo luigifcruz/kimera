@@ -41,7 +41,9 @@ public:
     void PrintMeta();
 
 private:
+    int pts;
     State& state;
+    AVFrame* frame;
 
     std::shared_ptr<Backend> backend;
     std::shared_ptr<Resampler> in_resampler;

@@ -60,6 +60,21 @@ bool Render::LoadInput(PixelFormat fmt) {
 bool Render::LoadOutput(PixelFormat fmt) {
     out_fmt = SelectFormat(backend->GetOutputFormats(), fmt);
     out_resampler = std::make_shared<Resampler>(state, out_fmt);
+
+    frame = av_frame_alloc();
+    frame->width = state.width;
+    frame->height = state.height;
+    frame->format = out_fmt;
+    frame->pts = pts;
+
+    if (av_frame_get_buffer(frame, 0) < 0){
+        printf("[RENDER] Couldn't allocate output frame.\n");
+        return false;
+    }
+
+    if (!get_planes_size(frame, &out_size[0], &out_planes))
+        return false;
+
     return backend->LoadOutput(out_fmt);
 }
 
