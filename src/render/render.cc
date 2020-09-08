@@ -36,12 +36,12 @@ PixelFormat Render::SelectFormat(std::vector<PixelFormat> fmts, PixelFormat targ
     return *av_fmt;
 }
 
-Render::Render(State& state) : state(state) {
+Render::Render(State& state) : state(state), frame(nullptr), input_active(false), display_active(false), filter_active(false), output_active(false) {
     if (!CheckBackend()) throw "error";
 
     switch (state.backend) {
         case Backends::OPENGL:
-            backend = std::make_shared<OpenGL>();
+            backend = std::make_shared<OpenGL>(state);
             break;
         case Backends::VULKAN:
             break;
@@ -52,12 +52,14 @@ Render::~Render() {
 }
 
 bool Render::LoadInput(PixelFormat fmt) {
+    input_active = true;
     in_fmt = SelectFormat(backend->GetInputFormats(), fmt);
     in_resampler = std::make_shared<Resampler>(state, in_fmt);
-    return backend->LoadInput(in_fmt);
+    return backend->LoadInput(in_resampler->Pull());
 }
 
 bool Render::LoadOutput(PixelFormat fmt) {
+    output_active = true;
     out_fmt = SelectFormat(backend->GetOutputFormats(), fmt);
     out_resampler = std::make_shared<Resampler>(state, out_fmt);
 
@@ -72,29 +74,52 @@ bool Render::LoadOutput(PixelFormat fmt) {
         return false;
     }
 
-    if (!get_planes_size(frame, &out_size[0], &out_planes))
-        return false;
-
-    return backend->LoadOutput(out_fmt);
+    return backend->LoadOutput(frame);
 }
 
 bool Render::LoadDisplay() {
+    display_active = true;
     return backend->LoadDisplay();
 }
 
 bool Render::LoadFilter() {
+    filter_active = true;
     return backend->LoadFilter();
 }
 
+bool Render::CommitPipeline() {
+    return backend->CommitPipeline();
+}
+
 bool Render::Push(AVFrame* frame) {
-    if (!in_resampler->Push(frame)) return false;
-    if (!backend->Push(in_resampler->Pull())) return false;
-    if (!backend->Filter()) return false;
-    if (!backend->Draw()) return false;
+    if (!filter_active || !display_active || !output_active || !input_active) {
+        this->frame = frame;
+        return true;
+    }
+
+    if (!in_resampler->Push(frame))
+        return false;
+
+    return backend->Push(in_resampler->Pull());
+}
+
+bool Render::Filter() {
+    if (!filter_active)
+        return true;
+    return backend->Filter();
+}
+bool Render::Draw() {
+    if (!display_active)
+        return true;
+    return backend->Draw();
 }
 
 AVFrame* Render::Pull() {
-    if (!out_resampler->Push(backend->Pull())) return NULL;
+    if (!filter_active || !display_active || !input_active || !output_active)
+        return frame;
+
+    if (!backend->Pull(frame)) return NULL;
+    if (!out_resampler->Push(frame)) return NULL;
     return out_resampler->Pull();
 }
 

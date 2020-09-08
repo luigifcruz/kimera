@@ -1,40 +1,8 @@
-#include "kimera/render.hpp"
+#include "kimera/render/opengl/device.hpp"
 
-DeviceState* init_device() {
-    DeviceState* device = (DeviceState*)malloc(sizeof(DeviceState));
-    device->display = NULL;
-    device->surface = NULL;
-    device->context = NULL;
-    device->adapter = NULL;
-    return device;
-}
+namespace Kimera {
 
-void close_device(DeviceState* device) {
-    if (device->surface)
-        eglDestroySurface(device->display, device->surface);
-    if (device->context)
-        eglDestroyContext(device->display, device->context);
-    if (device->display)
-        eglTerminate(device->display);
-    if (device->adapter)
-        glfwDestroyWindow(device->adapter);
-    glfwTerminate();
-}
-
-char* device_window_name(RenderState* render) {
-    static char* name[32];
-    switch (render->state->mode) {
-        case TRANSMITTER:
-            sprintf((char*)name, "Kimera - Transmitter Display");
-            break;
-        case RECEIVER:
-            sprintf((char*)name, "Kimera - Receiver Display");
-            break;
-    }
-    return (char*)name;
-}
-
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+void key_callback(GLFWwindow*, int key, int, int action, int) {
     if (key == GLFW_KEY_Q && action == GLFW_RELEASE)
         raise(SIGINT);
 
@@ -42,125 +10,150 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         raise(SIGINT);
 }
 
-bool open_device(RenderState* render) {
-    DeviceState* device = render->device;
+Device::Device(State& state, int width, int height, bool use_display) : state(state) {
+    switch (state.mode) {
+        case Mode::TRANSMITTER:
+            window_name = "Kimera - Transmitter Display";
+            break;
+        case Mode::RECEIVER:
+            window_name = "Kimera - Receiver Display";
+            break;
+        case Mode::NONE:
+            window_name = "Kimera - No Receiver";
+            break;
+    }
 
-    device->api = EGL_OPENGL_API;
-    if (render->use_opengles)
-        device->api = EGL_OPENGL_ES_API;
+    api = EGL_OPENGL_ES_API;
 
     if (!gladLoadEGL()) {
-        printf("[RENDER] Failed to initialize EGL.\n");
-        return false;
+        printf("[EGL] Failed to initialize EGL.\n");
+        throw "error";
     }
 
-    device->display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-    if (device->display == EGL_NO_DISPLAY) {
-        printf("[RENDER] Failed to get device display.\n");
-        get_egl_error(__LINE__);
-        return false;
+    display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    if (display == EGL_NO_DISPLAY) {
+        printf("[EGL] Failed to get device display.\n");
+        GetError("Device::Device()");
+        throw "error";
     }
-    
-    if (!eglInitialize(device->display, NULL, NULL)) {
-        printf("[RENDER] Failed to initialize EGL.\n");
-        get_egl_error(__LINE__);
-        return false;
+
+    if (!eglInitialize(display, NULL, NULL)) {
+        printf("[EGL] Failed to initialize EGL.\n");
+        GetError("Device::Device()");
+        throw "error";
     }
 
     int num_config;
-    if (!eglChooseConfig(device->display, egl_attr, &device->config, 1, &num_config)) {
-        printf("[RENDER] Failed to config EGL.\n");
-        get_egl_error(__LINE__);
-        return false;
+    if (!eglChooseConfig(display, egl_attr, &config, 1, &num_config)) {
+        printf("[EGL] Failed to config EGL.\n");
+        GetError("Device::Device()");
+        throw "error";
     }
 
-    if (!eglBindAPI(device->api)) {
-        printf("[RENDER] Failed to bind API (%s) to EGL.\n", render_api_query(render));
-        get_egl_error(__LINE__);
-        return false;
+    if (!eglBindAPI(api)) {
+        printf("[EGL] Failed to bind API to EGL.\n");
+        GetError("Device::Device()");
+        throw "error";
     }
 
-    if (!render->use_display) {
-        if (!(device->surface = eglCreatePbufferSurface(device->display, device->config, egl_pbuf_attr))) {
-            printf("[RENDER] Error creating pbuffer surface.\n");
-            get_egl_error(__LINE__);
-            return false;
+    if (use_display) {
+        if (!(surface = eglCreatePbufferSurface(display, config, egl_pbuf_attr))) {
+            printf("[EGL] Error creating pbuffer surface.\n");
+            GetError("Device::Device()");
+            throw "error";
         }
     } else {
         if (!glfwInit()) {
-            printf("[RENDER] Can't initiate GLFW.\n");
-            return false;
+            printf("[EGL] Can't initiate GLFW.\n");
+            throw "error";
         }
 
         glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_NATIVE_CONTEXT_API);
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-        char* win_name = device_window_name(render);
-        if (!(device->adapter = glfwCreateWindow(
-            render->d_size.w, render->d_size.h, win_name, NULL, NULL))) {
-            printf("[RENDER] Can't create GLFW window.\n");
+        if (!(adapter = glfwCreateWindow(width, height, window_name.c_str(), NULL, NULL))) {
+            printf("[EGL] Can't create GLFW window.\n");
             glfwTerminate();
-            return false;
+            throw "error";
         }
 
-        EGLNativeWindowType surface = 0;
-    
+        EGLNativeWindowType native_surface = 0;
+
         #if   defined(KIMERA_MACOS)
-            surface = glfwGetCocoaWindow(device->adapter);
+            native_surface = glfwGetCocoaWindow(adapter);
         #elif defined(KIMERA_LINUX)
-            surface = glfwGetX11Window(device->adapter);
+            native_surface = glfwGetX11Window(adapter);
         #elif defined(KIMERA_WINDOWS)
-            surface = glfwGetWin32Window(device->adapter);
+            native_surface = glfwGetWin32Window(adapter);
         #endif
 
-        glfwSetKeyCallback(device->adapter, key_callback);
+        glfwSetKeyCallback(adapter, key_callback);
 
-        device->surface = eglCreateWindowSurface(device->display, device->config, surface, 0);
-        if (!device->surface) {
-            printf("[RENDER] Failed to create window surface.\n");
-            get_egl_error(__LINE__);
-            return false;
+        surface = eglCreateWindowSurface(display, config, native_surface, 0);
+        if (!surface) {
+            printf("[EGL] Failed to create window surface.\n");
+            GetError("Device::Device()");
+            throw "error";
         };
     }
 
-    device->context = eglCreateContext(device->display, device->config, EGL_NO_CONTEXT, egl_ctx_attr);
-    if (!device->context) {
-        printf("[RENDER] Failed to create context.\n");
-        get_egl_error(__LINE__);
-        return false;
+    if (!(context = eglCreateContext(display, config, EGL_NO_CONTEXT, egl_ctx_attr))) {
+        printf("[EGL] Failed to create context.\n");
+        GetError("Device::Device()");
+        throw "error";
     };
 
-    if (!eglMakeCurrent(device->display, device->surface, device->surface, device->context)) {
-        printf("[RENDER] Failed to make current surface.\n");
-        get_egl_error(__LINE__);
-        return false;
+    if (!eglMakeCurrent(display, surface, surface, context)) {
+        printf("[EGL] Failed to make current surface.\n");
+        GetError("Device::Device()");
+        throw "error";
     }
 
     int response = 0;
 
-    if (device->api == EGL_OPENGL_API)
+    if (api == EGL_OPENGL_API)
         response = gladLoadGLLoader((GLADloadproc)eglGetProcAddress);
-    if (device->api == EGL_OPENGL_ES_API)
+    if (api == EGL_OPENGL_ES_API)
         response = gladLoadGLES2Loader((GLADloadproc)eglGetProcAddress);
 
     if (!response) {
-        printf("[RENDER] Failed to initialize GL/GLES.\n");
-        return false;
+        printf("[EGL] Failed to initialize GL/GLES.\n");
+        throw "error";
     }
 
-    if (get_gl_error(__LINE__) || get_egl_error(__LINE__)) return false;
-
-    return true;
+    if (GetError("Device::Device()")) throw "error";
 }
 
-bool device_render(RenderState* render) {
-    if (!render->use_display)
+Device::~Device() {
+    if (surface) eglDestroySurface(display, surface);
+    if (context) eglDestroyContext(display, context);
+    if (display) eglTerminate(display);
+    if (adapter) glfwDestroyWindow(adapter);
+    glfwTerminate();
+}
+
+bool Device::GetError(std::string line) {
+    int error = eglGetError();
+    if (error != EGL_SUCCESS) {
+        std::cout << "[EGL] EGL returned an error #" << error
+                  << " at " << line << "." << std::endl;
         return true;
-
-    eglSwapBuffers(render->device->display, render->device->surface);
-    if (get_egl_error(__LINE__)) return false;
-    
-    glfwPollEvents();
-    glfwGetWindowSize(render->device->adapter, &render->d_size.w, &render->d_size.h);
-    return !glfwWindowShouldClose(render->device->adapter);
+    }
+    return false;
 }
+
+// name: EGL_CLIENT_APIS, EGL_VENDOR, EGL_VERSION, EGL_EXTENSIONS
+const char* Device::Query(int name) {
+    return eglQueryString(display, name);
+}
+
+bool Device::Step(int* w_width, int* w_height) {
+    eglSwapBuffers(display, surface);
+    if (GetError("Step()")) return false;
+
+    glfwPollEvents();
+    glfwGetWindowSize(adapter, w_width, w_height);
+    return !glfwWindowShouldClose(adapter);
+}
+
+} // namespace Kimera

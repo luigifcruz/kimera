@@ -1,62 +1,87 @@
-#include "kimera/render.hpp"
+#include "kimera/render/opengl/backend.hpp"
 
-#ifdef KIMERA_WINDOWS
-typedef struct timeval {
-    long tv_sec;
-    long tv_usec;
-} timeval;
+namespace Kimera {
 
-static int gettimeofday(struct timeval* tp, struct timezone* tzp) {
-    static const uint64_t EPOCH = ((uint64_t)116444736000000000ULL);
+bool OpenGL::ParsePlaneSizes(AVFrame* frame, Format* size, unsigned int* planes) {
+    *planes = av_pix_fmt_count_planes((AVPixelFormat)frame->format);
 
-    SYSTEMTIME  system_time;
-    FILETIME    file_time;
-    uint64_t    time;
+    for (unsigned int i = 0; i < *planes; i++) {
+        float ratio = (float)frame->width / (float)frame->linesize[i];
 
-    GetSystemTime(&system_time);
-    SystemTimeToFileTime(&system_time, &file_time);
-    time = ((uint64_t)file_time.dwLowDateTime);
-    time += ((uint64_t)file_time.dwHighDateTime) << 32;
+        switch (frame->format) {
+            case AV_PIX_FMT_YUV420P:
+                (size+i)->w = (int)((float)frame->width / ratio);
+                (size+i)->h = (int)((float)frame->height / ratio);
+                (size+i)->pix = GL_RED;
+                break;
+            case AV_PIX_FMT_BGRA:
+                (size+i)->w = frame->width;
+                (size+i)->h = frame->height;
+                (size+i)->pix = GL_RGBA;
+                break;
+            default:
+                return false;
+        }
+    }
 
-    tp->tv_sec = (long)((time - EPOCH) / 10000000L);
-    tp->tv_usec = (long)(system_time.wMilliseconds * 1000);
-    return 0;
+    if ((*planes) > MAX_PLANES) {
+        printf("[OPENGL] Too many planes (%d), format unsupported.\n", (*planes));
+        return false;
+    }
+
+    return true;
 }
-#endif
 
-// name: EGL_CLIENT_APIS, EGL_VENDOR, EGL_VERSION, EGL_EXTENSIONS
-const char* egl_query(RenderState* render, int name) {
-    return eglQueryString(render->device->display, name);
+bool OpenGL::GetError(std::string line) {
+    int error = glGetError();
+    if (error != GL_NO_ERROR) {
+        std::cout << "[OPENGL] GL returned an error #" << error
+                  << " at " << line << "." << std::endl;
+        return true;
+    }
+    return false;
 }
 
 // name: GL_VENDOR, GL_RENDERER, GL_VERSION, GL_SHADING_LANGUAGE_VERSION, GL_EXTENSIONS
-const char* gl_query(GLenum name) {
+const char* OpenGL::Query(GLenum name) {
     return (const char*)glGetString(name);
 }
 
-const char* render_mode_query(RenderState* render) {
-    return (render->use_display) ? "WINDOWED" : "HEADLESS";
+void OpenGL::CreateTexture(unsigned int id, Format fmt) {
+    glBindTexture(GL_TEXTURE_2D, id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, fmt.pix, fmt.w, fmt.h, 0, fmt.pix, GL_UNSIGNED_BYTE, NULL);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-const char* render_api_query(RenderState* render) {
-    return (render->use_opengles) ? "OpenGL ES" : "OpenGL";
+void OpenGL::FillTexture(Format size, uint8_t* data) {
+    glTexImage2D(GL_TEXTURE_2D, 0, size.pix, size.w, size.h, 0, size.pix, GL_UNSIGNED_BYTE, data);
 }
 
-size_t get_file_size(FILE* fp) {
-    fseek(fp, 0L, SEEK_END);
-    size_t size = ftell(fp);
-    fseek(fp, 0L, SEEK_SET);
-    return size;
+void OpenGL::ReadTexture(Format size, uint8_t* data) {
+    glReadPixels(0, 0, size.w, size.h, size.pix, GL_UNSIGNED_BYTE, data);
 }
 
-char* open_shader(char* filepath) {
+void OpenGL::SetDrawBuffer(unsigned int attachment) {
+    unsigned int targets[1] = { GL_COLOR_ATTACHMENT0 };
+    targets[0] = attachment;
+    glDrawBuffers(1, targets);
+}
+
+char* OpenGL::OpenShader(char* filepath) {
     FILE* fp = fopen(filepath, "r");
     if (fp == NULL) {
         printf("[RENDER] Can't open shader file: %s\n", filepath);
         return NULL;
     }
 
-    size_t size = get_file_size(fp);
+    fseek(fp, 0L, SEEK_END);
+    size_t size = ftell(fp);
+    fseek(fp, 0L, SEEK_SET);
+
     char* buffer = (char*)malloc((size + 1) * sizeof(char));
     if (buffer == NULL) {
         printf("[RENDER] Can't allocate file buffer.\n");
@@ -77,7 +102,7 @@ char* open_shader(char* filepath) {
     return buffer;
 }
 
-unsigned int compile_shader(unsigned int type, char* code_str) {
+unsigned int OpenGL::CompileShader(unsigned int type, char* code_str) {
     unsigned int shader = glCreateShader(type);
     glShaderSource(shader, 1, (const GLchar* const*)&code_str, NULL);
     glCompileShader(shader);
@@ -94,17 +119,17 @@ unsigned int compile_shader(unsigned int type, char* code_str) {
     return shader;
 }
 
-unsigned int load_shader(int type, char* vs_str, char* fs_str) {
+unsigned int OpenGL::LoadShader(int type, char* vs_str, char* fs_str) {
     unsigned int program = glCreateProgram();
 
     if (type == 0) {
-        vs_str = open_shader(vs_str);
-        fs_str = open_shader(fs_str);
+        vs_str = OpenShader(vs_str);
+        fs_str = OpenShader(fs_str);
         if (!vs_str || !fs_str) return 0;
     }
 
-    unsigned int vertex_shader = compile_shader(GL_VERTEX_SHADER, vs_str);
-    unsigned int fragment_shader = compile_shader(GL_FRAGMENT_SHADER, fs_str);
+    unsigned int vertex_shader = CompileShader(GL_VERTEX_SHADER, vs_str);
+    unsigned int fragment_shader = CompileShader(GL_FRAGMENT_SHADER, fs_str);
 
     if (type == 0) {
         free(vs_str);
@@ -134,91 +159,47 @@ unsigned int load_shader(int type, char* vs_str, char* fs_str) {
     return program;
 }
 
-void bind_framebuffer_tex(unsigned int atch_id, unsigned int tex_id) {
+unsigned int OpenGL::PunchFramebuffer() {
+    unsigned int index = proc_tex[proc_index];
+    proc_index = (proc_index + 1) % MAX_PROC;
+    return index;
+}
+
+unsigned int OpenGL::GetFramebuffer() {
+    return proc_tex[proc_index];
+}
+
+unsigned int OpenGL::GetLastFramebuffer() {
+    return proc_tex[!proc_index];
+}
+
+void OpenGL::BindFramebufferTexture(unsigned int atch_id, unsigned int tex_id) {
     glFramebufferTexture2D(GL_FRAMEBUFFER, atch_id, GL_TEXTURE_2D, tex_id, 0);
 }
 
-bool get_planes_size(AVFrame* frame, Resolution* size, unsigned int* planes) {
-    *planes = av_pix_fmt_count_planes(frame->format);
-
-    for (unsigned int i = 0; i < *planes; i++) {
-        float ratio = (float)frame->width / (float)frame->linesize[i];
-
-        switch (frame->format) {
-            case AV_PIX_FMT_YUV420P:
-                (size+i)->w = (int)((float)frame->width / ratio);
-                (size+i)->h = (int)((float)frame->height / ratio);
-                (size+i)->pix = GL_RED;
-                break;
-            case AV_PIX_FMT_BGRA:
-                (size+i)->w = frame->width;
-                (size+i)->h = frame->height;
-                (size+i)->pix = GL_RGBA;
-                break;
-            default:
-                return false;
-        }
-    }
-
-    if ((*planes) > MAX_PLANES) {
-        printf("[RENDER] Too many planes (%d), format unsupported.\n", (*planes));
-        return false;
-    }
-
-    return true;
-}
-
-void read_texture(Resolution size, uint8_t* data) {
-    glReadPixels(0, 0, size.w, size.h, size.pix, GL_UNSIGNED_BYTE, data);
-}
-
-void set_uniform4f(int program, char* name, float v0, float v1, float v2, float v3) {
+void OpenGL::SetUniform4f(int program, char* name, float v0, float v1, float v2, float v3) {
     int location = glGetUniformLocation(program, name);
     glUniform4f(location, v0, v1, v2, v3);
 }
 
-void set_uniform3f(int program, char* name, float v0, float v1, float v2) {
+void OpenGL::SetUniform3f(int program, char* name, float v0, float v1, float v2) {
     int location = glGetUniformLocation(program, name);
     glUniform3f(location, v0, v1, v2);
 }
 
-void set_uniform2f(int program, char* name, float v0, float v1) {
+void OpenGL::SetUniform2f(int program, char* name, float v0, float v1) {
     int location = glGetUniformLocation(program, name);
     glUniform2f(location, v0, v1);
 }
 
-void set_uniform1f(int program, char* name, float v0) {
+void OpenGL::SetUniform1f(int program, char* name, float v0) {
     int location = glGetUniformLocation(program, name);
     glUniform1f(location, v0);
 }
 
-void set_uniform1i(int program, char* name, int v0) {
+void OpenGL::SetUniform1i(int program, char* name, int v0) {
     int location = glGetUniformLocation(program, name);
     glUniform1i(location, v0);
 }
 
-double mticks() {
-    struct timeval tv;
-    gettimeofday(&tv, 0);
-    return (double) tv.tv_usec / 1000 + tv.tv_sec * 1000;
-}
-
-bool is_format_supported(PixelFormat format, const PixelFormat formats[], int size) {
-    for (int i = 0; i < size; i++)
-        if (format == formats[i]) return true;
-    return false;
-}
-
-unsigned int punch_framebuffer(RenderState* render) {
-    unsigned int index = render->proc_tex[render->proc_index];
-    render->proc_index = (render->proc_index + 1) % MAX_PROC;
-    return index;
-}
-
-unsigned int get_framebuffer(RenderState* render) {
-    return render->proc_tex[render->proc_index];
-}
-
-unsigned int get_last_framebuffer(RenderState* render) {
-    return render->proc_tex[!render->proc_index];
-}
+} // namespace Kimera

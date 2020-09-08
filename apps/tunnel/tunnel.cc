@@ -59,35 +59,43 @@ void transmitter(State& state, Client& cli) {
 
     if (!socket.LoadServer()) return;
     if (!loopback.LoadSource()) return;
-    if (!render.Load()) return;
-//  ok &= open_render(render, state);
+
+    if (CHECK(state.pipe, Interfaces::GPU_RESAMPLE) ||
+        CHECK(state.pipe, Interfaces::FILTER) ||
+        CHECK(state.sink, Interfaces::DISPLAY)) {
+        if (!render.LoadInput(state.in_format)) return;
+    }
+
+    if (CHECK(state.pipe, Interfaces::FILTER)) {
+        if (!render.LoadFilter()) return;
+    }
+
+    if (CHECK(state.sink, Interfaces::DISPLAY)) {
+        if (!render.LoadDisplay()) return;
+    }
+
+    if (CHECK(state.pipe, Interfaces::GPU_RESAMPLE) ||
+        CHECK(state.pipe, Interfaces::FILTER)) {
+        if (!render.LoadOutput(state.out_format)) return;
+    }
+
+    render.CommitPipeline();
 
     Client::PrintState(state);
-//  render_print_meta(render);
+    render.PrintMeta();
 
     while (cli.ShouldStop()) {
         AVFrame* frame = loopback.Pull();
         if (!frame) break;
 
-/*
-        Interfaces pipe = state->pipe;
-        Interfaces sink = state->source;
+        if (!render.Push(frame)) break;
+        if (!render.Filter()) break;
+        if (!render.Draw()) break;
+        if (!(frame = render.Pull())) break;
 
-        if (pipe & GPU_RESAMPLE || pipe & FILTER || sink & DISPLAY)
-            if (!render_push_frame(render, frame)) break;
-        if (pipe & FILTER)
-            if (!render_proc_frame(render)) break;
-        if (sink & DISPLAY)
-            if (!render_draw_frame(render)) break;
-        if (pipe & GPU_RESAMPLE || pipe & FILTER) {
-            if (!render_pull_frame(render)) break;
-            frame = render->frame;
-        }
-*/
-
-        resampler.Push(frame);
+        if (!resampler.Push(frame)) break;
         if (encoder.Push(resampler.Pull()))
-            socket.Push(encoder.Pull());
+            if(!socket.Push(encoder.Pull())) break;
     }
 }
 

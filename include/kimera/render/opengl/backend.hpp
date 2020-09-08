@@ -6,27 +6,11 @@
 
 extern "C" {
 #include "glad/glad.h"
-#include "glad/glad_egl.h"
-
-#if   defined(KIMERA_MACOS)
-    #define GLFW_EXPOSE_NATIVE_COCOA
-    #include <sys/time.h>
-#elif defined(KIMERA_LINUX)
-    #define GLFW_EXPOSE_NATIVE_X11
-    #define GLFW_EXPOSE_NATIVE_WAYLAND
-    #include <unistd.h>
-    #include <sys/time.h>
-#elif defined(KIMERA_WINDOWS)
-    #define GLFW_EXPOSE_NATIVE_WIN32
-    #include <Windows.h>
-#endif
-
-#include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
-
 #include <libavcodec/avcodec.h>
+#include <libavutil/pixdesc.h>
 }
 
+#include "kimera/render/opengl/device.hpp"
 #include "kimera/render/shaders.hpp"
 #include "kimera/render/backend.hpp"
 #include "kimera/state.hpp"
@@ -35,28 +19,6 @@ extern "C" {
 #include <vector>
 
 namespace Kimera {
-
-static const int egl_attr[] = {
-    EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
-    EGL_RED_SIZE, 8,
-    EGL_GREEN_SIZE, 8,
-    EGL_BLUE_SIZE, 8,
-    EGL_ALPHA_SIZE, 8,
-    EGL_DEPTH_SIZE, 16,
-    EGL_NONE
-};
-
-static const int egl_ctx_attr[] = {
-    EGL_CONTEXT_MAJOR_VERSION, 2,
-    EGL_CONTEXT_CLIENT_VERSION, 2,
-    EGL_NONE
-};
-
-static const int egl_pbuf_attr[] = {
-    EGL_WIDTH, 640,
-    EGL_HEIGHT, 480,
-    EGL_NONE,
-};
 
 static const float vertices[] = {
      1.0f,  1.0f, 0.0f,  1.0f, 0.0f,
@@ -76,18 +38,9 @@ typedef struct {
     GLenum pix;
 } Format;
 
-typedef struct {
-    GLFWwindow*  adapter;
-    GLenum       api;
-    EGLConfig    config;
-    EGLDisplay   display;
-    EGLSurface   surface;
-    EGLContext   context;
-} DeviceState;
-
 class OpenGL : public Backend {
 public:
-    OpenGL();
+    OpenGL(State&);
     ~OpenGL();
 
     void PrintMeta();
@@ -95,16 +48,16 @@ public:
     std::vector<PixelFormat> GetInputFormats();
     std::vector<PixelFormat> GetOutputFormats();
 
-    bool LoadInput(PixelFormat);
+    bool LoadInput(AVFrame*);
     bool LoadDisplay();
     bool LoadFilter();
-    bool LoadOutput(PixelFormat);
+    bool LoadOutput(AVFrame*);
     bool CommitPipeline();
 
     bool Push(AVFrame*);
     bool Draw();
     bool Filter();
-    AVFrame* Pull(AVFrame*);
+    bool Pull(AVFrame*);
 
 private:
     std::vector<PixelFormat> InputFormats = {
@@ -119,15 +72,10 @@ private:
     bool use_opengles;
     bool use_display;
 
-    bool display_ready;
-    bool input_ready;
-    bool output_ready;
-    bool process_ready;
-
+    int pts;
     double time;
 
-    AVFrame* frame;
-    DeviceState device;
+    std::unique_ptr<Device> device;
 
     PixelFormat in_format;
     PixelFormat out_format;
@@ -156,12 +104,10 @@ private:
     unsigned int out_tex[MAX_PLANES];
     unsigned int proc_tex[MAX_PROC];
 
-    // Utils
-    const char* EGLQuery(int);
-    const char* GLQuery(GLenum);
+    const char* Query(GLenum);
+    bool GetError(std::string);
 
-    bool GetErrorGL(std::string);
-    bool GetErrorEGL(std::string);
+    bool ParsePlaneSizes(AVFrame*, Format*, unsigned int*);
 
     char* OpenShader(char*);
     unsigned int CompileShader(unsigned int, char*);
@@ -169,6 +115,20 @@ private:
 
     void CreateTexture(unsigned int, Format);
     void SetDrawBuffer(unsigned int);
+    void FillTexture(Format, uint8_t*);
+    void ReadTexture(Format, uint8_t*);
+
+    unsigned int PunchFramebuffer();
+    unsigned int GetFramebuffer();
+    unsigned int GetLastFramebuffer();
+
+    void BindFramebufferTexture(unsigned int, unsigned int);
+
+    void SetUniform4f(int, char*, float, float, float, float);
+    void SetUniform3f(int, char*, float, float, float);
+    void SetUniform2f(int, char*, float, float);
+    void SetUniform1f(int, char*, float);
+    void SetUniform1i(int, char*, int);
 };
 
 } // namespace Kimera

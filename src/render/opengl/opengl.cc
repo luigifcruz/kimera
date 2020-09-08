@@ -2,143 +2,19 @@
 
 namespace Kimera {
 
-bool OpenGL::GetErrorGL(std::string line) {
-    int error = glGetError();
-    if (error != GL_NO_ERROR) {
-        std::cout << "[RENDER] GL returned an error #" << error
-                  << " at " << line << "." << std::endl;
-        return true;
-    }
-    return false;
-}
+OpenGL::OpenGL(State& state) {
+    std::cout << "[OPENGL] Initializing OpenGL backend." << std::endl;
 
-bool OpenGL::GetErrorEGL(std::string line) {
-    int error = eglGetError();
-    if (error != EGL_SUCCESS) {
-        std::cout << "[RENDER] EGL returned an error #" << error
-                  << " at " << line << "." << std::endl;
-        return true;
-    }
-    return false;
-}
+    // Set initial frame size.
+    f_size.w = state.width;
+    f_size.h = state.height;
+    f_size.pix = GL_RGBA;
 
-// name: EGL_CLIENT_APIS, EGL_VENDOR, EGL_VERSION, EGL_EXTENSIONS
-const char* OpenGL::EGLQuery(int name) {
-    return eglQueryString(device.display, name);
-}
+    d_size.w = f_size.w / 2;
+    d_size.h = f_size.h / 2;
 
-// name: GL_VENDOR, GL_RENDERER, GL_VERSION, GL_SHADING_LANGUAGE_VERSION, GL_EXTENSIONS
-const char* OpenGL::GLQuery(GLenum name) {
-    return (const char*)glGetString(name);
-}
-
-void OpenGL::CreateTexture(unsigned int id, Format fmt) {
-    glBindTexture(GL_TEXTURE_2D, id);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, fmt.pix, fmt.w, fmt.h, 0, fmt.pix, GL_UNSIGNED_BYTE, NULL);
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void OpenGL::SetDrawBuffer(unsigned int attachment) {
-    unsigned int targets[1] = { GL_COLOR_ATTACHMENT0 };
-    targets[0] = attachment;
-    glDrawBuffers(1, targets);
-}
-
-char* OpenGL::OpenShader(char* filepath) {
-    FILE* fp = fopen(filepath, "r");
-    if (fp == NULL) {
-        printf("[RENDER] Can't open shader file: %s\n", filepath);
-        return NULL;
-    }
-
-    fseek(fp, 0L, SEEK_END);
-    size_t size = ftell(fp);
-    fseek(fp, 0L, SEEK_SET);
-
-    char* buffer = (char*)malloc((size + 1) * sizeof(char));
-    if (buffer == NULL) {
-        printf("[RENDER] Can't allocate file buffer.\n");
-        fclose(fp);
-        return NULL;
-    }
-
-    size_t r_size = fread(buffer, sizeof(char), size, fp);
-    if (r_size != size) {
-        printf("[RENDER] Failed to read file properly (S: %ld, R: %ld)", size, r_size);
-        fclose(fp);
-        free(buffer);
-        return NULL;
-    }
-    buffer[size] = '\0';
-
-    fclose(fp);
-    return buffer;
-}
-
-unsigned int OpenGL::CompileShader(unsigned int type, char* code_str) {
-    unsigned int shader = glCreateShader(type);
-    glShaderSource(shader, 1, (const GLchar* const*)&code_str, NULL);
-    glCompileShader(shader);
-
-    int success;
-    char info_log[1024];
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(shader, 512, NULL, info_log);
-        printf("[RENDER] Shader compilation error:\n%s", info_log);
-        return 0;
-    }
-
-    return shader;
-}
-
-unsigned int OpenGL::LoadShader(int type, char* vs_str, char* fs_str) {
-    unsigned int program = glCreateProgram();
-
-    if (type == 0) {
-        vs_str = OpenShader(vs_str);
-        fs_str = OpenShader(fs_str);
-        if (!vs_str || !fs_str) return 0;
-    }
-
-    unsigned int vertex_shader = CompileShader(GL_VERTEX_SHADER, vs_str);
-    unsigned int fragment_shader = CompileShader(GL_FRAGMENT_SHADER, fs_str);
-
-    if (type == 0) {
-        free(vs_str);
-        free(fs_str);
-    }
-
-    if (vertex_shader == 0 || fragment_shader == 0)
-        return 0;
-
-    glAttachShader(program, vertex_shader);
-    glAttachShader(program, fragment_shader);
-    glLinkProgram(program);
-    glValidateProgram(program);
-
-    int success;
-    char info_log[512];
-    glGetProgramiv(program, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(program, 512, NULL, info_log);
-        printf("[RENDER] Shader compilation error:\n%s", info_log);
-        return 0;
-    }
-
-    glDeleteShader(vertex_shader);
-    glDeleteShader(fragment_shader);
-
-    return program;
-}
-
-
-OpenGL::OpenGL() {
-    std::cout << "[BACKEND] Initializing OpenGL backend." << std::endl;
+    // Load EGL device
+    device = std::make_unique<Device>(state, d_size.w, d_size.h, false);
 
     // Generating Buffers
     glGenBuffers(1, &vertex_buffer);
@@ -170,11 +46,12 @@ OpenGL::OpenGL() {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    if (!GetErrorGL(__LINE__)) throw "error";
+    if (GetError("OpenGL::OpenGL()")) throw "error";
 }
 
 OpenGL::~OpenGL() {
-    std::cout << "[BACKEND] Exiting OpenGL backend." << std::endl;
+    std::cout << "[OPENGL] Exiting OpenGL backend." << std::endl;
+    device.reset();
 }
 
 void OpenGL::PrintMeta() {
@@ -185,14 +62,14 @@ void OpenGL::PrintMeta() {
     printf("├── Frame Size:    %dx%d\n", f_size.w, f_size.h);
     printf("├── Device Size:   %dx%d\n", d_size.w, d_size.h);
     printf("└──.   [EGL Meta]\n");
-    printf("│  ├── APIs:       %s\n", EGLQuery(EGL_CLIENT_APIS));
-    printf("│  ├── Version:    %s\n", EGLQuery(EGL_VERSION));
-    printf("│  └── Vendor:     %s\n", EGLQuery(EGL_VENDOR));
+    printf("│  ├── APIs:       %s\n", device->Query(EGL_CLIENT_APIS));
+    printf("│  ├── Version:    %s\n", device->Query(EGL_VERSION));
+    printf("│  └── Vendor:     %s\n", device->Query(EGL_VENDOR));
     printf("└──.   [GL Meta]\n");
-    printf("   ├── Renderer:   %s\n", GLQuery(GL_RENDERER));
-    printf("   ├── Version:    %s\n", GLQuery(GL_VERSION));
-    printf("   ├── Vendor:     %s\n", GLQuery(GL_VENDOR));
-    printf("   └── GLSL Ver.:  %s\n", GLQuery(GL_SHADING_LANGUAGE_VERSION));
+    printf("   ├── Renderer:   %s\n", Query(GL_RENDERER));
+    printf("   ├── Version:    %s\n", Query(GL_VERSION));
+    printf("   ├── Vendor:     %s\n", Query(GL_VENDOR));
+    printf("   └── GLSL Ver.:  %s\n", Query(GL_SHADING_LANGUAGE_VERSION));
 }
 
 std::vector<PixelFormat> OpenGL::GetInputFormats() {
@@ -203,8 +80,10 @@ std::vector<PixelFormat> OpenGL::GetOutputFormats() {
     return OutputFormats;
 }
 
-bool OpenGL::LoadInput(PixelFormat) {
-    if (!get_planes_size(frame, &in_size[0], &in_planes))
+bool OpenGL::LoadInput(AVFrame* frame) {
+    this->in_format = (PixelFormat)frame->format;
+
+    if (!ParsePlaneSizes(frame, &in_size[0], &in_planes))
         return false;
 
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
@@ -229,28 +108,15 @@ bool OpenGL::LoadInput(PixelFormat) {
 
     if (!in_shader) return false;
 
-    input_ready = true;
-
-    return !GetErrorGL("Push");
+    return !GetError("OpenGL::Push()");
 }
 
-bool OpenGL::LoadDisplay() {
-    disp_shader = LoadShader(1, (char*)display_vs, (char*)display_fs);
-    if (!disp_shader) return false;
+bool OpenGL::LoadOutput(AVFrame* frame) {
+    this->out_format = (PixelFormat)frame->format;
 
-    display_ready = true;
-    return true;
-}
+    if (!ParsePlaneSizes(frame, &out_size[0], &out_planes))
+        return false;
 
-bool OpenGL::LoadFilter() {
-    proc_shader = LoadShader(1, (char*)filter_vs, (char*)filter_fs);
-    if (!proc_shader) return false;
-
-    process_ready = true;
-    return true;
-}
-
-bool OpenGL::LoadOutput(PixelFormat) {
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
 
     glGenTextures(out_planes, &out_tex[0]);
@@ -262,55 +128,149 @@ bool OpenGL::LoadOutput(PixelFormat) {
     out_shader = LoadShader(1, (char*)out_yuv420_vs,  (char*)out_yuv420_fs);
     if (!out_shader) return false;
 
-    output_ready = true;
-
-    return !GetErrorGL("LoadOutput");
+    return !GetError("OpenGL::LoadOutput()");
 }
 
-bool OpenGL::CommitPipeline() {}
+bool OpenGL::LoadDisplay() {
+    disp_shader = LoadShader(1, (char*)display_vs, (char*)display_fs);
+    if (!disp_shader) return false;
+    return true;
+}
 
-bool OpenGL::Push(AVFrame*) {
-    if (!resampler_push_frame(render->resampler, render->state, frame))
-        return false;
+bool OpenGL::LoadFilter() {
+    proc_shader = LoadShader(1, (char*)filter_vs, (char*)filter_fs);
+    if (!proc_shader) return false;
+    return true;
+}
 
-    if (!render->input_ready)
-        if (!load_input(render, render->resampler->frame)) return false;
+bool OpenGL::CommitPipeline() {
+    return true;
+}
 
-    glBindFramebuffer(GL_FRAMEBUFFER, render->frame_buffer);
-    bind_framebuffer_tex(GL_COLOR_ATTACHMENT0, get_framebuffer(render));
-    set_draw_buffer(GL_COLOR_ATTACHMENT0);
+bool OpenGL::Push(AVFrame* frame) {
+    glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
+    BindFramebufferTexture(GL_COLOR_ATTACHMENT0, GetFramebuffer());
+    SetDrawBuffer(GL_COLOR_ATTACHMENT0);
 
     {
-        glViewport(0, 0, render->f_size.w, render->f_size.h);
+        glViewport(0, 0, f_size.w, f_size.h);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(render->in_shader);
+        glUseProgram(in_shader);
 
-        for (unsigned int i = 0; i < render->in_planes; i++) {
+        for (unsigned int i = 0; i < in_planes; i++) {
             char plane_name[16];
             sprintf(plane_name, "PlaneTex%d", i);
-            set_uniform1i(render->in_shader, plane_name, i);
+            SetUniform1i(in_shader, plane_name, i);
 
             glActiveTexture(GL_TEXTURE0 + i);
-            glBindTexture(GL_TEXTURE_2D, render->in_tex[i]);
-            fill_texture(render->in_size[i], render->resampler->frame->data[i]);
+            glBindTexture(GL_TEXTURE_2D, in_tex[i]);
+            FillTexture(in_size[i], frame->data[i]);
         }
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     }
 
-    bind_framebuffer_tex(GL_COLOR_ATTACHMENT0, 0);
-    punch_framebuffer(render);
+    BindFramebufferTexture(GL_COLOR_ATTACHMENT0, 0);
+    PunchFramebuffer();
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    render->pts = render->resampler->frame->pts;
+    frame->pts += 1;
 
-    return !get_gl_error(__LINE__);
+    return !GetError("OpenGL::Push()");
 }
 
-bool OpenGL::Draw() {}
-bool OpenGL::Filter() {}
-AVFrame* OpenGL::Pull(AVFrame* frame) {}
+bool OpenGL::Pull(AVFrame* frame) {
+    glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
+
+    SetDrawBuffer(GL_COLOR_ATTACHMENT0);
+    glUseProgram(out_shader);
+
+    SetUniform1i(out_shader, (char*)"renderedTexture", 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, GetLastFramebuffer());
+
+    for (unsigned int i = 0; i < out_planes; i++) {
+        SetUniform1i(out_shader, (char*)"PlaneId", i);
+        BindFramebufferTexture(GL_COLOR_ATTACHMENT0, out_tex[i]);
+
+        glViewport(0, 0, out_size[i].w, out_size[i].h);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        ReadTexture(out_size[i], frame->data[i]);
+        BindFramebufferTexture(GL_COLOR_ATTACHMENT0, 0);
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    frame->pts += 1;
+
+    return !GetError("OpenGL::Pull()");
+}
+
+bool OpenGL::Draw() {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    {
+        glViewport(0, 0, d_size.w, d_size.h);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glUseProgram(disp_shader);
+
+        float imgAspectRatio = (float)f_size.w / (float)f_size.h;
+        float viewAspectRatio = (float)d_size.w / (float)d_size.h;
+
+        float xScale = 1.0f, yScale = 1.0f;
+        if (imgAspectRatio > viewAspectRatio) {
+            yScale = viewAspectRatio / imgAspectRatio;
+        } else {
+            xScale = imgAspectRatio / viewAspectRatio;
+        }
+        SetUniform2f(disp_shader, (char*)"ScaleFact", xScale, yScale);
+
+        SetUniform1f(disp_shader, (char*)"renderedTexture", 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, GetLastFramebuffer());
+
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    if (GetError("OpenGL::Draw()")) return false;
+
+    return device->Step(&d_size.w, &d_size.h);
+}
+
+bool OpenGL::Filter() {
+    glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
+
+    BindFramebufferTexture(GL_COLOR_ATTACHMENT0, GetFramebuffer());
+    SetDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+    {
+        glUseProgram(proc_shader);
+
+        SetUniform1i(proc_shader, (char*)"pts", pts);
+        //SetUniform1f(proc_shader, "time", );
+        SetUniform2f(proc_shader, (char*)"resolution", f_size.w, f_size.h);
+        SetUniform2f(proc_shader, (char*)"display", d_size.w, d_size.h);
+
+        //if (cb != NULL) (void)(*cb)(render, obj);
+
+        SetUniform1i(proc_shader, (char*)"renderedTexture", 0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, GetLastFramebuffer());
+
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    }
+
+    BindFramebufferTexture(GL_COLOR_ATTACHMENT0, 0);
+    PunchFramebuffer();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    return !GetError("OpenGL::Filter()");
+}
 
 } // namespace Kimera

@@ -34,8 +34,11 @@ public:
     bool LoadDisplay();
     bool LoadFilter();
     bool LoadOutput(PixelFormat);
+    bool CommitPipeline();
 
     bool Push(AVFrame*);
+    bool Filter();
+    bool Draw();
     AVFrame* Pull();
 
     void PrintMeta();
@@ -44,6 +47,11 @@ private:
     int pts;
     State& state;
     AVFrame* frame;
+
+    bool input_active;
+    bool display_active;
+    bool filter_active;
+    bool output_active;
 
     std::shared_ptr<Backend> backend;
     std::shared_ptr<Resampler> in_resampler;

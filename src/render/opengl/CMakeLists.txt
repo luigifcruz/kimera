@@ -21,8 +21,9 @@ endif()
 target_include_directories(kimera PUBLIC ${EGL_INCLUDE_DIRS})
 target_link_libraries(kimera PUBLIC ${EGL_LDFLAGS})
 
-file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/opengl.cc")
-target_sources(kimera PRIVATE ${SOURCE_LIST})
+file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cc")
+file(GLOB FW_SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/glad/*.c")
+target_sources(kimera PRIVATE ${SOURCE_LIST} ${FW_SOURCE_LIST})
 
 #set(SHADER_COMPILER_BIN ${CMAKE_SOURCE_DIR}/utils/compile_shaders.py)
 #set(SHADER_COMPILER_SRC ${PROJECT_SOURCE_DIR}/shaders)
