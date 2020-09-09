@@ -72,37 +72,55 @@ bool Socket::LoadServer() {
 
 bool Socket::Push(AVPacket* packet) {
     if (packet == NULL) return true;
+
     while (router.Push(packet)) {
         void* buf  = router.BufferPtr();
         size_t len = router.BufferSize();
 
         switch (interf) {
-            case Interfaces::UDP:  SendUDP(buf, len);  break;
-            case Interfaces::TCP:  SendTCP(buf, len);  break;
-            case Interfaces::UNIX: SendUNIX(buf, len); break;
-            default: return false;
+            case Interfaces::UDP:
+                SendUDP(buf, len);
+                break;
+            case Interfaces::TCP:
+                SendTCP(buf, len);
+                break;
+            case Interfaces::UNIX:
+                SendUNIX(buf, len);
+                break;
+            default:
+                return false;
         }
     }
+
     return true;
 }
 
 AVPacket* Socket::Pull() {
-    while (true) {
+    AVPacket* packet = nullptr;
+
+    while (!packet) {
         void*  buf = router.BufferPtr();
         size_t len = router.BufferSize();
         size_t out = 0;
 
         switch (interf) {
-            case Interfaces::UDP:  out = RecvUDP(buf, len);  break;
-            case Interfaces::TCP:  out = RecvTCP(buf, len);  break;
-            case Interfaces::UNIX: out = RecvUNIX(buf, len); break;
-            default: return NULL;
+            case Interfaces::UDP:
+                out = RecvUDP(buf, len);
+                break;
+            case Interfaces::TCP:
+                out = RecvTCP(buf, len);
+                break;
+            case Interfaces::UNIX:
+                out = RecvUNIX(buf, len);
+                break;
+            default:
+                return NULL;
         }
 
-        AVPacket* packet = router.Pull(out);
-        if (packet) return packet;
+        packet = router.Pull(out);
     }
-    return NULL;
+
+    return packet;
 }
 
 } // namespace Kimera
