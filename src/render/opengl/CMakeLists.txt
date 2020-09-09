@@ -37,4 +37,4 @@ target_sources(kimera PRIVATE ${SOURCE_LIST} ${FW_SOURCE_LIST})
 #)
 
 message(STATUS "Adding OpenGL support!")
-SET(OPENGL_BACKEND_AVAILABLE ON CACHE BOOL "Enable OpenGL backend" FORCE)
+SET(OPENGL_BACKEND_AVAILABLE ON CACHE BOOL "Enabling OpenGL backend" FORCE)

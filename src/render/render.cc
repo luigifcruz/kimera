@@ -40,10 +40,18 @@ Render::Render(State& state) : state(state), frame(nullptr), input_active(false)
     if (!CheckBackend()) throw "error";
 
     switch (state.backend) {
+        #ifdef OPENGL_BACKEND_AVAILABLE
         case Backends::OPENGL:
             backend = std::make_shared<OpenGL>(state);
             break;
+        #endif
+        #ifdef VULKAN_BACKEND_AVAILABLE
         case Backends::VULKAN:
+            backend = std::make_shared<Vulkan::Render>(state);
+            break;
+        #endif
+        default:
+            std::cerr << "[RENDER] No backend available!" << std::endl;
             break;
     }
 }

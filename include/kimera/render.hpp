@@ -20,7 +20,7 @@ extern "C" {
 #endif
 
 #ifdef VULKAN_BACKEND_AVAILABLE
-#include "kimera/render/vukan/backend.hpp"
+#include "kimera/render/vulkan/backend.hpp"
 #endif
 
 namespace Kimera {

@@ -15,7 +15,7 @@ target_include_directories(kimera PUBLIC ${GLFW_INCLUDE_DIRS})
 target_link_libraries(kimera PUBLIC ${GLFW_LDFLAGS} ${X11_LDFLAGS})
 
 add_subdirectory(opengl)
-#add_subdirectory(vulkan)
+add_subdirectory(vulkan)
 
 file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cc")
 target_sources(kimera PRIVATE ${SOURCE_LIST})
