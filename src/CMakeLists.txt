@@ -1,15 +1,22 @@
-include(${CMAKE_SOURCE_DIR}/cmake/ffmpeg.cmake)
+add_library(kimera SHARED)
+target_include_directories(kimera PUBLIC "${PROJECT_SOURCE_DIR}/include")
 
-add_subdirectory(loopback)
-add_subdirectory(transport)
-add_subdirectory(render)
+option(OPENGL_BACKEND_AVAILABLE "Compile OpenGL Backend" OFF)
+option(VULKAN_BACKEND_AVAILABLE "Compile Vulkan Backend" OFF)
+
+add_subdirectory(state)
 add_subdirectory(codec)
+add_subdirectory(render)
+add_subdirectory(transport)
+add_subdirectory(loopback)
 add_subdirectory(client)
 
-if(LINUX OR MACOS OR WINDOWS)
-    file(GLOB TMP_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
-    list(APPEND SOURCE_LIST ${TMP_LIST})
-endif()
+# Attach flags to header file
+configure_file(
+    "${PROJECT_SOURCE_DIR}/include/kimera/state.hpp.in"
+    "${PROJECT_SOURCE_DIR}/include/kimera/state.hpp"
+)
 
-set_property(GLOBAL APPEND PROPERTY GLOBAL_SOURCE_LIST ${SOURCE_LIST})
-set_property(GLOBAL APPEND PROPERTY GLOBAL_LIB_LIST ${LIB_LIST})
+install(TARGETS kimera
+        LIBRARY DESTINATION lib
+        INCLUDES DESTINATION include)

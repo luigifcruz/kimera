@@ -1,14 +1,15 @@
-include(${CMAKE_SOURCE_DIR}/cmake/openssl.cmake)
-
-if(LINUX OR MACOS OR WINDOWS)
-    list(APPEND LIB_LIST openssl)
-    file(GLOB TMP_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
-    list(APPEND SOURCE_LIST ${TMP_LIST})
+# Find OpenSSL Dependencies
+if(LINUX OR MACOS)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(OPENSSL REQUIRED IMPORTED_TARGET openssl)
 endif()
 
 if(WINDOWS)
-    list(APPEND LIB_LIST "Ws2_32.lib")
 endif()
 
-set_property(GLOBAL APPEND PROPERTY GLOBAL_SOURCE_LIST ${SOURCE_LIST})
-set_property(GLOBAL APPEND PROPERTY GLOBAL_LIB_LIST ${LIB_LIST})
+target_include_directories(kimera PUBLIC ${OPENSSL_INCLUDE_DIRS})
+target_link_libraries(kimera PUBLIC ${OPENSSL_LDFLAGS})
+
+# Add module source list
+file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cc")
+target_sources(kimera PRIVATE ${SOURCE_LIST})

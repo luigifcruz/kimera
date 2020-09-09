@@ -1,0 +1,28 @@
+width: 1280
+height: 800
+framerate: 30
+bitrate: 15000000
+packet_size: 8192
+
+transmitter:
+  source:
+    - DISPLAY
+  pipe:
+    - RESAMPLE
+  sink:
+    - TCP
+  device: 0
+  address: 0.0.0.0 # Local Address
+  port: 8080 # Local Port
+  codec: h264_videotoolbox
+
+receiver:
+  source:
+    - TCP
+  pipe:
+    - RESAMPLE
+  sink:
+    - DISPLAY
+  address: 127.0.0.1 # Source Address
+  port: 8080 # Source Port
+  codec: h264

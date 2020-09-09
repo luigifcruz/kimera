@@ -11,8 +11,6 @@
 #include <libavcodec/avcodec.h>
 #include <libavutil/imgutils.h>
 
-#include "kimera/state.h"
-
 @interface CameraAdapter : NSObject
 {
   ReceiverContext ctx;
@@ -20,9 +18,9 @@
 
 - (int) getFrameWidth;
 - (int) getFrameHeight;
-- (bool) startCapture: (State*)state;
+- (bool) startCapture:(bool)display d:(char*)device f:(int)fps w:(int)width h:(int)height;
 - (void) stopCapture;
-- (bool) pullFrame: (AVFrame*)frame;
+- (bool) pullFrame:(char*[])buffers linesize:(int[])linesize;
 
 @end
 

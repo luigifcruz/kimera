@@ -2,13 +2,15 @@ width: 1280
 height: 720
 framerate: 30
 bitrate: 8000000
-packet_size: 32000
+packet_size: 8192
 
 transmitter:
   source:
-    - loopback
+    - LOOPBACK
+  pipe:
+    - RESAMPLE
   sink:
-    - tcp
+    - UDP
   device: /dev/video0
   address: 0.0.0.0 # Local Address
   port: 8080 # Local Port
@@ -16,9 +18,11 @@ transmitter:
 
 receiver:
   source: 
-    - tcp 
+    - UDP 
+  pipe:
+    - RESAMPLE
   sink:
-    - display
-  address: 192.168.0.2 # Source Address
+    - DISPLAY
+  address: 0.0.0.0 # Source Address
   port: 8080 # Source Port
   codec: h264

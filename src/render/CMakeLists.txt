@@ -1,29 +1,21 @@
-include(${CMAKE_SOURCE_DIR}/cmake/egl.cmake)
-include(${CMAKE_SOURCE_DIR}/cmake/glfw.cmake)
-
-if(LINUX)
-    list(APPEND LIB_LIST dl)
+if(LINUX OR MACOS)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(GLFW REQUIRED IMPORTED_TARGET glfw3)
+    list(APPEND GLFW_LDFLAGS "-lm -lpthread")
 endif()
 
-list(APPEND LIB_LIST glfw egl)
-file(GLOB TMP_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*/*.c" "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
-list(APPEND SOURCE_LIST ${TMP_LIST})
+if(LINUX)
+    pkg_check_modules(X11 REQUIRED IMPORTED_TARGET x11)
+endif()
 
-# Compile Shaders
-find_package(PythonInterp REQUIRED)
+if(WINDOWS)
+endif()
 
-set(SHADER_COMPILER_BIN ${CMAKE_SOURCE_DIR}/utils/compile_shaders.py)
-set(SHADER_COMPILER_SRC ${PROJECT_SOURCE_DIR}/shaders)
-set(SHADER_COMPILER_DST ${CMAKE_SOURCE_DIR}/include/kimera)
+target_include_directories(kimera PUBLIC ${GLFW_INCLUDE_DIRS})
+target_link_libraries(kimera PUBLIC ${GLFW_LDFLAGS} ${X11_LDFLAGS})
 
-add_custom_target(
-    shader_compiler ALL
-    COMMAND ${PYTHON_EXECUTABLE} ${SHADER_COMPILER_BIN} ${SHADER_COMPILER_SRC} ${SHADER_COMPILER_DST}
-    BYPRODUCTS enums.h
-    COMMENT "Generating Shader Header"
-)
+add_subdirectory(opengl)
+#add_subdirectory(vulkan)
 
-# Append to Global
-set_property(GLOBAL APPEND PROPERTY GLOBAL_DEPENDENCIES shader_compiler)
-set_property(GLOBAL APPEND PROPERTY GLOBAL_SOURCE_LIST ${SOURCE_LIST})
-set_property(GLOBAL APPEND PROPERTY GLOBAL_LIB_LIST ${LIB_LIST})
+file(GLOB SOURCE_LIST CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.cc")
+target_sources(kimera PRIVATE ${SOURCE_LIST})

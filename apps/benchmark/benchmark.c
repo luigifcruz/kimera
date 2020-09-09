@@ -1,9 +1,3 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <signal.h>
-#include <stdbool.h>
-#include <string.h>
-
 #include "kimera/transport.h"
 #include "kimera/codec.h"
 #include "kimera/loopback.h"
@@ -42,9 +36,9 @@ void benchmark(State* state, volatile sig_atomic_t* stop) {
     while (!(*stop)) {
         clock_t beginFrame = clock();
         if (!render_push_frame(render, frame)) break;
-        if (state->sink & FILTER)
+        if (CHECK(state->sink, FILTER))
             if (!render_proc_frame(render)) break;
-        if (state->sink & DISPLAY)
+        if (CHECK(state->sink, DISPLAY))
             if (!render_draw_frame(render)) break;
         if (!render_pull_frame(render)) break;
         clock_t endFrame = clock();

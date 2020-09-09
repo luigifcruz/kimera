@@ -28,19 +28,19 @@
     return ctx.height;
 }
 
-- (bool)initDisplay: (State*)state
+- (bool)initDisplay:(char*)device f:(int)fps
 {
     uint32_t num_screens = 0;
     CGGetActiveDisplayList(0, NULL, &num_screens);
 
-    NSUInteger selectedDevice = (NSUInteger)atoi(state->loopback);
+    NSUInteger selectedDevice = (NSUInteger)atoi(device);
     if (selectedDevice >= num_screens) {
         NSLog(@"[LOOPBACK] Selected screen (%lu) doesn't exist!\n", selectedDevice);
         return false;
     }
 
     ctx.displayInput = [[AVCaptureScreenInput alloc] initWithDisplayID: selectedDevice];
-    ctx.displayInput.minFrameDuration = CMTimeMake(1, state->framerate);
+    ctx.displayInput.minFrameDuration = CMTimeMake(1, fps);
     ctx.displayInput.capturesCursor = YES;
     ctx.displayInput.capturesMouseClicks = NO;
 
@@ -50,11 +50,11 @@
     return true;
 }
 
-- (bool)initCamera: (State*)state
+- (bool)initCamera:(char*)device f:(int)framerate w:(int)width h:(int)height
 {
     NSError* error = nil;
     NSArray * devices = [ AVCaptureDevice devicesWithMediaType: AVMediaTypeVideo ];
-    NSUInteger selectedDevice = (NSUInteger)atoi(state->loopback);
+    NSUInteger selectedDevice = (NSUInteger)atoi(device);
 
     if (selectedDevice >= [devices count]) {
         NSLog(@"[LOOPBACK] Selected device (%lu) isn't available!\n", selectedDevice);
@@ -78,10 +78,10 @@
             CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(desc);
 
             if (
-                range.minFrameRate <= state->framerate  && 
-                state->framerate <= range.maxFrameRate  && 
-                dimensions.width == state->width        &&
-                dimensions.height == state->height
+                range.minFrameRate <= framerate           && 
+                framerate          <= range.maxFrameRate  && 
+                dimensions.width   == width               &&
+                dimensions.height  == height
             ) {
                 selectedFormat = format;
                 frameRateRange = range;
@@ -116,7 +116,7 @@
     return true;
 }
 
-- (bool)startCapture: (State*)state
+- (bool)startCapture:(bool)display d:(char*)device f:(int)fps w:(int)width h:(int)height
 {
     pthread_mutex_init(&ctx.frame_lock, NULL);
     pthread_cond_init(&ctx.frame_wait_cond, NULL);
@@ -134,24 +134,18 @@
 
     ctx.session = [[AVCaptureSession alloc] init];
 
-    switch (state->source) {
-        case DISPLAY:
-            if ([self initDisplay:state]) {
-                [ctx.session addInput: ctx.displayInput];
-            } else {
-                return false;
-            }
-            break;
-        case LOOPBACK:
-            if ([self initCamera:state]) {
-                [ctx.session addInput: ctx.cameraInput];
-            } else {
-                return false;
-            }
-            break;
-        default:
-            NSLog(@"Source not an input device.\n");
+    if (display) {
+        if ([self initDisplay:device f:fps]) {
+            [ctx.session addInput: ctx.displayInput];
+        } else {
             return false;
+        }
+    } else {
+        if ([self initCamera:device f:fps w:width h:height]) {
+            [ctx.session addInput: ctx.cameraInput];
+        } else {
+            return false;
+        }
     }
 
     [ctx.session addOutput: ctx.output];
@@ -166,7 +160,7 @@
     pthread_cond_destroy(&ctx.frame_wait_cond);
 }
 
-- (bool) pullFrame: (AVFrame*)frame
+- (bool) pullFrame:(char*[])buffers linesize:(int[])linesize;
 {
     pthread_mutex_lock(&ctx.frame_lock);
     pthread_cond_wait(&ctx.frame_wait_cond, &ctx.frame_lock);
@@ -182,9 +176,9 @@
         size_t plane_count = CVPixelBufferGetPlaneCount(image_buffer);
         for (size_t i = 0; i < plane_count; i++) {
             memcpy(
-                frame->data[i],
+                buffers[i],
                 CVPixelBufferGetBaseAddressOfPlane(image_buffer, i),
-                frame->linesize[i] * CVPixelBufferGetHeightOfPlane(image_buffer, i));
+                linesize[i] * CVPixelBufferGetHeightOfPlane(image_buffer, i));
         }
 
         CVPixelBufferUnlockBaseAddress(image_buffer, 0);

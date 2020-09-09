@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
-project(kimera VERSION 1.0 LANGUAGES C)
-
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-endif()
+project(kimera VERSION 1.0 LANGUAGES CXX C)
 
 if(UNIX AND NOT APPLE)
     message(STATUS "Assuming Linux system...")
@@ -23,41 +19,29 @@ if(APPLE)
     set(KIMERA_MACOS TRUE)
 endif()
 
-configure_file(
-    "${PROJECT_SOURCE_DIR}/include/kimera/state.h.in"
-    "${PROJECT_SOURCE_DIR}/include/kimera/state.h"
-)
-
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-include(cmake/listdirs.cmake)
-
-set_property(GLOBAL PROPERTY GLOBAL_CMAKE_C_FLAGS "")
-set_property(GLOBAL PROPERTY GLOBAL_DEPENDENCIES "")
-set_property(GLOBAL PROPERTY GLOBAL_SOURCE_LIST "")
-set_property(GLOBAL PROPERTY GLOBAL_LIB_LIST "")
-
-add_subdirectory(src)
-
-get_property(LIB_LIST GLOBAL PROPERTY GLOBAL_LIB_LIST)
-get_property(SOURCE_LIST GLOBAL PROPERTY GLOBAL_SOURCE_LIST)
-get_property(DEPENDENCIES GLOBAL PROPERTY GLOBAL_DEPENDENCIES)
-get_property(CMAKE_C_FLAGS GLOBAL PROPERTY GLOBAL_CMAKE_C_FLAGS)
-
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-    if(NOT WINDOWS)
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -Wno-int-to-pointer-cast")
-        set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O2 -g")
-        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2")
-    endif()
+    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O2 -g")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2")
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+    set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
+
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-deprecated-declarations")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-private-field")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
+    endif()
+
+    if(NOT CMAKE_BUILD_TYPE)
+        set(CMAKE_BUILD_TYPE Debug)
+    endif()
 endif()
 
-add_library(kimera ${SOURCE_LIST})
-target_link_libraries(kimera ${LIB_LIST})
-target_include_directories(kimera PUBLIC include)
-add_dependencies(kimera ${DEPENDENCIES})
-
+add_subdirectory(src)
+add_subdirectory(python)
 add_subdirectory(apps)
