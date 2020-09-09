@@ -56,7 +56,7 @@ Device::Device(State& state, int width, int height, bool use_display) : state(st
         throw "error";
     }
 
-    if (use_display) {
+    if (!use_display) {
         if (!(surface = eglCreatePbufferSurface(display, config, egl_pbuf_attr))) {
             printf("[EGL] Error creating pbuffer surface.\n");
             GetError("Device::Device()");
@@ -149,7 +149,7 @@ const char* Device::Query(int name) {
 
 bool Device::Step(int* w_width, int* w_height) {
     eglSwapBuffers(display, surface);
-    if (GetError("Step()")) return false;
+    if (GetError("Device::Step()")) return false;
 
     glfwPollEvents();
     glfwGetWindowSize(adapter, w_width, w_height);

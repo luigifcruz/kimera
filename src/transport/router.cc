@@ -14,6 +14,13 @@ Router::Router(State& state) : state(state) {
         printf("[ROUTER] Can't allocate router.\n");
         throw;
     }
+
+    packet->payload = NULL;
+    packet->pts     = (uint64_t)0;
+    packet->len     = (uint32_t)0;
+    packet->i       = (uint32_t)0;
+    packet->n       = (uint32_t)0;
+    checksum        = (uint32_t)0;
 }
 
 Router::~Router() {
@@ -66,12 +73,12 @@ AVPacket* Router::Pull(size_t buf_len) {
     //printf("PTS: %llu LEN: %d I: %d N: %d\n", pts, len, i, n);
 
     if (checksum == packet->n) {
-        AVPacket* packet = av_packet_alloc();
-        av_init_packet(packet);
-        packet->data = (uint8_t*)this->packet->payload;
-        packet->size = this->packet->len;
-        packet->pts = this->packet->pts;
-        return packet;
+        AVPacket* out_packet = av_packet_alloc();
+        av_init_packet(out_packet);
+        out_packet->data = (uint8_t*)packet->payload;
+        out_packet->size = packet->len;
+        out_packet->pts = packet->pts;
+        return out_packet;
     }
 
     return NULL;

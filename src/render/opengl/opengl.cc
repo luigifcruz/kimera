@@ -3,8 +3,6 @@
 namespace Kimera {
 
 OpenGL::OpenGL(State& state) {
-    std::cout << "[OPENGL] Initializing OpenGL backend." << std::endl;
-
     // Set initial frame size.
     f_size.w = state.width;
     f_size.h = state.height;
@@ -14,7 +12,7 @@ OpenGL::OpenGL(State& state) {
     d_size.h = f_size.h / 2;
 
     // Load EGL device
-    device = std::make_unique<Device>(state, d_size.w, d_size.h, false);
+    device = std::make_unique<Device>(state, d_size.w, d_size.h, true);
 
     // Generating Buffers
     glGenBuffers(1, &vertex_buffer);
@@ -50,12 +48,11 @@ OpenGL::OpenGL(State& state) {
 }
 
 OpenGL::~OpenGL() {
-    std::cout << "[OPENGL] Exiting OpenGL backend." << std::endl;
     device.reset();
 }
 
 void OpenGL::PrintMeta() {
-    const char* render_mode = (use_display) ? "WINDOWED" : "HEADLESS";
+    const char* render_mode = (true) ? "WINDOWED" : "HEADLESS";
 
     printf(".   [Render Meta]\n");
     printf("├── Window Mode:   %s\n", render_mode);
@@ -80,10 +77,10 @@ std::vector<PixelFormat> OpenGL::GetOutputFormats() {
     return OutputFormats;
 }
 
-bool OpenGL::LoadInput(AVFrame* frame) {
-    this->in_format = (PixelFormat)frame->format;
+bool OpenGL::LoadInput(PixelFormat fmt) {
+    this->in_format = fmt;
 
-    if (!ParsePlaneSizes(frame, &in_size[0], &in_planes))
+    if (!ParsePlaneSizes(fmt, f_size.w, f_size.h, &in_size[0], &in_planes))
         return false;
 
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
@@ -111,10 +108,10 @@ bool OpenGL::LoadInput(AVFrame* frame) {
     return !GetError("OpenGL::Push()");
 }
 
-bool OpenGL::LoadOutput(AVFrame* frame) {
-    this->out_format = (PixelFormat)frame->format;
+bool OpenGL::LoadOutput(PixelFormat fmt) {
+    this->out_format = fmt;
 
-    if (!ParsePlaneSizes(frame, &out_size[0], &out_planes))
+    if (!ParsePlaneSizes(fmt, f_size.w, f_size.h, &out_size[0], &out_planes))
         return false;
 
     glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
@@ -176,8 +173,6 @@ bool OpenGL::Push(AVFrame* frame) {
     PunchFramebuffer();
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    frame->pts += 1;
-
     return !GetError("OpenGL::Push()");
 }
 
@@ -203,8 +198,6 @@ bool OpenGL::Pull(AVFrame* frame) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    frame->pts += 1;
-
     return !GetError("OpenGL::Pull()");
 }
 
@@ -228,8 +221,8 @@ bool OpenGL::Draw() {
             xScale = imgAspectRatio / viewAspectRatio;
         }
         SetUniform2f(disp_shader, (char*)"ScaleFact", xScale, yScale);
+        SetUniform1i(disp_shader, (char*)"renderedTexture", 0);
 
-        SetUniform1f(disp_shader, (char*)"renderedTexture", 0);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, GetLastFramebuffer());
 
@@ -239,7 +232,6 @@ bool OpenGL::Draw() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     if (GetError("OpenGL::Draw()")) return false;
-
     return device->Step(&d_size.w, &d_size.h);
 }
 
@@ -252,14 +244,11 @@ bool OpenGL::Filter() {
     {
         glUseProgram(proc_shader);
 
-        SetUniform1i(proc_shader, (char*)"pts", pts);
-        //SetUniform1f(proc_shader, "time", );
+        SetUniform1f(proc_shader, (char*)"time", Milliseconds());
         SetUniform2f(proc_shader, (char*)"resolution", f_size.w, f_size.h);
         SetUniform2f(proc_shader, (char*)"display", d_size.w, d_size.h);
-
-        //if (cb != NULL) (void)(*cb)(render, obj);
-
         SetUniform1i(proc_shader, (char*)"renderedTexture", 0);
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, GetLastFramebuffer());
 

@@ -55,7 +55,7 @@ bool Render::LoadInput(PixelFormat fmt) {
     input_active = true;
     in_fmt = SelectFormat(backend->GetInputFormats(), fmt);
     in_resampler = std::make_shared<Resampler>(state, in_fmt);
-    return backend->LoadInput(in_resampler->Pull());
+    return backend->LoadInput(in_fmt);
 }
 
 bool Render::LoadOutput(PixelFormat fmt) {
@@ -67,14 +67,13 @@ bool Render::LoadOutput(PixelFormat fmt) {
     frame->width = state.width;
     frame->height = state.height;
     frame->format = out_fmt;
-    frame->pts = pts;
 
     if (av_frame_get_buffer(frame, 0) < 0){
         printf("[RENDER] Couldn't allocate output frame.\n");
         return false;
     }
 
-    return backend->LoadOutput(frame);
+    return backend->LoadOutput(out_fmt);
 }
 
 bool Render::LoadDisplay() {
@@ -92,7 +91,7 @@ bool Render::CommitPipeline() {
 }
 
 bool Render::Push(AVFrame* frame) {
-    if (!filter_active || !display_active || !output_active || !input_active) {
+    if (!filter_active && !display_active && !output_active && !input_active) {
         this->frame = frame;
         return true;
     }
@@ -100,6 +99,7 @@ bool Render::Push(AVFrame* frame) {
     if (!in_resampler->Push(frame))
         return false;
 
+    pts = frame->pts;
     return backend->Push(in_resampler->Pull());
 }
 
@@ -115,8 +115,13 @@ bool Render::Draw() {
 }
 
 AVFrame* Render::Pull() {
-    if (!filter_active || !display_active || !input_active || !output_active)
+    if (!filter_active && !display_active && !input_active && !output_active)
         return frame;
+
+    if (!input_active)
+        pts += 1;
+
+    this->frame->pts = pts;
 
     if (!backend->Pull(frame)) return NULL;
     if (!out_resampler->Push(frame)) return NULL;
@@ -124,10 +129,7 @@ AVFrame* Render::Pull() {
 }
 
 void Render::PrintMeta() {
-    std::cout << "[RENDER] Available Backends: ";
-    for (auto i: AvailableBackends)
-        std::cout << magic_enum::enum_name(i) << " ";
-    std::cout << std::endl;
+    backend->PrintMeta();
 }
 
 } // namespace Kimera

@@ -8,13 +8,13 @@ transmitter:
   source:
     - DISPLAY
   pipe:
-    - RESAMPLE
+    - GPU_RESAMPLE
   sink:
     - UDP
     - DISPLAY
   device: :1
   address: 127.0.0.1
-  port: 8080
+  port: 8081
   in_format: AV_PIX_FMT_YUV420P
   out_format: AV_PIX_FMT_YUV420P
   codec: h264_nvenc
@@ -26,8 +26,8 @@ receiver:
     - RESAMPLE
   sink:
     - DISPLAY
-  address: 0.0.0.0
-  port: 8080
+  address: 127.0.0.1
+  port: 8081
   in_format: AV_PIX_FMT_YUV420P
   out_format: AV_PIX_FMT_YUV420P
   codec: h264

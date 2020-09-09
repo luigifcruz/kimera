@@ -191,7 +191,7 @@ int Client::Attach(int argc, char *argv[], void(*tx)(State&, Client&), void(*rx)
 }
 
 bool Client::ShouldStop() {
-    return this->stop;
+    return !this->stop;
 }
 
 } // namespace Kimera

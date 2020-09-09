@@ -18,10 +18,10 @@ public:
     virtual std::vector<PixelFormat> GetInputFormats() = 0;
     virtual std::vector<PixelFormat> GetOutputFormats() = 0;
 
-    virtual bool LoadInput(AVFrame*) = 0;
+    virtual bool LoadInput(PixelFormat) = 0;
     virtual bool LoadDisplay() = 0;
     virtual bool LoadFilter() = 0;
-    virtual bool LoadOutput(AVFrame*) = 0;
+    virtual bool LoadOutput(PixelFormat) = 0;
     virtual bool CommitPipeline() = 0;
 
     virtual bool Push(AVFrame*) = 0;
@@ -29,7 +29,6 @@ public:
     virtual bool Filter() = 0;
     virtual bool Pull(AVFrame*) = 0;
 
-private:
     static double Milliseconds();
 };
 

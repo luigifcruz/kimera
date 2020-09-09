@@ -8,6 +8,7 @@ extern "C" {
 #include "glad/glad.h"
 #include <libavcodec/avcodec.h>
 #include <libavutil/pixdesc.h>
+#include <libavutil/imgutils.h>
 }
 
 #include "kimera/render/opengl/device.hpp"
@@ -48,10 +49,10 @@ public:
     std::vector<PixelFormat> GetInputFormats();
     std::vector<PixelFormat> GetOutputFormats();
 
-    bool LoadInput(AVFrame*);
+    bool LoadInput(PixelFormat);
     bool LoadDisplay();
     bool LoadFilter();
-    bool LoadOutput(AVFrame*);
+    bool LoadOutput(PixelFormat);
     bool CommitPipeline();
 
     bool Push(AVFrame*);
@@ -72,7 +73,6 @@ private:
     bool use_opengles;
     bool use_display;
 
-    int pts;
     double time;
 
     std::unique_ptr<Device> device;
@@ -107,7 +107,7 @@ private:
     const char* Query(GLenum);
     bool GetError(std::string);
 
-    bool ParsePlaneSizes(AVFrame*, Format*, unsigned int*);
+    bool ParsePlaneSizes(PixelFormat, int, int, Format*, unsigned int*);
 
     char* OpenShader(char*);
     unsigned int CompileShader(unsigned int, char*);

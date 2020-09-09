@@ -2,21 +2,21 @@
 
 namespace Kimera {
 
-bool OpenGL::ParsePlaneSizes(AVFrame* frame, Format* size, unsigned int* planes) {
-    *planes = av_pix_fmt_count_planes((AVPixelFormat)frame->format);
+bool OpenGL::ParsePlaneSizes(PixelFormat fmt, int width, int height, Format* size, unsigned int* planes) {
+    *planes = av_pix_fmt_count_planes(fmt);
 
     for (unsigned int i = 0; i < *planes; i++) {
-        float ratio = (float)frame->width / (float)frame->linesize[i];
+        float ratio = (float)width / (float)av_image_get_linesize(fmt, width, i);
 
-        switch (frame->format) {
+        switch (fmt) {
             case AV_PIX_FMT_YUV420P:
-                (size+i)->w = (int)((float)frame->width / ratio);
-                (size+i)->h = (int)((float)frame->height / ratio);
+                (size+i)->w = (int)((float)width / ratio);
+                (size+i)->h = (int)((float)height / ratio);
                 (size+i)->pix = GL_RED;
                 break;
             case AV_PIX_FMT_BGRA:
-                (size+i)->w = frame->width;
-                (size+i)->h = frame->height;
+                (size+i)->w = width;
+                (size+i)->h = height;
                 (size+i)->pix = GL_RGBA;
                 break;
             default:
