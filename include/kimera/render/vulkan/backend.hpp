@@ -5,6 +5,9 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavutil/pixdesc.h>
 #include <libavutil/imgutils.h>
+#include <vulkan/vulkan.h>
+#include <vulkan/vulkan_core.h>
+#include <GLFW/glfw3.h>
 }
 
 #include "kimera/render/vulkan/tools.hpp"
@@ -16,6 +19,8 @@ extern "C" {
 #include <vector>
 
 namespace Kimera::Vulkan {
+
+const int MAX_FRAMES_IN_FLIGHT = 2;
 
 struct QueueFamilyIndices {
     std::optional<uint32_t> graphicFamily;
@@ -66,11 +71,35 @@ private:
     VkInstance instance;
     VkDevice device;
     VkSurfaceKHR surface;
+    GLFWwindow* window;
+    VkSwapchainKHR swapChain;
+
+    std::vector<VkImage> swapChainImages;
+    VkFormat swapChainImageFormat;
+    VkExtent2D swapChainExtent;
+    std::vector<VkImageView> swapChainImageView;
+    std::vector<VkFramebuffer> swapChainFramebuffers;
+    std::vector<VkCommandBuffer> commandBuffers;
+
+    VkPipelineLayout pipelineLayout;
+    VkRenderPass renderPass;
+    VkPipeline graphicsPipeline;
+    VkCommandPool commandPool;
+
+    std::vector<VkSemaphore> imageAvailableSemaphores;
+    std::vector<VkSemaphore> renderFinishedSemaphores;
+    std::vector<VkFence> inFlightFences;
+    std::vector<VkFence> imagesInFlight;
+    size_t currentFrame = 0;
+
+    VkQueue graphicQueue;
+    VkQueue presentQueue;
+    VkQueue computeQueue;
 
     VkDebugReportCallbackEXT debugReportCallback{};
 
     bool validationEnabled = true;
-    bool headlessEnabled = true;
+    bool headlessEnabled = false;
 
     std::vector<PixelFormat> InputFormats = {
         AV_PIX_FMT_BGRA
@@ -84,7 +113,22 @@ private:
         "VK_LAYER_KHRONOS_validation",
     };
 
-    const std::vector<const char*> deviceExtensions = {};
+    std::vector<const char*> deviceExtensions = {};
+
+    void CreateWindow();
+    void CreateInstance();
+    void CreateSurface();
+    void CreateDevice();
+    void CreateQueues();
+    void CreateSwapChain();
+    void CreateImageView();
+    void CreateRenderPass();
+    void CreateGraphicsPipeline();
+    void CreateFrameBuffers();
+    void CreateCommandPool();
+    void CreateCommandBuffers();
+    void CreateSyncObjects();
+    void DrawFrame();
 
     bool checkValidationLayerSupport();
     std::vector<const char*> getRequiredExtensions();
@@ -92,6 +136,10 @@ private:
     QueueFamilyIndices findQueueFamilies(VkPhysicalDevice);
     bool checkDeviceExtensionSupport(VkPhysicalDevice);
     SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice);
+
+    VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>);
+    VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>&);
+    VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR&);
 };
 
 } // namespace Kimera

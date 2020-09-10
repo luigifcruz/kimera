@@ -10,7 +10,6 @@ extern "C" {
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_core.h>
 
-#include "kimera/render/opengl/device.hpp"
 #include "kimera/render/shaders.hpp"
 #include "kimera/render/backend.hpp"
 #include "kimera/state.hpp"

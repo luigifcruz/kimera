@@ -3,25 +3,25 @@
 namespace Kimera::Vulkan {
 
 VkShaderModule Tools::LoadShaderFromFile(const char* filename, VkDevice device) {
-    std::ifstream is(filename, std::ios::binary | std::ios::in | std::ios::ate);
+    std::ifstream is(filename, std::ios::binary | std::ios::ate);
 
-    if (is.is_open()) {
-        size_t size = is.tellg();
-        is.seekg(0, std::ios::beg);
-        char* shaderCode = new char[size];
-        is.read(shaderCode, size);
-        is.close();
-
-        assert(size > 0);
-
-        return Vulkan::Tools::LoadShader(shaderCode, size, device);
-
-        delete [] shaderCode;
-    } else {
-        std::cerr << "[VULKAN] Can't open shader file \"" << filename << "\"." << std::endl;
+    if (!is.is_open()) {
+        throw std::runtime_error("[VULKAN] Can't open shader file.");
     }
 
-    return VK_NULL_HANDLE;
+    size_t size = (size_t)is.tellg();
+    is.seekg(0, std::ios::beg);
+    char* shaderCode = new char[size];
+    is.read(shaderCode, size);
+    is.close();
+
+    assert(size > 0);
+
+    VkShaderModule module = Vulkan::Tools::LoadShader(shaderCode, size, device);
+
+    delete [] shaderCode;
+
+    return module;
 }
 
 VkShaderModule Tools::LoadShader(const char* code, size_t size, VkDevice device) {
@@ -29,7 +29,7 @@ VkShaderModule Tools::LoadShader(const char* code, size_t size, VkDevice device)
     VkShaderModuleCreateInfo moduleCreateInfo{};
     moduleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     moduleCreateInfo.codeSize = size;
-    moduleCreateInfo.pCode = (uint32_t*)code;
+    moduleCreateInfo.pCode = reinterpret_cast<const uint32_t*>(code);
 
     VK_CHECK_RESULT(vkCreateShaderModule(device, &moduleCreateInfo, nullptr, &shaderModule));
 
