@@ -3,6 +3,7 @@
 
 #include <cstdbool>
 #include <cstdint>
+#include <set>
 
 extern "C" {
 #ifdef KIMERA_WINDOWS
@@ -25,6 +26,10 @@ extern "C" {
 
 #include "kimera/state.hpp"
 
+#include <websocketpp/config/asio_no_tls.hpp>
+#include <websocketpp/common/thread.hpp>
+#include <websocketpp/server.hpp>
+
 namespace Kimera {
 
 typedef struct {
@@ -39,6 +44,9 @@ typedef struct {
 typedef struct sockaddr_in socket_in;
 typedef struct sockaddr_un socket_un;
 typedef struct sockaddr socket_t;
+typedef websocketpp::server<websocketpp::config::asio> server;
+
+using websocketpp::connection_hdl;
 
 class Router {
 public:
@@ -102,6 +110,24 @@ private:
     const char* GetCypher();
 };
 
+class WebsocketServer {
+public:
+    WebsocketServer(unsigned int);
+
+    void on_open(connection_hdl);
+    void on_close(connection_hdl);
+    void send_message(const void*, size_t);
+
+    void run();
+
+private:
+    typedef std::set<connection_hdl,std::owner_less<connection_hdl>> con_list;
+
+    unsigned int port;
+    server m_server;
+    con_list m_connections;
+};
+
 class Socket {
 public:
     Socket(State&);
@@ -127,6 +153,15 @@ private:
     socket_in* server_in;
     socket_un* client_un;
     socket_un* server_un;
+
+    // WS Methods
+    std::shared_ptr<WebsocketServer> ws_server;
+    bool OpenWSClient();
+    bool OpenWSServer();
+    void CloseWS();
+
+    int SendWS(const void*, size_t);
+    int RecvWS(void*, size_t);
 
     // TCP Methods
     bool OpenTCPClient();

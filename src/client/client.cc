@@ -39,6 +39,8 @@ void Client::PrintInterface(Interfaces interfaces) {
         printf("    UDP");
     if (CHECK(interfaces, Interfaces::UNIX))
         printf("    UNIX");
+    if (CHECK(interfaces, Interfaces::WS))
+        printf("    WS");
     if (CHECK(interfaces, Interfaces::DISPLAY))
         printf("    DISPLAY");
     if (CHECK(interfaces, Interfaces::LOOPBACK))
