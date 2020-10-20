@@ -1,8 +1,6 @@
 #include "kimera/transport.hpp"
 
-using websocketpp::connection_hdl;
 using websocketpp::lib::placeholders::_1;
-using websocketpp::lib::placeholders::_2;
 using websocketpp::lib::bind;
 using websocketpp::lib::thread;
 
@@ -11,8 +9,14 @@ namespace Kimera {
 WebsocketServer::WebsocketServer(unsigned int port) : port(port) {
     m_server.init_asio();
 
+    m_server.clear_access_channels(websocketpp::log::alevel::all); 
+
     m_server.set_open_handler(bind(&WebsocketServer::on_open, this, ::_1));
     m_server.set_close_handler(bind(&WebsocketServer::on_close, this, ::_1));
+}
+
+WebsocketServer::~WebsocketServer() {
+    m_server.stop_listening();
 }
 
 void WebsocketServer::on_open(connection_hdl hdl) {
@@ -35,7 +39,6 @@ void WebsocketServer::run() {
     m_server.run();
 }
 
-
 bool Socket::OpenWSClient() {
     std::cerr << "[WS] Websocket client not implemented yet." << std::endl;
     return false;
@@ -51,6 +54,8 @@ bool Socket::OpenWSServer() {
 }
 
 void Socket::CloseWS() {
+    ws_server.reset();
+    sleep(1); // pls fix this
 }
 
 int Socket::SendWS(const void* buf, size_t len) {
@@ -58,7 +63,9 @@ int Socket::SendWS(const void* buf, size_t len) {
     return len;
 }
 
-int Socket::RecvWS(void* buf, size_t len) {
+int Socket::RecvWS(void*, size_t) {
+    std::cerr << "[WS] Websocket client not implemented yet." << std::endl;
+    return -1;
 }
 
 } // namespace Kimera

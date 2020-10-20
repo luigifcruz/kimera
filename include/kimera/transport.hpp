@@ -113,6 +113,7 @@ private:
 class WebsocketServer {
 public:
     WebsocketServer(unsigned int);
+    ~WebsocketServer();
 
     void on_open(connection_hdl);
     void on_close(connection_hdl);
