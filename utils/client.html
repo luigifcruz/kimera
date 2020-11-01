@@ -1,0 +1,96 @@
+<html>
+    <head>
+        <title>Kimera</title>
+    </head>
+    <body>
+        <canvas id="canvas" width="768" height="432"></canvas>
+    </body>
+    <script>
+        const HEADER_SIZE = 20;
+        const PACKET_SIZE = 16000;
+        const PAYLOAD_SIZE = PACKET_SIZE - HEADER_SIZE;
+
+        let pts = 0;
+        let len = 0;
+        let i   = 0;
+        let n   = 0;
+        
+        let checksum = 0;
+        let payload = new Uint8Array([]);
+
+        function GetPacketSize(offset) {
+            let pkt_size = PACKET_SIZE;
+            if ((offset + pkt_size) > len) {
+                pkt_size = len - offset + HEADER_SIZE;
+            }
+            return pkt_size;
+        }
+
+        const canvasElement = document.getElementById("canvas");
+        let canvasContext = canvasElement.getContext("2d", { alpha: false });
+
+        async function paintFrameToCanvas(videoFrame) {
+            let bitmap = await videoFrame.createImageBitmap();
+            canvasContext.drawImage(bitmap, 0, 0);   
+        }
+
+        const videoDecoder = new VideoDecoder({
+            output: paintFrameToCanvas,
+            error: (e) => {
+                console.log("[WEBCODECS] Error: " + e);
+            }
+        });
+
+        const config = {
+            codec: 'vp8',
+            codedWidth: 768,
+            codedHeight: 432
+        };
+
+        videoDecoder.configure(config);
+
+        var socket = new WebSocket('ws://192.168.0.19:8081');
+        socket.binaryType = 'arraybuffer';
+        socket.onmessage = function (e) {
+            var data = e.data;
+            var dv = new DataView(data);
+
+            let pkt_pts = dv.getUint32(0, true);
+            let pkt_len = dv.getUint32(8, true);
+            let pkt_i   = dv.getUint32(12, true);
+            let pkt_n   = dv.getUint32(16, true);
+            let pkt_payload = new Uint8Array(e.data);
+
+            if (pkt_pts < pts) return;
+
+            if (pkt_pts > pts) {
+                payload = new Uint8Array([]);
+                checksum = 0;
+            }
+
+            pts = pkt_pts;
+            len = pkt_len;
+            i   = pkt_i;
+            n   = pkt_n;
+
+            checksum += 1;
+
+            let offset = i * PAYLOAD_SIZE;
+            let size = GetPacketSize(offset);
+            payload = new Uint8Array([
+                ...payload,
+                ...pkt_payload.slice(HEADER_SIZE, size),
+            ]);
+
+            //console.log("PTS: " + pts + " LEN: " + len + " I: " + i + " N: " + n + " CK: " + checksum);
+
+            if (checksum == n) {
+                let chunk = new EncodedVideoChunk({
+                    timestamp: new Date().getTime(),
+                    data: payload,
+                });
+                videoDecoder.decode(chunk);
+            }
+        }
+    </script>
+</html>

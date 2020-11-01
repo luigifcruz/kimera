@@ -12,6 +12,9 @@ Socket::~Socket() {
         case Interfaces::TCP:
             CloseTCP();
             break;
+        case Interfaces::WS:
+            CloseWS();
+            break;
         case Interfaces::UNIX:
             CloseUNIX();
             break;
@@ -39,6 +42,9 @@ bool Socket::LoadClient() {
     if (CHECK(state.source, Interfaces::UNIX))
         OpenUNIXClient();
 
+    if(CHECK(state.source, Interfaces::WS))
+        OpenWSClient();
+
     if (interf == Interfaces::NONE) {
         printf("[SOCKET] Can't initiate socket client.\n");
         return false;
@@ -62,6 +68,9 @@ bool Socket::LoadServer() {
     if (CHECK(state.sink, Interfaces::UNIX))
         OpenUNIXServer();
 
+    if (CHECK(state.sink, Interfaces::WS))
+        OpenWSServer();
+
     if (interf == Interfaces::NONE) {
         printf("[SOCKET] Can't initiate socket server.\n");
         return false;
@@ -83,6 +92,9 @@ bool Socket::Push(AVPacket* packet) {
                 break;
             case Interfaces::TCP:
                 SendTCP(buf, len);
+                break;
+            case Interfaces::WS:
+                SendWS(buf, len);
                 break;
             case Interfaces::UNIX:
                 SendUNIX(buf, len);
@@ -109,6 +121,9 @@ AVPacket* Socket::Pull() {
                 break;
             case Interfaces::TCP:
                 out = RecvTCP(buf, len);
+                break;
+            case Interfaces::WS:
+                out = RecvWS(buf, len);
                 break;
             case Interfaces::UNIX:
                 out = RecvUNIX(buf, len);

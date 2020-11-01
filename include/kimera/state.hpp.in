@@ -42,13 +42,14 @@ enum class Interfaces : uint16_t {
     UNIX         = 1 << 0,
     TCP          = 1 << 1,
     UDP          = 1 << 2,
-    DISPLAY      = 1 << 3,
-    LOOPBACK     = 1 << 4,
+    WS           = 1 << 3,
+    DISPLAY      = 1 << 4,
+    LOOPBACK     = 1 << 5,
     // Pipe Options
-    FILTER       = 1 << 5,
-    RESAMPLE     = 1 << 6,
-    GPU_RESAMPLE = 1 << 7,
-    CRYPTO       = 1 << 8,
+    FILTER       = 1 << 6,
+    RESAMPLE     = 1 << 7,
+    GPU_RESAMPLE = 1 << 8,
+    CRYPTO       = 1 << 9,
 };
 
 enum class Mode : uint16_t {

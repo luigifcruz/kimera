@@ -91,10 +91,10 @@ bool Render::CommitPipeline() {
 }
 
 bool Render::Push(AVFrame* frame) {
-    if (!filter_active && !display_active && !output_active && !input_active) {
-        this->frame = frame;
+    this->frame = frame;
+
+    if (!input_active)
         return true;
-    }
 
     if (!in_resampler->Push(frame))
         return false;
@@ -115,7 +115,7 @@ bool Render::Draw() {
 }
 
 AVFrame* Render::Pull() {
-    if (!filter_active && !display_active && !input_active && !output_active)
+    if (!output_active)
         return frame;
 
     if (!input_active)
