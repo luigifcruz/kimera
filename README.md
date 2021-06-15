@@ -1,5 +1,5 @@
 # 🐙 Kimera (Alpha Work-in-Progress)
-### Low-latency hardware accelerated codec based video streaming utility.
+### Low-latency hardware-accelerated codec-based video streaming utility.
 
 ## Features
 - ⚡ Low-latency (~35ms).
@@ -17,9 +17,9 @@
 ### Interfacing
 |    OS    |  Display  |   Screen-Capture   | Native Video Source | Native Video Sink |
 |----------|-----------|--------------------|---------------------|-------------------|
-| Linux    | ✅ (GLFW)  | ✅ (XCB)            | ✅ (V4L2)            | ✅ (V4L2)          |
-| macOS    | ✅ (GLFW)  | ✅ (AVFoundation)   | ✅ (AVFoundation)    | ❌                 |
-| Windows  | ✅ (GLFW)  | ❌                  | ❌                   | ❌                 |
+| Linux    | ✅ (GLFW)  | ✅ (XCB)            | ✅ (V4L2)           | ✅ (V4L2)          |
+| macOS    | ✅ (GLFW)  | ✅ (AVFoundation)   | ✅ (AVFoundation)   | ❌                 |
+| Windows  | ✅ (GLFW)  | ❌                  | ❌                  | ❌                 |
 
 ### Hardware Acceleration
 |  Technology  | Encode | Decode |         Description         |
@@ -35,25 +35,24 @@ Pre-compiled binary packages will be available once this app reaches beta. For n
 ### Dependencies
 - C++17 Compiler
 - GLFW
-- OpenGL ES >2.0 or OpenGL >3.3
+- OpenGL ES >3.0 or OpenGL >3.3
 - LibAV >12.3
 - CMake >3.13
 - XCB (For Linux)
 - Xcode Toolchain (For macOS)
 
-#### Linux (Debian Based)
+#### Linux-Debian
+This list will be reduced once Meson is implemented in the next version.
 ```shell
-$ sudo apt install libavcodec-dev libavfilter-dev libavutil-dev libavformat-dev libglfw3-dev libyaml-dev libssl-dev build-essential cmake git
+$ sudo apt install libavcodec-dev libavfilter-dev libavutil-dev libavformat-dev libglfw3-dev libyaml-dev libssl-dev build-essential cmake git pkg-config python3 python3-pybind11 python3-dev libwebsocketpp-dev libboost-all-dev
 ```
 
 #### macOS
-```shell
-$ brew install yaml-cpp glfw3 libav cmake pybind11
-```
+You will need to compile Google's ANGLE OpenGL ES 3.0 for this to work on macOS. Thank Apple.
 
 ### Compilation
 ```shell
-$ git clone https://github.com/luigifreitas/kimera.git
+$ git clone --recursive https://github.com/luigifreitas/kimera.git
 $ cd kimera
 $ mkdir build
 $ cd build
@@ -78,7 +77,7 @@ This module is distributed under a [GPL-2.0 License](https://raw.githubuserconte
 
 ## Roadmap
 This is a list of unfinished tasks that I pretend to pursue soon. Pull requests are more than welcome!
-- [ ] Implement AVFoundation Native Sink Device.
-- [ ] Write Windows Support.
-- [ ] Write Android Support.
-- [ ] Write iOS Support.
+- [ ] Replace current render with `librender`.
+- [ ] Replace CMake with Meson.
+- [ ] Better WebCodecs support.
+- [ ] Add WebTransport module.
