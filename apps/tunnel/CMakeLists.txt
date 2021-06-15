@@ -8,5 +8,5 @@ set_target_properties(tunnel PROPERTIES OUTPUT_NAME kimera)
 
 target_link_libraries(tunnel PRIVATE kimera)
 
-install(TARGETS tunnel RUNTIME)
+install(TARGETS tunnel RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
